@@ -3,10 +3,10 @@ import os
 from flask import g
 
 sql_config = {
-    'user': os.environ["SANDBOX_USER"],
-    'host': os.environ["SANDBOX_HOST"],
-    'passwd': os.getenv("SANDBOX_PASSWORD"),
-    'db': os.getenv("SANDBOX_DATABASE"),
+    'user': os.environ["API_USER"],
+    'host': os.environ["API_HOST"],
+    'passwd': os.getenv("API_PASSWORD"),
+    'db': os.getenv("API_DATABASE"),
     'charset': 'utf8'
 }
 

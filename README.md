@@ -1,23 +1,24 @@
-this read me assume that you have python 3.5+ installed
+This read me assume that you have python 3.5+ installed
 
 # Installation
 
 Cloning the repository.
-On terminal or command line 
-`cd` to the directory you want to work with assumption that the directory is `home/tac_developer/tac_dir/`  on and run command
+On terminal or cmd. 
+`cd` to the directory you want to work on with assumption that the directory is `home/development/` 
 
 ```
-cd home/tac_developer/tac_dir/
-git clone https://github.com/saltastro/tacprocess.git
+cd home/development/
+git clone https://github.com/saltastro/saltapi.git
+
 ``` 
 
-This will clone the repository to your machine
+This will clone the repository to your machine. A directory will be created with the name `saltapi`
 
-cd to the `cd tacprocess/` dir 
+cd to the `home/development/saltapi/` dir 
 ```bazaar
-cd tacprocess/
+cd home/development/saltapi/
 ```
-create virtual Environments and activate it, assumes that you have python3 virtualenv installed
+Create virtual Environments and activate it, assumes that you have python3 virtualenv installed
 
 ```
    virtualenv -p python3 venv
@@ -29,110 +30,75 @@ and install reqirements.txt
 
 ```bazaar
 pip install -r reqirements.txt
-
+```
 # Enironment valiables
-the app will require some Enironment valiables to be set
-`SANDBOX_USER, SANDBOX_HOST, SANDBOX_PASSWORD, SANDBOX_DATABASE, FLASK_DEBUG `
+The app will require some Enironment valiables to be set
+`API_USER, API_HOST, API_PASSWORD, API_DATABASE, MODE, DATABASE_URI `
 which are the connection to the sdb, for development I am using sdb sandbox
 ```
-    SANDBOX_USER = sdb user
-    SANDBOX_HOST = sdb host
-    SANDBOX_PASSWORD = sdb password
-    SANDBOX_DATABASE = sdb database name
-    FLASK_DEBUG = 1 for development (This will activate GraphiQL for viewing data in a browser)
+    API_USER = sdb user
+    API_HOST = sdb host
+    API_PASSWORD = sdb password
+    API_DATABASE = sdb database name
+    DATABASE_URI = mysql+pymysql://user:password@host/database_name  (sqlAlchemy database uri)
+    MODE = "DEVELOPMENT"  (Development mode either PRODUCTION, TESTING or DEVELOPMENT)
 ```
 
-now you are up and ready
+Now ready to start the graphql
 
-to start rhe server from `tacprocess/` dir 
-cd to `server` dir and run `app.py` with python3
+to start the server
+
+Make sure you are still in directory `home/development/saltapi/`  and Virtual environment is activated.
+
 ```bazaar
-cd server\
-python3 app.py
+Run command.
+
+python3 run.py
 ```
 
-This will run on [http://127.0.0.1:5001/graphql](http://127.0.0.1:5001/graphql) if `FLASK_DEBUG = 1`
-else you will have to provide a query like [http://127.0.0.1:5001/graphql?query={proposals(semester:"2017-2"){proposalCode}}](http://127.0.0.1:5001/graphql?query={proposals(semester:"2017-2"){proposalCode}})
-which will return a list of proposal code of semester 2017-2 explained below
+This will run on [http://127.0.0.1:5001/](http://127.0.0.1:5001). See about api on 
+[http://127.0.0.1:5001/about](http://127.0.0.1:5001/about) to learn how to use this saltapi
 
 
 # GraphQL Query
 
-assuming that `FLASK_DEBUG = 1` (on development.)
+Graphql will only return what you asked for or an error.
 
-With graphql you query what you need in a structure you need it.
-
-For this api what ever you are queiring for, a semester must be provided to impove the speed of query.
+On saltapi what ever you are querying for, a semester must be provided to improve the speed of query. 
+i.e you can only query data belonging to provided semester  
 
 ### Query
 
 ```
 {
-  viewer {
-    proposals(semester:"2017-2"){
+  proposals(semester:"2017-2"){
+    proposalcode{
       proposalCode
     }
   }
 }
 ```
 
-this will return a json object 
+above query will return a json object. 
 
 ```
 {
-  "viewer": {
-    "data": {
-      "proposals": [
-        ...List of proposal code of that semester...
-      ]
-    }
+  "data": {
+    "proposals": [
+      {
+        "proposalcode": {
+          "ProposalCode": "2015-2-MLT-006"
+        }
+      },
+      {
+        "proposalcode": {
+          "ProposalCode": "2016-2-MLT-001"
+        }
+      }, ... list continue ...
+    ]
   }
 }
 ```
 
-assume server is started.
-
-going to [http://127.0.0.1:5001/graphql](http://127.0.0.1:5001/graphql) you will see what are the other thing to query 
-for and type of data it is and other filters of data. Clicking `Docs` then `Query` it will show you other thing to query for
-and arguments
-
-```
-{
-  viewer {
-    proposals(semester:"2017-2", partnerCode:"RSA"){
-      proposalCode
-      targets{
-        name
-        coordinates{
-          ra
-          dec
-        }      
-      }
-    }
-  }
-}
-```
-
-the above Query will return 
-
-```
-{
-  "viewer": {
-    "data": {
-        "proposals": [
-            ...List of proposal code of that semester...
-            ...List of targets per proposal: {
-                Target name
-                Coordinates of target :{
-                RA
-                DEC
-                }
-            }...
-        ]
-    }
-  }
-}
-```
-
-you can learn more about graphql querys on [graphql querys link](http://graphql.org/learn/queries/)
+You can learn more about graphql query on [graphql querys link](http://graphql.org/learn/queries/)
 

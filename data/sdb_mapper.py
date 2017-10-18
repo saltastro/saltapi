@@ -11,7 +11,7 @@ def to_map(filename):
     content = [x.strip() for x in content]
     return content
 
-engine = create_engine(os.environ["DEV_DATABASE_URI"], convert_unicode=True)
+engine = create_engine(os.environ["DATABASE_URI"], convert_unicode=True)
 session = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
 
 db_session = Session(engine)
