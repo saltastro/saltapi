@@ -1,0 +1,2 @@
+#!/bin/sh
+GIT_WORK_TREE=/home/tacweb/tac_api git checkout -f

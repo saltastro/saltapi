@@ -1,0 +1,37 @@
+...Test
+
+describe('/proposals', () => {
+   it('should return all the proposals', () => {
+   }
+}
+
+Login
+    -> are the users forced to login first
+    -> are users getting a valid token
+    -> ... handling user login
+
+User permissions
+    ... from a token
+    -> Can I get a user's information
+    -> Are the users permissions set right
+    ... from users information
+    -> Can a user get only what they are allowed to see
+    -> user having a right role
+
+Own Methods
+    ... more tests hare
+    -> are the self defined methods doing or returning what they suppose to do!
+    -> are error handled properly
+
+GraphQL Queries
+    -> ... graphene already tested query handling
+    -> are arguments of right format
+    -> are mandatory args provided
+
+GraphQL results
+    ... problem test?
+    * since data is mapped from the sql cant I just test the sql results if they are as expected
+    * 
+
+
+

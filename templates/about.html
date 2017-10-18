@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+    <style>tab { padding-left: 2em; } tab1 { padding-left: 4em; } tab2 { padding-left: 6em; } tab3 { padding-left: 8em; } tab4 { padding-left: 10em; }</style>
+
+</head>
+<body  style="background-color:#E6E6FA">
+    <br>
+    <div class="container" style="background-color:#f9f9f9"><br>
+        <h1>API Overview</h1> <br>
+        <div class="features-content">
+            <p>
+                This API can query most of information needed by the TAC statistics page, more query
+                fields will be added as they are needed by the TAC Process or any other application that might need to use
+                it. <br>Some Query fields might change in time to best fit what will be confirmed as effective by
+                anyone or any application using it and not affecting any application that is already using this API.
+            </p>
+            <h3>What is GraphQL?</h3>
+            <p>Please refer to <a href="http://graphql.org/learn/">official website</a> for more </p>
+        </div>
+        <br>
+        <div class="features-content">
+            <h3>How to use this <a href="http://tacweb.cape.saao.ac.za/graphql">API</a></h3>.
+            <div>
+                For development purposes graphiql is enabled, which will help you see the structure of the API and what
+                you can query for, which will require your web manager username and
+                password to login. For production users must go to <a href="http://tacweb.cape.saao.ac.za/token">/token</a> with
+                 a json object having username and password fields  like <code>{"usename": "WMUser",
+                "password":"password"}</code>to get a user Token which need to be included as a header in all queries
+                to API. header name:- Authorization: Token <code>user token.</code>
+                <br>
+                <br>
+                <a href="http://tacweb.cape.saao.ac.za/graphql">API Development</a> screen is normally divided into two sections
+                and the third section can be added by clicking <strong><code>Docs</code></strong> button at top right of the screen.<br>
+                <ul class="list-group">
+                    <li class="list-group-item"><strong>First section:</strong>
+                        This is for writing your query.
+                        <div>
+                            <p>A graphQL query is like defining a structure of your json object. </p>
+                            <h4><Strong>Sample query</Strong></h4>
+                            <p> Querying for number of visits, ra and dec for 2017-1 targets.</p>
+
+                            <div class="syntaxhighlighter javascript"><table><tboby>
+                                    <tr>
+                                        <td class="gutter">
+                                            <div class="line n1">1</div>
+                                            <div class="line n2">2</div>
+                                            <div class="line n3">3</div>
+                                            <div class="line n4">4</div>
+                                            <div class="line n5">5</div>
+                                            <div class="line n6">6</div>
+                                            <div class="line n7">7</div>
+                                            <div class="line n8">8</div>
+                                            <div class="line n9">9</div>
+                                            <div class="line n10">10</div>
+                                            <div class="line n11">11</div>
+                                        </td>
+                                        <td class="code">
+                                            <div class="container"><div class="line"><code>{</code></div></div>
+                                            <div class="container"><div class="line"><tab></tab><code> targets(semester: "2017-1"){ </code> </div></div>
+                                            <div class="container"><div class="line"><tab1></tab1><code> NVisits </code></div></div>
+                                            <div class="container"><div class="line"><tab1></tab1><code> target{ </code> </div></div>
+                                            <div class="container"><div class="line"><tab2></tab2><code> targetcoordinates{ </code> </div></div>
+                                            <div class="container"><div class="line"><tab3></tab3><code> ra </code> </div></div>
+                                            <div class="container"><div class="line"><tab3></tab3><code> dec </code> </div></div>
+                                            <div class="container"><div class="line"><tab2></tab2><code> } </code></div></div>
+                                            <div class="container"><div class="line"><tab1></tab1><code> } </code></div></div>
+                                            <div class="container"><div class="line"><tab></tab><code> } </code></div></div>
+                                            <div class="container"><div class="line"><code>}</code></div></div>
+                                        </td>
+                                    </tr>
+                            </tboby></table></div>
+                            <div>
+                                <strong>line 2: </strong> it will return the list of all 2017-2 targets <br>
+                                <strong>line 3: </strong> number of visits for each target <br>
+                                <strong>line 4-7: </strong> due to SDB structure, to get more details of the target.
+                                    Click on <code>Target</code> field where there is a link to target Coordinates field
+                                where there are  RA and DEC of that target <br>
+                                <code>To avoid Line 4-7 the auto mapping of the SDB don't have to map everything</code>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item"><strong>Second section:</strong> This section is for query results. <br>
+
+                        GraphQL will return a json object of data with the structure you defined on your query section
+                        or json object of errors.
+                        <br>Sample results for the above query
+                            <code><br>
+                                {<br>
+                                    <tab />"data": {<br>
+                                        <tab1 />"targets": [<br>
+                                        <tab1 />{<br>
+                                            <tab2 />"NVisits": 1,<br>
+                                            <tab2 />"target": {<br>
+                                                <tab3 />"targetcoordinates": {<br>
+                                                    <tab4 />"dec": x.x,<br>
+                                                    <tab4 />"ra": x.x<br>
+                                               <tab3 /> }<br>
+                                            <tab2 />}<br>
+                                        <tab1 />},<br>
+                                        <tab1 />{<br>
+                                            <tab2 />"NVisits": 2,<br>
+                                            <tab2 />"target": {<br>
+                                                <tab3 />"targetcoordinates": {<br>
+                                                    <tab4 />"dec": x.x,<br>
+                                                    <tab4 />"ra": x.x<br>
+                                                <tab3 />}<br>
+                                            <tab2 />}<br>
+                                        <tab1 />}, <br><tab1 />.<br><tab1 />. <br><tab1 />. <br>
+                            </code>
+                    </li>
+                    <li class="list-group-item"><strong>Third section:</strong> To see the depth of what you can
+                        query and the structure of API.
+                        <div>
+                            This section will guide you in writing a GraphQL query and it will also show data
+                            type of what you are querying.
+                            Start by clicking<code>Query </code>this will lead you to what you can query in a
+                            root field.
+                        </div>
+                        <br>
+                        <div>
+                            How above query was created.
+                            <div>
+                                <ol>
+                                    <li> Select <code>Docs</code> for  <strong>Documentation Explorer</strong> </li>
+                                    <li> Select <code>Query</code> to <strong>root query</strong>, <br>
+                                        A list of field  will appear, this will be what can be queried on this field.
+                                        <ul>
+                                            <li>Look for field/s of interest in this case targets. <br>
+                                                <code>targets(semester: String): [ProposalTarget]</code><br>
+                                            </li>
+                                            <li>targets require argument <code>("semester: String") </code> which means
+                                                you must provide a semester of type string when you are querying for
+                                                targets
+                                            </li>
+                                            <li><code>"[ProposalTarget]"</code> square brackets means you will get a list of
+                                                what is defined within it, in this case you will get a list of
+                                                <code>ProposalTarget</code>
+                                            </li>
+                                        </ul>
+
+                                    </li>
+                                    <li>Select <code>ProposalTarget</code> to see what fields it contains. <br>
+                                        <ul>
+                                            <li>One of the fields of <code>ProposalTarget</code> is of interest, which is <code>NVisits</code> of type INT.
+                                                It is then added to the query
+                                            </li>
+                                            <li>RA and DEC are in <code>target: Target</code> Field in
+                                                <code>target >> targetcoordinates >>  ra and dec</code> which are float</li>
+                                        </ul>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <br>
+        <div>
+            <h3>For Production</h3>
+            Users need to get a token and use it as described above.
+            To get data from the API user will have to go to <a href="http://tacweb.cape.saao.ac.za/graphql">
+            GraphQL End-point</a> with the query included in the uri like
+            <code><a href='http://tacweb.cape.saao.ac.za/graphql?query={targets(semester: "2017-1"){NVisits target{targetcoordinates{ra dec}}}}'>
+                 http://tacweb.cape.saao.ac.za/graphql?query={targets(semester: "2017-1"){NVisits target{targetcoordinates{ra dec}}}}</a></code>
+            the results of the above  query will either be errors or data.
+            <br><code>errors</code>
+
+            will have massage field that explains what kind of error it is or where the error
+            is happening
+            <br><code>data</code> the results from a successful query.
+        </div>
+
+        <br><br>
+        <hr>
+        <footer class="container"> This API is not on its best conditions yet so any suggestion for improvement is welcomed.</footer>
+        <br>
+    </div>
+    <br>
+    <br>
+</body>
+</html>
