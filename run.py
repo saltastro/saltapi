@@ -37,7 +37,7 @@ def authenticate():
     """Sends a 401 response that enables basic auth"""
     return Response(
         'Could not verify your access level for that URL.\n'
-        'You have to login with proper credentials', 401,
+        'You have to login with Web Manager credentials', 401,
         {'WWW-Authenticate': 'Basic realm="Login Required"'})
 
 
@@ -52,7 +52,7 @@ def requires_auth(f):
     return decorated
 
 
-@app.route("/token", methods=['GET', 'POST'])
+@app.route("/token", methods=['POST'])
 def token():
     if request.json:
         tok = User.get_user_token(request.json)
@@ -65,11 +65,11 @@ def token():
 
 def f():
     if os.environ["MODE"] == "PRODUCTION":
-        return token_auth.login_required(GraphQLView.as_view('graphql', schema=schema))
-    return requires_auth(GraphQLView.as_view('graphql', schema=schema, graphiql=True))
+        return token_auth.login_required
+    return requires_auth
 
 
-app.add_url_rule('/graphql', view_func=f())
+app.add_url_rule('/graphql', view_func=f()(GraphQLView.as_view('graphql', schema=schema, graphiql=True)))
 
 
 @app.route("/about")

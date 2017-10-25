@@ -18,7 +18,7 @@ cd saltapi/
 ##Create a Python Virtual Environment 
 Start by installing the virtualenv package using pip
 ```bazaar
-sudo pip install virtualenv
+sudo pip3 install virtualenv
 ```
 We can create a virtual environment to store our Flask project's Python requirements by typing:
 ```bazaar
@@ -33,7 +33,7 @@ source tacvenv/bin/activate
 ```
 and install requirements
 ```bazaar
-pip install -r requrements.txt
+pip3 install -r requirements.txt 
 ```
 deactivate after installing by running.
 ```bazaar
@@ -60,6 +60,7 @@ A file will open and add the following.
 }
 
 ```
+please note hostname need to be replaced by real hostname
 save and close file
 ```bazaar
 Ctrl + o
@@ -68,7 +69,7 @@ Ctrl + x
 ```
 To enable the Nginx server block configuration just created, link the file to the sites-enabled directory:
 ```bazaar
-sudo ln -s /etc/nginx/sites-available/myproject /etc/nginx/sites-enabled
+sudo ln -s /etc/nginx/sites-available/tacapi /etc/nginx/sites-enabled
 ```
 
 ##Setup supervisor
@@ -94,7 +95,7 @@ Ctrl + x
 
 ##Reboot server
 ```bazaar
-sudo Reboot
+sudo reboot
 ```
 
 

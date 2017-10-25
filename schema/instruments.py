@@ -1,10 +1,6 @@
 from data.instruments import *
 from graphene_sqlalchemy import SQLAlchemyObjectType
-from data.common import Semester as TypeSemester, conn
-import pandas as pd
 from graphene import relay
-import graphene
-
 
 class P1Config(SQLAlchemyObjectType):
     class Meta:

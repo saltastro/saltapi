@@ -1,7 +1,12 @@
+from data.user import *
 from flask import g
+from graphene_sqlalchemy import SQLAlchemyObjectType
 import pandas as pd
 from data.common import conn
 import jwt
+import  graphene
+from graphene import ObjectType, String, List, Boolean, relay
+
 
 
 class User:
@@ -19,8 +24,9 @@ class User:
         if credentials is None:
             return User._user_error(not_provided=True)
         try:
-            username = credentials['username']
-            password = credentials['password']
+
+            username = credentials['credentials']['username']
+            password = credentials['credentials']['password']
         except KeyError:
             return User._user_error(not_provided=True)
 
@@ -70,13 +76,27 @@ class User:
         :param user_id:
         :return: the token
         """
-        user = {'user_id': '{user_id}'.format(user_id=user_id)}
+        user = {
+            'user_id': '{user_id}'.format(user_id=user_id)
+        }
         token = jwt.encode(user, "SECRET-KEY", algorithm='HS256').decode('utf-8')
 
         return token
 
     @staticmethod
     def is_valid_token(token):
+        try:
+            user = jwt.decode(token, "SECRET-KEY", algorithm='HS256')
+
+            if 'user_id' in user:
+                User.current_user(user['user_id'])
+                return True
+            return False
+        except:
+            return False
+
+    @staticmethod
+    def user_if_from_token(token):
         try:
             user = jwt.decode(token, "SECRET-KEY", algorithm='HS256')
 
@@ -96,3 +116,47 @@ class User:
             g.user = User(result.iloc[0]['PiptUser_Id'], result.iloc[0]['PiptSetting_Id'], result.iloc[0]['Value'], )
 
 
+class PiptUser(SQLAlchemyObjectType):
+    class Meta:
+        interfaces = (relay.Node, )
+        model = PiptUserModel
+        only_fields = ('PiptUser_Id', 'Username', 'Investigator')
+    user_id = PiptUserModel.PiptUser_Id
+    username = PiptUserModel.Username
+    is_tac_chair = Boolean()
+    partner_code = PartnerModel.Partner_Code
+    partner_name = PartnerModel.Partner_Name
+
+    def resolve_is_tac_chair(self, args, context, info):
+        query = PiptUserTAC.get_query(info)
+        result = query.filter(PiptUserTACModel.PiptUser_Id == self.user_id).first()
+        return PiptUserTACModel.Chair
+
+
+class PiptSetting(SQLAlchemyObjectType):
+    class Meta:
+        interfaces = (relay.Node, )
+        model = PiptSettingModel
+
+
+class PiptUserSetting(SQLAlchemyObjectType):
+    class Meta:
+        interfaces = (relay.Node, )
+        model = PiptUserSettingModel
+
+
+class PiptUserTAC(SQLAlchemyObjectType):
+    class Meta:
+        interfaces = (relay.Node, )
+        model = PiptUserTACModel
+
+
+
+
+
+user_list = [
+    PiptUser,
+    PiptSetting,
+    PiptUserSetting,
+    PiptUserTAC
+]
