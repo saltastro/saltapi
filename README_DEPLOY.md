@@ -81,8 +81,8 @@ sudo nano /etc/supervisor/conf.d/tacapi.cape.saao.ac.za.conf
 A file will open and add the following.
 ```bazaar
 [program:website]
-command=/home/tacweb/tacapi/tacvenv/bin/uwsgi uwsgi.ini
-directory=/home/tacweb/tacapi
+command=/home/tacapi/saltapi/tacvenv/bin/uwsgi uwsgi.ini
+directory=/home/tacapi/saltapi
 user=www-data
 environment=ENVIRONMENT_VARIABLE_1="value",ENVIRONMENT_VARIABLE_2="value",...
 ```
