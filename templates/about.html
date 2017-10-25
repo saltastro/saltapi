@@ -23,17 +23,17 @@
         </div>
         <br>
         <div class="features-content">
-            <h3>How to use this <a href="http://tacweb.cape.saao.ac.za/graphql">API</a></h3>.
+            <h3>How to use this <a href="http://tacapi.cape.saao.ac.za/graphql">API</a></h3>.
             <div>
                 For development purposes graphiql is enabled, which will help you see the structure of the API and what
                 you can query for, which will require your web manager username and
-                password to login. For production users must go to <a href="http://tacweb.cape.saao.ac.za/token">/token</a> with
+                password to login. For production users must go to <a href="http://tacapi.cape.saao.ac.za/token">/token</a> with
                  a json object having username and password fields  like <code>{"usename": "WMUser",
                 "password":"password"}</code>to get a user Token which need to be included as a header in all queries
                 to API. header name:- Authorization: Token <code>user token.</code>
                 <br>
                 <br>
-                <a href="http://tacweb.cape.saao.ac.za/graphql">API Development</a> screen is normally divided into two sections
+                <a href="http://tacapi.cape.saao.ac.za/graphql">API Development</a> screen is normally divided into two sections
                 and the third section can be added by clicking <strong><code>Docs</code></strong> button at top right of the screen.<br>
                 <ul class="list-group">
                     <li class="list-group-item"><strong>First section:</strong>
@@ -163,10 +163,10 @@
         <div>
             <h3>For Production</h3>
             Users need to get a token and use it as described above.
-            To get data from the API user will have to go to <a href="http://tacweb.cape.saao.ac.za/graphql">
+            To get data from the API user will have to go to <a href="http://tacapi.cape.saao.ac.za/graphql">
             GraphQL End-point</a> with the query included in the uri like
-            <code><a href='http://tacweb.cape.saao.ac.za/graphql?query={targets(semester: "2017-1"){NVisits target{targetcoordinates{ra dec}}}}'>
-                 http://tacweb.cape.saao.ac.za/graphql?query={targets(semester: "2017-1"){NVisits target{targetcoordinates{ra dec}}}}</a></code>
+            <code><a href='http://tacapi.cape.saao.ac.za/graphql?query={targets(semester: "2017-1"){NVisits target{targetcoordinates{ra dec}}}}'>
+                 http://tacapi.cape.saao.ac.za/graphql?query={targets(semester: "2017-1"){NVisits target{targetcoordinates{ra dec}}}}</a></code>
             the results of the above  query will either be errors or data.
             <br><code>errors</code>
 
