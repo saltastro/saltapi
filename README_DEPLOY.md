@@ -69,8 +69,9 @@ Ctrl + x
 ```
 To enable the Nginx server block configuration just created, link the file to the sites-enabled directory:
 ```bazaar
-sudo ln -s /etc/nginx/sites-available/tacapi /etc/nginx/sites-enabled
+sudo ln -s /etc/nginx/sites-available/tacapi /etc/nginx/sites-enabled/tacapi
 ```
+(please note site-enables is a directory not a file)
 
 ##Setup supervisor
 
