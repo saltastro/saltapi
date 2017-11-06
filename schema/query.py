@@ -27,6 +27,7 @@ class Query(graphene.ObjectType):
         query = ProposalTarget.get_query(info)
         ids = Proposal.get_proposal_ids(semester=context['semester'])
         results = query.filter(ProposalTarget.ProposalCode_Id.in_(ids['ProposalCodeIds'])).all()
+
         return results
 
     def resolve_instruments(self, context, info, args):
@@ -34,7 +35,6 @@ class Query(graphene.ObjectType):
         ids = Proposal.get_proposal_ids(semester=context['semester'])
 
         results = query.filter(P1Config.ProposalCode_Id.in_(ids['ProposalCodeIds'])).all()
-        print(results)
         return results
 
     def resolve_user(self, context, info , args):

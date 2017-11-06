@@ -1,9 +1,9 @@
 server {
     listen 80;
-    server_name tacweb.cape.saao.ac.za;
+    server_name tacapi.cape.saao.ac.za;
 
     location / {
         include uwsgi_params;
-        uwsgi_pass unix:/home/tacweb/tacapi/tacapi.sock;
+        uwsgi_pass unix:/home/tacapi/saltapi/saltapi.sock;
     }
 }

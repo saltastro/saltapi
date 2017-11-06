@@ -19,7 +19,6 @@ multi_auth = MultiAuth(HTTPBasicAuth, HTTPTokenAuth)
 
 @token_auth.verify_token
 def verify_token(token):
-    print(request)
     g.user_id = None
     try:
         is_valid = User.is_valid_token(token)
