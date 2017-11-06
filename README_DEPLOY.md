@@ -7,9 +7,9 @@ sudo apt-get install python3-pip python3-dev nginx supervisor
 sudo apt-get install git
 ```
 
-##Clone TAC Api
+##Clone SALT API
 
-Cloning the tacapi repository using git home directory for user and cd to it.
+Cloning the saltapi repository using git home directory for user and cd to it.
 ```bazaar
 cd ~
 git clone https://github.com/saltastro/saltapi.git

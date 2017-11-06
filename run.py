@@ -3,12 +3,14 @@ from flask import Flask, jsonify, request, g, make_response, Response, render_te
 from flask_graphql import GraphQLView
 from flask_httpauth import HTTPTokenAuth, HTTPBasicAuth, MultiAuth
 from functools import wraps
+from flask_cors import CORS
 
 from schema.query import schema
 from schema.user import User
 
 app = Flask(__name__)
 app.debug = True
+CORS(app)
 
 token_auth = HTTPTokenAuth(scheme='Token')
 basic_auth = HTTPBasicAuth()
@@ -17,6 +19,7 @@ multi_auth = MultiAuth(HTTPBasicAuth, HTTPTokenAuth)
 
 @token_auth.verify_token
 def verify_token(token):
+    print(request)
     g.user_id = None
     try:
         is_valid = User.is_valid_token(token)
@@ -64,12 +67,14 @@ def token():
 
 
 def f():
-    if os.environ["MODE"] == "PRODUCTION":
-        return token_auth.login_required
-    return requires_auth
+    if True:
+        return
+
+    return
 
 
-app.add_url_rule('/graphql', view_func=f()(GraphQLView.as_view('graphql', schema=schema, graphiql=True)))
+app.add_url_rule('/graphiql', view_func=requires_auth(GraphQLView.as_view('graphiql', schema=schema, graphiql=True)))
+app.add_url_rule('/graphql', view_func=token_auth.login_required(GraphQLView.as_view('graphql', schema=schema, graphiql=False)))
 
 
 @app.route("/about")
