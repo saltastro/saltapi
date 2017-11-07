@@ -1,19 +1,49 @@
 from data.proposals import *
-from graphene_sqlalchemy import SQLAlchemyObjectType
+from graphene_sqlalchemy import SQLAlchemyObjectType, SQLAlchemyConnectionField
 from data.common import Semester as TypeSemester, conn
 import pandas as pd
-from graphene import relay
+from graphene import relay, Field, List, Boolean
 from flask import g
+
+
+class ProposalGeneralInfo(SQLAlchemyObjectType):
+    class Meta:
+        interfaces = (relay.Node, )
+        model = ProposalGeneralInfoModel
+
+    is_p4 = Boolean()
+
+    def resolve_is_p4(self, args, context, info):
+        return ProposalGeneralInfoModel.P4 == 1
+
+
+class Partner(SQLAlchemyObjectType):
+    class Meta:
+        interfaces = (relay.Node, )
+        model = PartnerModel
+
+
+class MultiPartner(SQLAlchemyObjectType):
+    class Meta:
+        interfaces = (relay.Node, )
+        model = MultiPartnerModel
 
 
 class Proposal(SQLAlchemyObjectType):
     class Meta:
         interfaces = (relay.Node, )
         model = ProposalModel
-    Proposal_Id = ProposalModel.Proposal_Id
+    proposal_id = ProposalModel.Proposal_Id
+    ProposalCode_Id = ProposalModel.ProposalCode_Id
+    proposal_info = Field(ProposalGeneralInfo)
 
-    def resolve_Proposal_Id(self, args, context, info):
-        return "proposal: " + str(self.Proposal_Id)
+    def resolve_proposal_id(self, args, context, info):
+        return "proposal: " + str(self.proposal_id)
+
+    def resolve_proposal_info(self, args, contect, info):
+        general_info = ProposalGeneralInfoModel.query.get(self.ProposalCode_Id)
+        return general_info
+
 
     @staticmethod
     def get_proposal_ids(**args):
@@ -29,10 +59,10 @@ class Proposal(SQLAlchemyObjectType):
             semester = TypeSemester.get_semester(semester_code=args['semester'])
             sql = sql + " AND mp.Semester_Id = {semester_id} ".format(semester_id=semester.id)
 
-        if 'partner_code' in args:
+        if 'partner_code' in args and args['partner_code'] is not None:
             sql = sql + "AND pa.Partner_Code = '{parner_code}' ".format(parner_code=args['partner_code'])
 
-        if 'proposal_code' in args:
+        if 'proposal_code' in args and args['proposal_code'] is not None:
             sql = sql + "AND pc.Proposal_Code = '{proposal_code}' ".format(proposal_code=args['proposal_code'])
 
         if g.user.user_value == 0:
@@ -78,22 +108,11 @@ class SemesterPhase(SQLAlchemyObjectType):
         model = SemesterPhaseModel
 
 
-class MultiPartner(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = MultiPartnerModel
-
-
 class ProposalType(SQLAlchemyObjectType):
     class Meta:
         interfaces = (relay.Node, )
         model = ProposalTypeModel
 
-
-class Partner(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = PartnerModel
 
 
 class ProposalStatus(SQLAlchemyObjectType):
@@ -114,10 +133,6 @@ class Transparency(SQLAlchemyObjectType):
         model = TransparencyModel
 
 
-class ProposalGeneralInfo(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = ProposalGeneralInfoModel
 
 proposals_list = [
     Investigator,
