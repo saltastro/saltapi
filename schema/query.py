@@ -16,6 +16,8 @@ class Query(graphene.ObjectType):
     targets = graphene.List(ProposalTarget, semester=graphene.String(), partner_code=graphene.String(), proposal_code=graphene.String())
     instruments = graphene.List(P1Config, semester=graphene.String())
     user = graphene.Field(User, description="This is a wm user you would need to be having a on your header to query. ")
+    semesters = graphene.List(Semester, description="List of simesters available on the SDB")
+    partners = graphene.List(Partner, description="List od SALT Partners")
 
     def resolve_proposals(self, context, info, args, partner_code=None, proposal_code=None):
         query = Proposal.get_query(info)
@@ -62,6 +64,13 @@ class Query(graphene.ObjectType):
 
         results = query.filter(User.username == "nhlavutelo").first()
         return results
+
+    def resolve_semesters(self, context, info, args):
+        query = Semester.get_query(info)
+        return query.all()
+    def resolve_partners(self, context, info, args):
+        query = Partner.get_query(info)
+        return query.all()
 
 
 schema = graphene.Schema(query=Query, types=list_to_map)

@@ -2,7 +2,7 @@ from data.proposals import *
 from graphene_sqlalchemy import SQLAlchemyObjectType, SQLAlchemyConnectionField
 from data.common import Semester as TypeSemester, conn
 import pandas as pd
-from graphene import relay, Field, List, Boolean
+from graphene import relay, Field, String, Boolean
 from flask import g
 
 
