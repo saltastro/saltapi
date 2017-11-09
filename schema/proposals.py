@@ -2,19 +2,20 @@ from data.proposals import *
 from graphene_sqlalchemy import SQLAlchemyObjectType, SQLAlchemyConnectionField
 from data.common import Semester as TypeSemester, conn
 import pandas as pd
-from graphene import relay, Field, String, Boolean
+from graphene import relay, Field, List, Boolean, ObjectType
 from flask import g
+
+
+class RequestedTime(SQLAlchemyObjectType):
+    class Meta:
+        interfaces = (relay.Node, )
+        model = RequestedTimeModel
 
 
 class ProposalGeneralInfo(SQLAlchemyObjectType):
     class Meta:
         interfaces = (relay.Node, )
         model = ProposalGeneralInfoModel
-
-    is_p4 = Boolean()
-
-    def resolve_is_p4(self, args, context, info):
-        return ProposalGeneralInfoModel.P4 == 1
 
 
 class Partner(SQLAlchemyObjectType):
@@ -33,17 +34,27 @@ class Proposal(SQLAlchemyObjectType):
     class Meta:
         interfaces = (relay.Node, )
         model = ProposalModel
-    proposal_id = ProposalModel.Proposal_Id
+    Proposal_Id = ProposalModel.Proposal_Id
     ProposalCode_Id = ProposalModel.ProposalCode_Id
     proposal_info = Field(ProposalGeneralInfo)
+    is_new = Boolean()
+    requested_times = Field(List(RequestedTime))
 
-    def resolve_proposal_id(self, args, context, info):
-        return "proposal: " + str(self.proposal_id)
+    # def resolve_proposal_id(self, args, context, info):
+    #     return "proposal: " + str(self.Proposal_Id)
 
     def resolve_proposal_info(self, args, contect, info):
         general_info = ProposalGeneralInfoModel.query.get(self.ProposalCode_Id)
         return general_info
 
+    def resolve_is_new(self, args, context, info):
+        return False
+
+    def resolve_requested_times(self, args, context, info):
+        query = RequestedTime.get_query(info)
+        print(query)
+        times = query.filter(RequestedTimeModel.Proposal_Id == self.Proposal_Id).all()
+        return times
 
     @staticmethod
     def get_proposal_ids(**args):
@@ -133,7 +144,6 @@ class Transparency(SQLAlchemyObjectType):
         model = TransparencyModel
 
 
-
 proposals_list = [
     Investigator,
     MultiPartner,
@@ -147,5 +157,6 @@ proposals_list = [
     Semester,
     SemesterPhase,
     Transparency,
-    ProposalType
+    ProposalType,
+    RequestedTime
 ]

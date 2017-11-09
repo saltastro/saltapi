@@ -14,6 +14,7 @@ ProposalStatusModel = Base.classes.ProposalStatus
 P1ObservingConditionsModel = Base.classes.P1ObservingConditions
 TransparencyModel = Base.classes.Transparency
 ProposalGeneralInfoModel = Base.classes.ProposalGeneralInfo
+RequestedTimeModel = Base.classes.P1RequestedTime
 
 
 

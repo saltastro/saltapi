@@ -1,10 +1,12 @@
 from schema.proposals import *
+from schema.proposal_manual import *
+from data.proposal_manual import get_proposals
 from schema.targets import *
 from schema.instruments import *
 from schema.user import *
 from schema.user import PiptUser as User
 import graphene
-from graphene import relay
+from graphene import relay, Field, List
 
 list_to_map = instruments_list + proposals_list + targets_list + user_list
 
@@ -12,7 +14,8 @@ list_to_map = instruments_list + proposals_list + targets_list + user_list
 class Query(graphene.ObjectType):
     node = relay.Node.Field()
 
-    proposals = graphene.List(Proposal, semester=graphene.String(), partner_code=graphene.String(), proposal_code=graphene.String())
+    proposals = List(Proposal, semester=graphene.String(), partner_code=graphene.String(), proposal_code=graphene.String())
+    proposals_m = Field(List(ProposalM), semester=graphene.String(), partner_code=graphene.String(), proposal_code=graphene.String())
     targets = graphene.List(ProposalTarget, semester=graphene.String(), partner_code=graphene.String(), proposal_code=graphene.String())
     instruments = graphene.List(P1Config, semester=graphene.String())
     user = graphene.Field(User, description="This is a wm user you would need to be having a on your header to query. ")
@@ -32,7 +35,7 @@ class Query(graphene.ObjectType):
             proposal = proposal_code
 
         ids = Proposal.get_proposal_ids(partner_code=partner, semester=context['semester'], proposal_code=proposal)
-        results = query.filter(Proposal.proposal_id.in_(ids['ProposalIds'])).all()
+        results = query.filter(Proposal.Proposal_Id.in_(ids['ProposalIds'])).all()
         return results
 
     def resolve_targets(self, context, info, args, partner_code=None, proposal_code=None):
@@ -71,6 +74,19 @@ class Query(graphene.ObjectType):
     def resolve_partners(self, context, info, args):
         query = Partner.get_query(info)
         return query.all()
+
+    def resolve_proposals_m(self, context, info, args, partner_code=None, proposal_code=None):
+        if 'partner_code' in context:
+            partner = context['partner_code']
+        else:
+            partner = partner_code
+
+        if 'proposal_code' in context:
+            proposal = context['proposal_code']
+        else:
+            proposal = proposal_code
+
+        return get_proposals(semester=context['semester'], partner_code=partner, proposal_code=proposal)
 
 
 schema = graphene.Schema(query=Query, types=list_to_map)
