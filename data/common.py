@@ -41,7 +41,7 @@ class Semester:
                     if len(semester_code) != 6:
                         raise ValueError("{semester_code} is not a semester".format(semester_code=semester_code))
 
-                    sql = sql + ' WHERE (CONCAT(Year, "-", Semester) = "{semester_code}" ' \
+                    sql = sql + ' WHERE (CONCAT(Year, "-", Semester) = "{semester_code}") ' \
                         .format(semester_code=semester_code)
                 else:
                     raise ValueError(
