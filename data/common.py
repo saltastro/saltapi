@@ -14,18 +14,12 @@ class Semester:
     end_semester = None
 
     @staticmethod
-    def get_semester(active=False, semester_code=None, all_data=False):
+    def get_semester(active=False, semester_code=None):
         """
         :return:
         """
         sql = 'SELECT  Semester_Id, CONCAT(Year,"_", Semester) as SemesterCode, StartSemester, EndSemester ' \
               ' FROM  Semester '
-
-        if all_data:
-            data = pd.read_sql(sql, conn)
-
-            li = [Semester().__make_semester(d) for i, d in data.iterrows()]
-            return li
 
         date = datetime.datetime.now().date()
         date_3 = date + relativedelta(months=3)
@@ -38,16 +32,23 @@ class Semester:
 
             sql = sql + ' where StartSemester <= "{date_}" and "{date_}" < EndSemester;'.format(date_=date_3)
         else:
-            if not pd.isnull(semester_code):
+            try:
+                if not pd.isnull(semester_code):
+                    int(semester_code[:4])
+                    int(semester_code[5:])
+                    if "_" in semester_code:
+                        semester_code = semester_code.replace("_", "-")
+                    if len(semester_code) != 6:
+                        raise ValueError("{semester_code} is not a semester".format(semester_code=semester_code))
 
-                sql = sql + ' WHERE (CONCAT(Year, "-", Semester) = "{semester_code}" ' \
-                            '   OR CONCAT(Year, "_", Semester) = "{semester_code}") '\
-                    .format(semester_code=semester_code)
-            else:
-                print("Semester failing")
-                raise ValueError(
-                    "Set active=True for active semester, or provide semester_id or semester like '2017_1'  "
-                    "or '2017-1'")
+                    sql = sql + ' WHERE (CONCAT(Year, "-", Semester) = "{semester_code}" ' \
+                        .format(semester_code=semester_code)
+                else:
+                    raise ValueError(
+                        "Set active=True for active semester, or provide semester_id or semester like '2017_1'  "
+                        "or '2017-1'")
+            except ValueError:
+                return None
 
         data = pd.read_sql(sql, conn)
         try:
