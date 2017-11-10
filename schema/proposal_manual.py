@@ -1,6 +1,13 @@
 from graphene import ObjectType, String, ID, Boolean, Field, Int, List, Float
 
 
+class Investigator(ObjectType):
+    id = ID()
+    first_name = String()
+    surname = String()
+    email = String()
+
+
 class ProposalInfoM(ObjectType):
     is_p4 = Boolean()
     status = String()

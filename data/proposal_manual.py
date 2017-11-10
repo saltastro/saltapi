@@ -18,6 +18,8 @@ def query_proposal_data(**args):
           "     join Semester as s on (s.Semester_Id = p1.Semester_Id) " \
           "     join P1ObservingConditions  using (ProposalCode_Id) " \
           "     join Transparency using (Transparency_Id) " \
+          "     join ProposalContact as pc using(ProposalCode_Id) " \
+          "     join Investigator as i on(i.Investigator_Id = pc.Leader_Id) " \
           "  where Proposal_Id in {ids} " \
           " ".format(ids=tuple(ids['ProposalIds']))
     results = pd.read_sql(sql, conn)
