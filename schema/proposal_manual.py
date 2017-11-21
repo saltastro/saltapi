@@ -22,9 +22,10 @@ class RequestedTimeM(ObjectType):
 
 
 class ProposalM(ObjectType):
-    proposal_id = ID()
-    proposal_code = String()
+    id = ID()
+    code = String()
     general_info = Field(ProposalInfoM)
     requester_time = List(RequestedTimeM)
     total_time_requested = Int()
-    is_new = Boolean()
+    minimum_useful_time = Int()
+    is_thesis = Boolean()

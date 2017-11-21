@@ -6,55 +6,13 @@ from graphene import relay, Field, List, Boolean, ObjectType
 from flask import g
 
 
-class RequestedTime(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = RequestedTimeModel
 
-
-class ProposalGeneralInfo(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = ProposalGeneralInfoModel
-
-
-class Partner(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = PartnerModel
-
-
-class MultiPartner(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = MultiPartnerModel
 
 
 class Proposal(SQLAlchemyObjectType):
     class Meta:
         interfaces = (relay.Node, )
         model = ProposalModel
-    Proposal_Id = ProposalModel.Proposal_Id
-    ProposalCode_Id = ProposalModel.ProposalCode_Id
-    proposal_info = Field(ProposalGeneralInfo)
-    is_new = Boolean()
-    requested_times = Field(List(RequestedTime))
-
-    # def resolve_proposal_id(self, args, context, info):
-    #     return "proposal: " + str(self.Proposal_Id)
-
-    def resolve_proposal_info(self, args, contect, info):
-        general_info = ProposalGeneralInfoModel.query.get(self.ProposalCode_Id)
-        return general_info
-
-    def resolve_is_new(self, args, context, info):
-        return False
-
-    def resolve_requested_times(self, args, context, info):
-        query = RequestedTime.get_query(info)
-        print(query)
-        times = query.filter(RequestedTimeModel.Proposal_Id == self.Proposal_Id).all()
-        return times
 
     @staticmethod
     def get_proposal_ids(**args):
@@ -87,76 +45,3 @@ class Proposal(SQLAlchemyObjectType):
         ids = [int(x) for x in list(results['Ids'].values)]
         pcode_ids = [int(x) for x in list(results['PCode_Ids'].values)]
         return {'ProposalIds': ids, 'ProposalCodeIds': pcode_ids}
-
-
-class ProposalCode(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = ProposalCodeModel
-
-
-class ProposalContact(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = ProposalContactModel
-
-
-class Investigator(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = InvestigatorModel
-
-
-class Semester(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = SemesterModel
-
-
-class SemesterPhase(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = SemesterPhaseModel
-
-
-class ProposalType(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = ProposalTypeModel
-
-
-
-class ProposalStatus(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = ProposalStatusModel
-
-
-class P1ObservingConditions(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = P1ObservingConditionsModel
-
-
-class Transparency(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = TransparencyModel
-
-
-proposals_list = [
-    Investigator,
-    MultiPartner,
-    P1ObservingConditions,
-    Partner,
-    Proposal,
-    ProposalCode,
-    ProposalContact,
-    ProposalGeneralInfo,
-    ProposalStatus,
-    Semester,
-    SemesterPhase,
-    Transparency,
-    ProposalType,
-    RequestedTime
-]

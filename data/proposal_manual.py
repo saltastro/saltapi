@@ -8,7 +8,6 @@ proposal_data = {}
 def query_proposal_data(**args):
     from schema.proposal_manual import ProposalM, RequestedTimeM, ProposalInfoM
     ids = Proposal.get_proposal_ids(**args)
-    print(tuple(ids['ProposalIds']))
     sql = " select * from Proposal " \
           "     join ProposalCode using (ProposalCode_Id) " \
           "     join ProposalGeneralInfo using (ProposalCode_Id) " \
@@ -20,18 +19,19 @@ def query_proposal_data(**args):
           "     join Transparency using (Transparency_Id) " \
           "     join ProposalContact as pc using(ProposalCode_Id) " \
           "     join Investigator as i on(i.Investigator_Id = pc.Leader_Id) " \
-          "  where Proposal_Id in {ids} " \
+          "     left join P1Thesis using (ProposalCode_Id) " \
+          "     join P1MinTime using(ProposalCode_Id) " \
+          "  where Proposal_Id in {ids} order by Proposal_Id" \
           " ".format(ids=tuple(ids['ProposalIds']))
     results = pd.read_sql(sql, conn)
-    times = []
     p = []
-    pc = []
+    pc = []  # I am using pc to control proposals that are checked
     for index, row in results.iterrows():
         if row["Proposal_Code"] not in pc:
             times = []
             p.append(ProposalM(
-                proposal_id="Proposal: " + str(row["Proposal_Id"]),
-                proposal_code=row["Proposal_Code"],
+                id="Proposal: " + str(row["Proposal_Id"]),
+                code=row["Proposal_Code"],
                 general_info=ProposalInfoM(
                     is_p4=row["P4"] == 1,
                     status=row["Status"],
@@ -39,15 +39,17 @@ def query_proposal_data(**args):
                     max_seeing=row["MaxSeeing"]
                 ),
                 total_time_requested=row["TotalReqTime"],
+                minimum_useful_time=row["P1MinimumUsefulTime"],
                 requester_time=[],
-                is_new=False
+                is_thesis=not pd.isnull(row["ThesisType_Id"])  # concluded that none thesis proposals have null on
+                # P1Thesis
             ))
         p[len(p) - 1].requester_time.append(RequestedTimeM(
             moon=row["Moon"],
             time=row["P1RequestedTime"],
             for_semester=str(row['Year']) + "-" + str(row['Semester'])
         ))
-        pc.append(row["Proposal_Code"])
+        pc.append(row["Proposal_Code"])  # I am using pc to control proposals that are checked
     return p
 
 
