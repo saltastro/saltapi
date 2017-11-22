@@ -1,145 +1,54 @@
-from data.instruments import *
-from graphene_sqlalchemy import SQLAlchemyObjectType
-from graphene import relay
-
-class P1Config(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = P1ConfigModel
-
-    ProposalCode_Id = P1ConfigModel.ProposalCode_Id
-
-    def resolve_Proposal_Id(self, args, context, info):
-        return "proposal: " + str(self.ProposalCode_Id)
+from graphene import ObjectType, String, List, Field
 
 
-class P1Hrs(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = P1HrsModel
+class Spectroscopy(ObjectType):
+    grating = String()
 
 
-class HrsMode(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = HrsModeModel
+class Polarimetry(ObjectType):
+    pattern_name = String()
 
 
-class P1Bvit(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = P1BvitModel
+class FabryPerot(ObjectType):
+    mode = String()
+    description = String()
+    etalon_config = String()
 
 
-class BvitFilter(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = BvitFilterModel
+class Mask(ObjectType):
+    type = String()
+    mos_description = String()
 
 
-class P1Salticam(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = P1SalticamModel
+class BVIT(ObjectType):
+    type = String()
+    filter_name = String()
 
 
-class SalticamDetectorMode(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = SalticamDetectorModeModel
+class SCAM(ObjectType):
+    type = String()
+    dictator_mode = String()
+    xml_dictator_mode = String()
 
 
-class P1Rss(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = P1RssModel
+class HRS(ObjectType):
+    exposure_mode = String()
+    type = String()
 
 
-class RssDetectorMode(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = RssDetectorModeModel
+class RSS(ObjectType):
+    type = String()
+    mode = String()
+    dictator_mode = String()
+    xml_dictator_mode = String()
+    spectroscopy = Field(Spectroscopy)
+    fabry_perot = Field(FabryPerot)
+    polarimetry = Field(Polarimetry)
+    mask = Field(Mask)
 
 
-class RssMode(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = RssModeModel
-
-
-class P1RssSpectroscopy(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = P1RssSpectroscopyModel
-
-
-class RssGrating(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = RssGratingModel
-
-
-class P1RssMask(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = P1RssMaskModel
-
-
-class RssMaskType(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = RssMaskTypeModel
-
-
-class P1RssFabryPerot(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = P1RssFabryPerotModel
-
-
-class RssFabryPerotMode(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = RssFabryPerotModeModel
-
-
-class RssEtalonConfig(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = RssEtalonConfigModel
-
-
-class P1RssPolarimetry(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = P1RssPolarimetryModel
-
-
-class RssPolarimetryPattern(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = RssPolarimetryPatternModel
-
-
-
-instruments_list = [
-    P1Config,
-    P1Hrs,
-    HrsMode,
-    P1Bvit,
-    BvitFilter,
-    P1Salticam,
-    SalticamDetectorMode,
-    P1Rss,
-    RssDetectorMode,
-    RssMode,
-    P1RssSpectroscopy,
-    RssGrating,
-    P1RssMask,
-    RssMaskType,
-    P1RssFabryPerot,
-    RssFabryPerotMode,
-    RssEtalonConfig,
-    P1RssPolarimetry,
-    RssPolarimetryPattern
-]
+class Instruments(ObjectType):
+    rss = List(RSS)
+    hrs = List(HRS)
+    bvit = List(BVIT)
+    scam = List(SCAM)
