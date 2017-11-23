@@ -80,7 +80,6 @@ class User:
 
     @staticmethod
     def is_valid_token(token):
-        print('TOKEN!', token)
         try:
             user = jwt.decode(token, "SECRET-KEY", algorithm='HS256')
 
