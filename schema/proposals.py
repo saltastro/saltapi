@@ -1,19 +1,13 @@
-from data.proposals import *
-from graphene_sqlalchemy import SQLAlchemyObjectType, SQLAlchemyConnectionField
+
 from data.common import Semester as TypeSemester, conn
 import pandas as pd
-from graphene import relay, Field, List, Boolean, ObjectType
 from flask import g
 
 
 
 
 
-class Proposal(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = ProposalModel
-
+class Proposal:
     @staticmethod
     def get_proposal_ids(**args):
         sql = " SELECT MAX(p.Proposal_Id) as Ids, p.ProposalCode_Id as PCode_Ids " \
@@ -35,7 +29,7 @@ class Proposal(SQLAlchemyObjectType):
             sql = sql + "AND pc.Proposal_Code = '{proposal_code}' ".format(proposal_code=args['proposal_code'])
 
         if g.user.user_value == 0:
-            return {'ProposalIds': [], 'ProposalCodeIds': []}
+            return {'ProposalIds': [], 'ProposalCodes': []}
 
         elif g.user.user_value == 1:
             sql = sql + " AND pi.Investigator_Id = {inverstitagor_id}".format(inverstitagor_id=g.user.user_id)
@@ -44,4 +38,4 @@ class Proposal(SQLAlchemyObjectType):
         results = pd.read_sql(sql, conn)
         ids = [int(x) for x in list(results['Ids'].values)]
         pcode_ids = [int(x) for x in list(results['PCode_Ids'].values)]
-        return {'ProposalIds': ids, 'ProposalCodeIds': pcode_ids}
+        return {'ProposalIds': ids, 'ProposalCodes': pcode_ids}

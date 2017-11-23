@@ -1,12 +1,7 @@
-from data.user import *
 from flask import g
-from graphene_sqlalchemy import SQLAlchemyObjectType
 import pandas as pd
 from data.common import conn
 import jwt
-import  graphene
-from graphene import ObjectType, String, List, Boolean, relay
-
 
 
 class User:
@@ -115,49 +110,3 @@ class User:
                   "  AND PiptUser_Id = {user_id}".format(user_id=user_id)
             result = pd.read_sql(sql, conn)
             g.user = User(result.iloc[0]['PiptUser_Id'], result.iloc[0]['PiptSetting_Id'], result.iloc[0]['Value'], )
-
-
-class PiptUser(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = PiptUserModel
-        only_fields = ('PiptUser_Id', 'Username', 'Investigator')
-    user_id = PiptUserModel.PiptUser_Id
-    username = PiptUserModel.Username
-    is_tac_chair = Boolean()
-    partner_code = PartnerModel.Partner_Code
-    partner_name = PartnerModel.Partner_Name
-
-    def resolve_is_tac_chair(self, args, context, info):
-        query = PiptUserTAC.get_query(info)
-        result = query.filter(PiptUserTACModel.PiptUser_Id == self.user_id).first()
-        return PiptUserTACModel.Chair
-
-
-class PiptSetting(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = PiptSettingModel
-
-
-class PiptUserSetting(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = PiptUserSettingModel
-
-
-class PiptUserTAC(SQLAlchemyObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
-        model = PiptUserTACModel
-
-
-
-
-
-user_list = [
-    PiptUser,
-    PiptSetting,
-    PiptUserSetting,
-    PiptUserTAC
-]

@@ -1,5 +1,4 @@
-import graphene as g
-from graphene import relay as r
+
 import pandas as pd
 from data import conn
 
@@ -8,7 +7,7 @@ import warnings
 from dateutil.relativedelta import relativedelta
 
 
-class Semester(g.ObjectType):
+class Semester:
 
     semester_id = g.Int()
     semester = g.String()
@@ -74,47 +73,3 @@ class Semester(g.ObjectType):
         semest.start_semester = data['StartSemester']
         semest.end_semester = data['EndSemester']
         return semest
-
-
-class UserRole(g.Enum):
-    VISITOR = 1
-    INVESTIGATOR = 2
-    TAC_MEMBER = 3
-    TAC_CHAIR = 4
-    SALT_ASTRONOMER = 5
-    ADMINISTRATOR = 6
-
-
-class Person(g.ObjectType):
-    class Meta:
-        interfaces = (r.Node,)
-
-    user_id = g.ID()
-    surname = g.String()
-    first_name = g.String()
-    email = g.String()
-    # roles = graphene.Field(UserRole, description="A user role object")  # ** was a list **
-    pipt_user_id = g.Int()
-    phone = g.String()
-    institute_id = g.Int()
-
-
-class ObservingConditions(g.ObjectType):
-    class Meta:
-        interfaces = (r.Node,)
-
-    max_seeing = g.Float()
-    transparency = g.String() # be enum
-    description = g.String()
-
-
-class Thesis(g.ObjectType): # was p1thesis
-    class Meta:
-        interfaces = (r.Node,)
-    thesis_type = g.String()  # be Enum
-    thesis_description = g.String()
-    student = g.Field(Person)
-    # todo add year of completion
-
-
-

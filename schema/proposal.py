@@ -1,4 +1,6 @@
-from graphene import ObjectType, String, ID, Boolean, Field, Int, List, Float
+from flask import g
+from graphene import ObjectType, String, ID, Boolean, Field, Int, List, Float, resolve_only_args
+from schema.instruments import Instruments
 
 
 class Investigator(ObjectType):
@@ -21,11 +23,13 @@ class RequestedTimeM(ObjectType):
     time = Int()
 
 
-class ProposalM(ObjectType):
+class Proposals(ObjectType):
     id = ID()
     code = String()
     general_info = Field(ProposalInfoM)
-    requester_time = List(RequestedTimeM)
+    time_requests = List(RequestedTimeM)
     total_time_requested = Int()
     minimum_useful_time = Int()
     is_thesis = Boolean()
+    instruments = Field(Instruments)
+
