@@ -80,14 +80,20 @@ class User:
 
     @staticmethod
     def is_valid_token(token):
+        print("Veryfy Token called.........................")
         try:
             user = jwt.decode(token, "SECRET-KEY", algorithm='HS256')
+            print(" Token valid ..................")
 
             if 'user_id' in user:
+                print("Verify user ........................")
                 User.current_user(user['user_id'])
+                print("User valid ..............................")
                 return True
+            print("User not valid ..............................")
             return False
         except:
+            print(" Token not  valid ..................")
             return False
 
     @staticmethod
