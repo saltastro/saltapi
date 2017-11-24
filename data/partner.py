@@ -1,5 +1,5 @@
 import pandas as pd
-from data import conn
+from data import sdb_connect
 
 
 def query_partner_data(**args):
@@ -18,8 +18,12 @@ def query_partner_data(**args):
         else:
             sql += " where Partner_Code = '{partner_code}'".format(partner_code=args['partner_code'])
 
-    print(sql)
-    results = pd.read_sql(sql + " order by Partner_Code", conn)
+    conn = sdb_connect()
+    try:
+        results = pd.read_sql(sql + " order by Partner_Code", conn)
+        conn.close()
+    except:
+        raise RuntimeError("Fail to get partners")
     partners, pc = [], []
     for index, row in results.iterrows():
         if row["Partner_Code"] not in pc:

@@ -34,8 +34,7 @@ def get_instruments(ids, proposals):
                       ' where ProposalCode_Id in {codes} order by Proposal_Code ' \
                       ''.format(codes=tuple(ids['ProposalCode_Ids']))
     conn = sdb_connect()
-    print(ids['ProposalCode_Ids'], "\n", ids['ProposalIds'])
-    if isinstance(conn, Connection):
+    try:
         i_results = pd.read_sql(instruments_sql, conn)
 
         conn.close()
@@ -86,3 +85,7 @@ def get_instruments(ids, proposals):
                         xml_dictator_mode=row['SCXmlDetectorMode']
                     )
                 )
+
+    except:
+        # TODO: Log exception
+        raise RuntimeError("Failed to get instruments data")

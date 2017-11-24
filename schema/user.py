@@ -1,6 +1,6 @@
 from flask import g
 import pandas as pd
-from data.common import conn
+from data.common import sdb_connect
 import jwt
 
 
@@ -56,12 +56,16 @@ class User:
         """
         sql = "SELECT PiptUser_Id From PiptUser where Username='{username}' AND Password=MD5('{password}')"\
             .format(username=username, password=password)
-        result = pd.read_sql(sql, conn)
 
+        conn = sdb_connect()
         try:
+            result = pd.read_sql(sql, conn)
+            conn.close()
             return result.iloc[0]['PiptUser_Id']
         except IndexError:
             return None
+        except:
+            raise RuntimeError("Fail to get User Id")
 
     @staticmethod
     def create_token(user_id):
@@ -80,20 +84,14 @@ class User:
 
     @staticmethod
     def is_valid_token(token):
-        print("Veryfy Token called.........................")
         try:
             user = jwt.decode(token, "SECRET-KEY", algorithm='HS256')
-            print(" Token valid ..................")
 
             if 'user_id' in user:
-                print("Verify user ........................")
                 User.current_user(user['user_id'])
-                print("User valid ..............................")
                 return True
-            print("User not valid ..............................")
             return False
         except:
-            print(" Token not valid ..................")
             return False
 
     @staticmethod
@@ -113,5 +111,12 @@ class User:
         if user_id is not None:
             sql = "SELECT PiptUser_Id, PiptSetting_Id, Value FROM PiptUserSetting WHERE PiptSetting_Id = 20 " \
                   "  AND PiptUser_Id = {user_id}".format(user_id=user_id)
-            result = pd.read_sql(sql, conn)
-            g.user = User(result.iloc[0]['PiptUser_Id'], result.iloc[0]['PiptSetting_Id'], result.iloc[0]['Value'], )
+            conn = sdb_connect()
+            try:
+                result = pd.read_sql(sql, conn)
+                g.user = User(result.iloc[0]['PiptUser_Id'], result.iloc[0]['PiptSetting_Id'], result.iloc[0]['Value'], )
+                conn.close()
+            except IndexError:
+                raise RuntimeError("User doesn't Exist")
+            except:
+                raise RuntimeError("Fail to set/get current user")

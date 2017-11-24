@@ -1,5 +1,6 @@
 import pandas as pd
-from data import conn
+from logging import log
+from data import sdb_connect
 import datetime
 import warnings
 from dateutil.relativedelta import relativedelta
@@ -49,13 +50,14 @@ class Semester:
                         "or '2017-1'")
             except ValueError:
                 return None
-
-        data = pd.read_sql(sql, conn)
+        conn = sdb_connect()
         try:
-            semester = [Semester().__make_semester(data=s) for i, s in data.iterrows()][0]
-        except IndexError:
-            semester = None
-        return semester
+            data = pd.read_sql(sql, conn)
+            conn.close()
+            return [Semester().__make_semester(data=s) for i, s in data.iterrows()][0]
+        except Exception as err:
+            log(1, err)
+            raise RuntimeError("Failed to get semester data")
 
     def __make_semester(self, data):
         # Todo This method is called only by get semester it is suppose to be a private method for semester
