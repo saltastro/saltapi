@@ -10,7 +10,7 @@ from flask import g
 class Proposal:
     @staticmethod
     def get_proposal_ids(**args):
-        sql = " SELECT MAX(p.Proposal_Id) as Ids, p.ProposalCode_Id as PCode_Ids " \
+        sql = " SELECT MAX(p.Proposal_Id) as Ids, pc.ProposalCode_Id as PCode_Ids " \
               "  FROM Proposal AS p " \
               "    JOIN ProposalCode AS pc ON (p.ProposalCode_Id=pc.ProposalCode_Id) " \
               "    JOIN MultiPartner AS mp ON (p.ProposalCode_Id=mp.ProposalCode_Id) " \
@@ -29,7 +29,7 @@ class Proposal:
             sql = sql + "AND pc.Proposal_Code = '{proposal_code}' ".format(proposal_code=args['proposal_code'])
 
         if g.user.user_value == 0:
-            return {'ProposalIds': [], 'ProposalCodes': []}
+            return {'ProposalIds': [], 'ProposalCode_Ids': []}
 
         elif g.user.user_value == 1:
             sql = sql + " AND pi.Investigator_Id = {inverstitagor_id}".format(inverstitagor_id=g.user.user_id)
@@ -38,4 +38,4 @@ class Proposal:
         results = pd.read_sql(sql, conn)
         ids = [int(x) for x in list(results['Ids'].values)]
         pcode_ids = [int(x) for x in list(results['PCode_Ids'].values)]
-        return {'ProposalIds': ids, 'ProposalCodes': pcode_ids}
+        return {'ProposalIds': ids, 'ProposalCode_Ids': pcode_ids}

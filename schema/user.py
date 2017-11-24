@@ -93,7 +93,7 @@ class User:
             print("User not valid ..............................")
             return False
         except:
-            print(" Token not  valid ..................")
+            print(" Token not valid ..................")
             return False
 
     @staticmethod
