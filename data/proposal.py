@@ -1,6 +1,6 @@
-from flask import g
+from pymysql.connections import Connection
 import pandas as pd
-from data import conn
+from data import sdb_connect
 from schema.proposals import Proposal
 
 proposal_data = {}
@@ -9,8 +9,12 @@ proposal_data = {}
 def query_proposal_data(**args):
     from schema.proposal import Proposals, RequestedTimeM, ProposalInfoM
     from schema.instruments import RSS, HRS, BVIT, SCAM, Instruments, Spectroscopy, Polarimetry, FabryPerot, Mask
+
     ids = Proposal.get_proposal_ids(**args)
-    proposal_sql = " select * from Proposal " \
+    conn = sdb_connect()
+    proposals = {}
+    if isinstance(conn, Connection):
+        proposal_sql = " select * from Proposal " \
                    "     join ProposalCode using (ProposalCode_Id) " \
                    "     join ProposalGeneralInfo using (ProposalCode_Id) " \
                    "     join P1RequestedTime as p1 using (Proposal_Id) " \
@@ -25,40 +29,41 @@ def query_proposal_data(**args):
                    "     join P1MinTime using(ProposalCode_Id) " \
                    "  where Proposal_Id in {ids} order by Proposal_Id" \
                    " ".format(ids=tuple(ids['ProposalIds']))
-    results = pd.read_sql(proposal_sql, conn)
-    proposals = {}
-    pc = []  # I am using pc to control proposals that are checked
-    for index, row in results.iterrows():
-        if row["Proposal_Code"] not in pc:
-            proposals[row["Proposal_Code"]] = Proposals(
-                id="Proposal: " + str(row["Proposal_Id"]),
-                code=row["Proposal_Code"],
-                general_info=ProposalInfoM(
-                    is_p4=row["P4"] == 1,
-                    status=row["Status"],
-                    transparency=row["Transparency"],
-                    max_seeing=row["MaxSeeing"]
-                ),
-                total_time_requested=row["TotalReqTime"],
-                minimum_useful_time=row["P1MinimumUsefulTime"],
-                time_requests=[],
-                instruments=Instruments(
-                    rss=[],
-                    hrs=[],
-                    bvit=[],
-                    scam=[]
-                ),
-                is_thesis=not pd.isnull(row["ThesisType_Id"])  # concluded that none thesis proposals have null on
-                # P1Thesis
+        results = pd.read_sql(proposal_sql, conn)
+        conn.close()
+
+        pc = []  # I am using pc to control proposals that are checked
+        for index, row in results.iterrows():
+            if row["Proposal_Code"] not in pc:
+                proposals[row["Proposal_Code"]] = Proposals(
+                    id="Proposal: " + str(row["Proposal_Id"]),
+                    code=row["Proposal_Code"],
+                    general_info=ProposalInfoM(
+                        is_p4=row["P4"] == 1,
+                        status=row["Status"],
+                        transparency=row["Transparency"],
+                        max_seeing=row["MaxSeeing"]
+                    ),
+                    total_time_requested=row["TotalReqTime"],
+                    minimum_useful_time=row["P1MinimumUsefulTime"],
+                    time_requests=[],
+                    instruments=Instruments(
+                        rss=[],
+                        hrs=[],
+                        bvit=[],
+                        scam=[]
+                    ),
+                    is_thesis=not pd.isnull(row["ThesisType_Id"])  # concluded that none thesis proposals have null on
+                    # P1Thesis
+                )
+            proposals[row["Proposal_Code"]].time_requests.append(
+                RequestedTimeM(
+                    moon=row["Moon"],
+                    time=row["P1RequestedTime"],
+                    for_semester=str(row['Year']) + "-" + str(row['Semester'])
+                )
             )
-        proposals[row["Proposal_Code"]].time_requests.append(
-            RequestedTimeM(
-                moon=row["Moon"],
-                time=row["P1RequestedTime"],
-                for_semester=str(row['Year']) + "-" + str(row['Semester'])
-            )
-        )
-        pc.append(row["Proposal_Code"])  # I am using pc to control proposals that are checked
+            pc.append(row["Proposal_Code"])  # I am using pc to control proposals that are checked
 
     instruments_sql = ' select *, sc.DetectorMode as SCDetectorMode, sc.XmlDetectorMode as SCXmlDetectorMode, ' \
                       '         rs.DetectorMode as RSDetectorMode, rs.XmlDetectorMode as RSXmlDetectorMode  ' \
@@ -87,55 +92,57 @@ def query_proposal_data(**args):
                       '   left join HrsMode using(HrsMode_Id) ' \
                       ' where ProposalCode_Id in {codes} order by Proposal_Code ' \
                       ''.format(codes=tuple(ids['ProposalCodes']))
-
-    i_results = pd.read_sql(instruments_sql, conn)
-    for index, row in i_results.iterrows():
-        if not pd.isnull(row["P1Rss_Id"]):
-            proposals[row["Proposal_Code"]].instruments.rss.append(
-                RSS(
-                    type="RSS",
-                    dictator_mode=row['RSDetectorMode'],
-                    xml_dictator_mode=row['RSXmlDetectorMode'],
-                    mode=row['Mode'],
-                    spectroscopy=Spectroscopy(
-                        grating=row["Grating"]
-                    ),
-                    fabry_perot=FabryPerot(
-                        mode=row['FabryPerot_Mode'],
-                        description=row['FabryPerot_Description'],
-                        etalon_config=row['EtalonConfig'],
-                    ),
-                    polarimetry=Polarimetry(
-                        pattern_name=row['PatternName']
-                    ),
-                    mask=Mask(
-                        type=row['RssMaskType'],
-                        mos_description=row['MosDescription']
+    conn = sdb_connect()
+    if isinstance(conn, Connection):
+        i_results = pd.read_sql(instruments_sql, conn)
+        conn.close()
+        for index, row in i_results.iterrows():
+            if not pd.isnull(row["P1Rss_Id"]):
+                proposals[row["Proposal_Code"]].instruments.rss.append(
+                    RSS(
+                        type="RSS",
+                        dictator_mode=row['RSDetectorMode'],
+                        xml_dictator_mode=row['RSXmlDetectorMode'],
+                        mode=row['Mode'],
+                        spectroscopy=Spectroscopy(
+                            grating=row["Grating"]
+                        ),
+                        fabry_perot=FabryPerot(
+                            mode=row['FabryPerot_Mode'],
+                            description=row['FabryPerot_Description'],
+                            etalon_config=row['EtalonConfig'],
+                        ),
+                        polarimetry=Polarimetry(
+                            pattern_name=row['PatternName']
+                        ),
+                        mask=Mask(
+                            type=row['RssMaskType'],
+                            mos_description=row['MosDescription']
+                        )
                     )
                 )
-            )
-        if not pd.isnull(row["P1Hrs_Id"]):
-            proposals[row["Proposal_Code"]].instruments.hrs.append(
-                HRS(
-                    type="HRS",
-                    exposure_mode=row["ExposureMode"]
+            if not pd.isnull(row["P1Hrs_Id"]):
+                proposals[row["Proposal_Code"]].instruments.hrs.append(
+                    HRS(
+                        type="HRS",
+                        exposure_mode=row["ExposureMode"]
+                    )
                 )
-            )
-        if not pd.isnull(row["P1Bvit_Id"]):
-            proposals[row["Proposal_Code"]].instruments.bvit.append(
-                BVIT(
-                    type="BVIT",
-                    filter_name=row['BvitFilter_Name']
+            if not pd.isnull(row["P1Bvit_Id"]):
+                proposals[row["Proposal_Code"]].instruments.bvit.append(
+                    BVIT(
+                        type="BVIT",
+                        filter_name=row['BvitFilter_Name']
+                    )
                 )
-            )
-        if not pd.isnull(row["P1Salticam_Id"]):
-            proposals[row["Proposal_Code"]].instruments.scam.append(
-                SCAM(
-                    type="SCAM",
-                    dictator_mode=row['SCDetectorMode'],
-                    xml_dictator_mode=row['SCXmlDetectorMode']
+            if not pd.isnull(row["P1Salticam_Id"]):
+                proposals[row["Proposal_Code"]].instruments.scam.append(
+                    SCAM(
+                        type="SCAM",
+                        dictator_mode=row['SCDetectorMode'],
+                        xml_dictator_mode=row['SCXmlDetectorMode']
+                    )
                 )
-            )
     return proposals.values()
 
 

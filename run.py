@@ -90,6 +90,10 @@ def home():
 def not_found(error):
     return make_response(jsonify({'errors': 'Not found'}), 404)
 
+@app.errorhandler(500)
+def not_found(error):
+    return make_response(jsonify({'errors': 'Fail to connect to sdb'}), 500)
+
 
 if __name__ == '__main__':
     app.run(port=5001)
