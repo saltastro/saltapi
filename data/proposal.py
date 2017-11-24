@@ -14,7 +14,7 @@ def query_proposal_data(**args):
     ids = Proposal.get_proposal_ids(**args)
     conn = sdb_connect()
     proposals = {}
-    if isinstance(conn, Connection):
+    try:
         proposal_sql = " select * from Proposal " \
                    "     join ProposalCode using (ProposalCode_Id) " \
                    "     join ProposalGeneralInfo using (ProposalCode_Id) " \
@@ -32,7 +32,6 @@ def query_proposal_data(**args):
                    " ".format(ids=tuple(ids['ProposalIds']))
         results = pd.read_sql(proposal_sql, conn)
         conn.close()
-        print(results)
 
         pc = []  # I am using pc to control proposals that are checked
         for index, row in results.iterrows():
@@ -65,6 +64,10 @@ def query_proposal_data(**args):
                     for_semester=str(row['Year']) + "-" + str(row['Semester'])
                 )
             )  # I am using pc to control proposals that are checked
+
+    except:
+        # TODO: Log exception
+        raise RuntimeError("Failed to get Proposal data")
 
     get_instruments(ids, proposals)
     return proposals.values()
