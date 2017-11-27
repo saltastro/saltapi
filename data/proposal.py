@@ -8,7 +8,7 @@ proposal_data = {}
 
 
 def query_proposal_data(**args):
-    from schema.proposal import Proposals, RequestedTimeM, ProposalInfoM
+    from schema.proposal import Proposals, RequestedTimeM, ProposalInfoM, PI
     from schema.instruments import RSS, HRS, BVIT, SCAM, Instruments, Spectroscopy, Polarimetry, FabryPerot, Mask
 
     ids = Proposal.get_proposal_ids(**args)
@@ -48,6 +48,11 @@ def query_proposal_data(**args):
                     total_time_requested=row["TotalReqTime"],
                     minimum_useful_time=row["P1MinimumUsefulTime"],
                     time_requests=[],
+                    pi=PI(
+                        name=row["FirstName"],
+                        surname=row["Surname"],
+                        email=row["Email"]
+                    ),
                     instruments=Instruments(
                         rss=[],
                         hrs=[],
