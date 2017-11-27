@@ -23,6 +23,12 @@ class RequestedTimeM(ObjectType):
     time = Int()
 
 
+class PI(ObjectType):
+    surname = String()
+    name = String()
+    email = String()
+
+
 class Proposals(ObjectType):
     id = ID()
     code = String()
@@ -32,4 +38,5 @@ class Proposals(ObjectType):
     minimum_useful_time = Int()
     is_thesis = Boolean()
     instruments = Field(Instruments)
+    pi = Field(PI)
 
