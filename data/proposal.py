@@ -27,7 +27,6 @@ def query_proposal_data(**args):
                    "     join ProposalContact as pc using(ProposalCode_Id) " \
                    "     join Investigator as i on(i.Investigator_Id = pc.Leader_Id) " \
                    "     left join P1Thesis using (ProposalCode_Id) " \
-                   "     join P1MinTime using(ProposalCode_Id) " \
                    "  where Proposal_Id in {ids} order by Proposal_Id" \
                    " ".format(ids=tuple(ids['ProposalIds']))
         results = pd.read_sql(proposal_sql, conn)
@@ -46,7 +45,6 @@ def query_proposal_data(**args):
                         max_seeing=row["MaxSeeing"]
                     ),
                     total_time_requested=row["TotalReqTime"],
-                    minimum_useful_time=row["P1MinimumUsefulTime"],
                     time_requests=[],
                     pi=PI(
                         name=row["FirstName"],
