@@ -32,6 +32,9 @@ class PI(ObjectType):
 class Proposals(ObjectType):
     id = ID()
     code = String()
+    title = String()
+    abstract = String()
+    semester = String()
     general_info = Field(ProposalInfoM)
     time_requests = List(RequestedTimeM)
     total_time_requested = Int()

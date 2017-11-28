@@ -15,7 +15,7 @@ def query_proposal_data(**args):
     conn = sdb_connect()
     proposals = {}
     try:
-        proposal_sql = " select * from Proposal " \
+        proposal_sql = " select *,  concat(s.Year, '-', s.Semester) as CurSemester from Proposal " \
                    "     join ProposalCode using (ProposalCode_Id) " \
                    "     join ProposalGeneralInfo using (ProposalCode_Id) " \
                    "     join P1RequestedTime as p1 using (Proposal_Id) " \
@@ -26,6 +26,8 @@ def query_proposal_data(**args):
                    "     join Transparency using (Transparency_Id) " \
                    "     join ProposalContact as pc using(ProposalCode_Id) " \
                    "     join Investigator as i on(i.Investigator_Id = pc.Leader_Id) " \
+                   "     join ProposalText using(ProposalCode_Id) " \
+                   "     join P1MinTime using(ProposalCode_Id) " \
                    "     left join P1Thesis using (ProposalCode_Id) " \
                    "  where Proposal_Id in {ids} order by Proposal_Id" \
                    " ".format(ids=tuple(ids['ProposalIds']))
@@ -38,6 +40,10 @@ def query_proposal_data(**args):
                 proposals[row["Proposal_Code"]] = Proposals(
                     id="Proposal: " + str(row["Proposal_Id"]),
                     code=row["Proposal_Code"],
+                    title=row["Title"],
+                    semester=row["CurSemester"],
+                    abstract=row["Abstract"],
+                    minimum_useful_time=row["P1MinimumUsefulTime"],
                     general_info=ProposalInfoM(
                         is_p4=row["P4"] == 1,
                         status=row["Status"],
