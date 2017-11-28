@@ -28,18 +28,17 @@ def get_instruments(ids, proposals):
                       '    ' \
                       '   left join P1Bvit using(P1Bvit_Id) ' \
                       '   left join BvitFilter using(BvitFilter_Id) ' \
-                      '    ' \
                       '   left join P1Hrs using(P1Hrs_Id) ' \
                       '   left join HrsMode using(HrsMode_Id) ' \
                       ' where ProposalCode_Id in {codes} order by Proposal_Code ' \
-                      ''.format(codes=tuple(ids['ProposalCode_Ids']))
+                      ''.format(codes=tuple(ids["ProposalCode_Ids"]))
     conn = sdb_connect()
-    try:
-        i_results = pd.read_sql(instruments_sql, conn)
 
-        conn.close()
-        for index, row in i_results.iterrows():
-            if not pd.isnull(row["P1Rss_Id"]):
+    i_results = pd.read_sql(instruments_sql, conn)
+
+    conn.close()
+    for index, row in i_results.iterrows():
+        if not pd.isnull(row["P1Rss_Id"]):
                 proposals[row["Proposal_Code"]].instruments.rss.append(
                     RSS(
                         type="RSS",
@@ -63,21 +62,21 @@ def get_instruments(ids, proposals):
                         )
                     )
                 )
-            if not pd.isnull(row["P1Hrs_Id"]):
+        if not pd.isnull(row["P1Hrs_Id"]):
                 proposals[row["Proposal_Code"]].instruments.hrs.append(
                     HRS(
                         type="HRS",
                         exposure_mode=row["ExposureMode"]
                     )
                 )
-            if not pd.isnull(row["P1Bvit_Id"]):
+        if not pd.isnull(row["P1Bvit_Id"]):
                 proposals[row["Proposal_Code"]].instruments.bvit.append(
                     BVIT(
                         type="BVIT",
                         filter_name=row['BvitFilter_Name']
                     )
                 )
-            if not pd.isnull(row["P1Salticam_Id"]):
+        if not pd.isnull(row["P1Salticam_Id"]):
                 proposals[row["Proposal_Code"]].instruments.scam.append(
                     SCAM(
                         type="SCAM",
@@ -86,6 +85,6 @@ def get_instruments(ids, proposals):
                     )
                 )
 
-    except:
-        # TODO: Log exception
-        raise RuntimeError("Failed to get instruments data")
+    #except:
+    # TODO: Log exception
+    #   raise RuntimeError("Failed to get instruments data")

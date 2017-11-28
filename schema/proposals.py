@@ -10,7 +10,7 @@ from data import sdb_connect
 class Proposal:
     @staticmethod
     def get_proposal_ids(**args):
-        sql = " SELECT MAX(p.Proposal_Id) as Ids, pc.ProposalCode_Id as PCode_Ids " \
+        sql = " SELECT MAX(p.Proposal_Id) as Ids, pc.ProposalCode_Id as PCode_Ids, pc.Proposal_Code as PCD " \
               "  FROM Proposal AS p " \
               "    JOIN ProposalCode AS pc ON (p.ProposalCode_Id=pc.ProposalCode_Id) " \
               "    JOIN MultiPartner AS mp ON (p.ProposalCode_Id=mp.ProposalCode_Id) " \

@@ -9,13 +9,14 @@ proposal_data = {}
 
 def query_proposal_data(**args):
     from schema.proposal import Proposals, RequestedTimeM, ProposalInfoM, PI
-    from schema.instruments import RSS, HRS, BVIT, SCAM, Instruments, Spectroscopy, Polarimetry, FabryPerot, Mask
+    from schema.instruments import Instruments
 
     ids = Proposal.get_proposal_ids(**args)
     conn = sdb_connect()
     proposals = {}
-    try:
-        proposal_sql = " select *,  concat(s.Year, '-', s.Semester) as CurSemester from Proposal " \
+    print(ids)
+
+    proposal_sql = " select *,  concat(s.Year, '-', s.Semester) as CurSemester from Proposal " \
                    "     join ProposalCode using (ProposalCode_Id) " \
                    "     join ProposalGeneralInfo using (ProposalCode_Id) " \
                    "     join P1RequestedTime as p1 using (Proposal_Id) " \
@@ -29,14 +30,15 @@ def query_proposal_data(**args):
                    "     join ProposalText using(ProposalCode_Id) " \
                    "     join P1MinTime using(ProposalCode_Id) " \
                    "     left join P1Thesis using (ProposalCode_Id) " \
-                   "     join ProposalTechReport using (ProposalCode_Id) " \
+                   "     left join ProposalTechReport using (ProposalCode_Id) " \
                    "  where Proposal_Id in {ids} order by Proposal_Id" \
                    " ".format(ids=tuple(ids['ProposalIds']))
-        results = pd.read_sql(proposal_sql, conn)
-        conn.close()
+    results = pd.read_sql(proposal_sql, conn)
+    conn.close()
 
-        pc = []  # I am using pc to control proposals that are checked
-        for index, row in results.iterrows():
+    pc = []  # I am using pc to control proposals that are checked
+    for index, row in results.iterrows():
+            #print(row["Proposal_Code"])
             if row["Proposal_Code"] not in proposals:
                 proposals[row["Proposal_Code"]] = Proposals(
                     id="Proposal: " + str(row["Proposal_Id"]),
@@ -76,11 +78,13 @@ def query_proposal_data(**args):
                 )
             )  # I am using pc to control proposals that are checked
 
-    except:
+    #except:
         # TODO: Log exception
-        raise RuntimeError("Failed to get Proposal data")
+        #raise RuntimeError("Failed to get Proposal data")
 
     get_instruments(ids, proposals)
+
+
     return proposals.values()
 
 
