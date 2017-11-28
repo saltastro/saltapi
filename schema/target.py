@@ -6,9 +6,10 @@ class Coordinates(ObjectType):
     ra = Float()
 
 
-class Horizon(ObjectType):
-    dec = Float()
-    ra = Float()
+class Moving(ObjectType):
+    dec_dot = Float()
+    ra_dot = Float()
+    epoch = String()
 
 
 class Magnitudes(ObjectType):
@@ -22,3 +23,4 @@ class Target(ObjectType):
     name = String()
     coordinates = Field(Coordinates)
     magnitudes = Field(Magnitudes)
+    moving = Field(Moving)
