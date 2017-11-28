@@ -42,4 +42,5 @@ class Proposals(ObjectType):
     is_thesis = Boolean()
     instruments = Field(Instruments)
     pi = Field(PI)
+    tech_report = String()
 

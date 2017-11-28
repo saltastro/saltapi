@@ -29,6 +29,7 @@ def query_proposal_data(**args):
                    "     join ProposalText using(ProposalCode_Id) " \
                    "     join P1MinTime using(ProposalCode_Id) " \
                    "     left join P1Thesis using (ProposalCode_Id) " \
+                   "     join ProposalTechReport using (ProposalCode_Id) " \
                    "  where Proposal_Id in {ids} order by Proposal_Id" \
                    " ".format(ids=tuple(ids['ProposalIds']))
         results = pd.read_sql(proposal_sql, conn)
@@ -63,8 +64,9 @@ def query_proposal_data(**args):
                         bvit=[],
                         scam=[]
                     ),
-                    is_thesis=not pd.isnull(row["ThesisType_Id"])  # concluded that none thesis proposals have null on
+                    is_thesis=not pd.isnull(row["ThesisType_Id"]),  # concluded that none thesis proposals have null on
                     # P1Thesis
+                    tech_report = row['TechReport']
                 )
             proposals[row["Proposal_Code"]].time_requests.append(
                 RequestedTimeM(
