@@ -64,8 +64,9 @@ def query_proposal_data(**args):
                         bvit=[],
                         scam=[]
                     ),
-                    is_thesis=not pd.isnull(row["ThesisType_Id"])  # concluded that none thesis proposals have null on
+                    is_thesis=not pd.isnull(row["ThesisType_Id"]),  # concluded that none thesis proposals have null on
                     # P1Thesis
+                    tech_report = row['TechReport']
                 )
             proposals[row["Proposal_Code"]].time_requests.append(
                 RequestedTimeM(
