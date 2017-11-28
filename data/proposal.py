@@ -8,13 +8,13 @@ proposal_data = {}
 
 
 def query_proposal_data(**args):
-    from schema.proposal import Proposals, RequestedTimeM, ProposalInfoM, PI
+    from schema.proposal import Proposals, RequestedTimeM, ProposalInfoM, PI, TimePerPartner
     from schema.instruments import Instruments
 
     ids = Proposal.get_proposal_ids(**args)
     conn = sdb_connect()
     proposals = {}
-    print(ids)
+    print(ids['ProposalCode_Ids'])
 
     proposal_sql = " select *,  concat(s.Year, '-', s.Semester) as CurSemester from Proposal " \
                    "     join ProposalCode using (ProposalCode_Id) " \
@@ -38,7 +38,6 @@ def query_proposal_data(**args):
 
     pc = []  # I am using pc to control proposals that are checked
     for index, row in results.iterrows():
-            #print(row["Proposal_Code"])
             if row["Proposal_Code"] not in proposals:
                 proposals[row["Proposal_Code"]] = Proposals(
                     id="Proposal: " + str(row["Proposal_Id"]),
@@ -68,13 +67,14 @@ def query_proposal_data(**args):
                     ),
                     is_thesis=not pd.isnull(row["ThesisType_Id"]),  # concluded that none thesis proposals have null on
                     # P1Thesis
-                    tech_report = row['TechReport']
+                    tech_report=row['TechReport']
                 )
             proposals[row["Proposal_Code"]].time_requests.append(
                 RequestedTimeM(
                     moon=row["Moon"],
-                    time=row["P1RequestedTime"],
-                    for_semester=str(row['Year']) + "-" + str(row['Semester'])
+                    total_time=row["P1RequestedTime"],
+                    for_semester=str(row['Year']) + "-" + str(row['Semester']),
+                    time_per_partner=[]
                 )
             )  # I am using pc to control proposals that are checked
 
@@ -82,7 +82,40 @@ def query_proposal_data(**args):
         # TODO: Log exception
         #raise RuntimeError("Failed to get Proposal data")
 
+    partner_time_sql = " select Proposal_Code, ReqTimeAmount*ReqTimePercent/100.0 as TimePerPartner, " \
+                       "    Partner_Id, Partner_Name, Partner_Code, concat(s.Year,'-', s.Semester) as CurSemester " \
+                       "       from ProposalCode  " \
+                       "           join MultiPartner using (ProposalCode_Id) " \
+                       "           join Semester as s using (Semester_Id) " \
+                       "           join Partner using(Partner_Id) " \
+                       "  where ProposalCode_Id in {ids}" \
+                       " ".format(ids=tuple(ids['ProposalCode_Ids']))
+    conn = sdb_connect()
+    results = pd.read_sql(partner_time_sql, conn)
+    conn.close()
+    print(partner_time_sql)
+
+    for index, row in results.iterrows():
+        proposal = proposals[row["Proposal_Code"]]
+
+        for p in proposal.time_requests:
+            if p.for_semester == row['CurSemester']:
+                p.time_per_partner.append(
+                    TimePerPartner(
+                                partner_name=row['Partner_Name'],
+                                partner_code=row['Partner_Code'],
+                                time=row['TimePerPartner']
+                            )
+                )
+
+
+        #     .time_per_partner.append(
+        #
+        # )
+
+
     get_instruments(ids, proposals)
+    #  get_targets(ids, proposals)
 
 
     return proposals.values()

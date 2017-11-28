@@ -1,6 +1,7 @@
 from flask import g
 from graphene import ObjectType, String, ID, Boolean, Field, Int, List, Float, resolve_only_args
 from schema.instruments import Instruments
+from schema.target import Target
 
 
 class Investigator(ObjectType):
@@ -17,16 +18,23 @@ class ProposalInfoM(ObjectType):
     max_seeing = Float()
 
 
-class RequestedTimeM(ObjectType):
-    for_semester = String()
-    moon = String()
-    time = Int()
-
-
 class PI(ObjectType):
     surname = String()
     name = String()
     email = String()
+
+
+class TimePerPartner(ObjectType):
+    partner_name = String()
+    partner_code = String()
+    time = String()
+
+
+class RequestedTimeM(ObjectType):
+    for_semester = String()
+    moon = String()
+    total_time = Int()
+    time_per_partner = Field(List(TimePerPartner))
 
 
 class Proposals(ObjectType):
@@ -41,6 +49,7 @@ class Proposals(ObjectType):
     minimum_useful_time = Int()
     is_thesis = Boolean()
     instruments = Field(Instruments)
+    targets = Field(List(Target))
     pi = Field(PI)
     tech_report = String()
 
