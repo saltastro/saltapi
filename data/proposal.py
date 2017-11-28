@@ -29,6 +29,7 @@ def query_proposal_data(**args):
                    "     join ProposalText using(ProposalCode_Id) " \
                    "     join P1MinTime using(ProposalCode_Id) " \
                    "     left join P1Thesis using (ProposalCode_Id) " \
+                   "     join ProposalCode using (ProposalCode_Id) " \
                    "  where Proposal_Id in {ids} order by Proposal_Id" \
                    " ".format(ids=tuple(ids['ProposalIds']))
         results = pd.read_sql(proposal_sql, conn)
