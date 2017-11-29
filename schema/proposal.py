@@ -24,17 +24,16 @@ class PI(ObjectType):
     email = String()
 
 
-class TimePerPartner(ObjectType):
+class Distribution(ObjectType):
     partner_name = String()
     partner_code = String()
     time = String()
 
 
 class RequestedTimeM(ObjectType):
-    for_semester = String()
-    moon = String()
-    total_time = Int()
-    time_per_partner = Field(List(TimePerPartner))
+    semester = String()
+    distribution = Field(List(Distribution))
+    minimum_useful_time = Int()
 
 
 class Proposals(ObjectType):
@@ -42,11 +41,11 @@ class Proposals(ObjectType):
     code = String()
     title = String()
     abstract = String()
-    semester = String()
-    general_info = Field(ProposalInfoM)
+    is_p4 = Boolean()
+    status = String()
+    transparency = String()
+    max_seeing = Float()
     time_requests = List(RequestedTimeM)
-    total_time_requested = Int()
-    minimum_useful_time = Int()
     is_thesis = Boolean()
     instruments = Field(Instruments)
     targets = Field(List(Target))
