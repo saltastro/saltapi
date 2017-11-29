@@ -1,7 +1,5 @@
-from logging import log
 from pymysql import connect
 import os
-from flask import abort
 
 sql_config = {
     'user': os.environ["API_USER"],
@@ -13,9 +11,4 @@ sql_config = {
 
 
 def sdb_connect():
-    try:
-        return connect(**sql_config)
-    except Exception as err:
-        raise RuntimeError("Failed to connect to sdb")
-        # TODO: Log exception
-
+    return connect(**sql_config)

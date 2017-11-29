@@ -64,8 +64,6 @@ class User:
             return result.iloc[0]['PiptUser_Id']
         except IndexError:
             return None
-        except:
-            raise RuntimeError("Fail to get User Id")
 
     @staticmethod
     def create_token(user_id):
@@ -112,11 +110,6 @@ class User:
             sql = "SELECT PiptUser_Id, PiptSetting_Id, Value FROM PiptUserSetting WHERE PiptSetting_Id = 20 " \
                   "  AND PiptUser_Id = {user_id}".format(user_id=user_id)
             conn = sdb_connect()
-            try:
-                result = pd.read_sql(sql, conn)
-                g.user = User(result.iloc[0]['PiptUser_Id'], result.iloc[0]['PiptSetting_Id'], result.iloc[0]['Value'], )
-                conn.close()
-            except IndexError:
-                raise RuntimeError("User doesn't Exist")
-            except:
-                raise RuntimeError("Fail to set/get current user")
+            result = pd.read_sql(sql, conn)
+            g.user = User(result.iloc[0]['PiptUser_Id'], result.iloc[0]['PiptSetting_Id'], result.iloc[0]['Value'], )
+            conn.close()

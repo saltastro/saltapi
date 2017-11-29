@@ -4,9 +4,6 @@ from data.common import Semester as TypeSemester
 from data import sdb_connect
 
 
-
-
-
 class Proposal:
     @staticmethod
     def get_proposal_ids(**args):
@@ -36,11 +33,8 @@ class Proposal:
 
         sql = sql + " GROUP BY pc.ProposalCode_Id "
         conn = sdb_connect()
-        try:
-            results = pd.read_sql(sql, conn)
-            conn.close()
-        except:
-            raise RuntimeError("Fail to get Proposal Ids")
+        results = pd.read_sql(sql, conn)
+        conn.close()
         ids = [int(x) for x in list(results['Ids'].values)]
         pcode_ids = [int(x) for x in list(results['PCode_Ids'].values)]
         return {'ProposalIds': ids, 'ProposalCode_Ids': pcode_ids}

@@ -19,11 +19,8 @@ def query_partner_data(**args):
             sql += " where Partner_Code = '{partner_code}'".format(partner_code=args['partner_code'])
 
     conn = sdb_connect()
-    try:
-        results = pd.read_sql(sql + " order by Partner_Code", conn)
-        conn.close()
-    except:
-        raise RuntimeError("Fail to get partners")
+    results = pd.read_sql(sql + " order by Partner_Code", conn)
+    conn.close()
     partners, pc = [], []
     for index, row in results.iterrows():
         if row["Partner_Code"] not in pc:

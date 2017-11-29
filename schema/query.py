@@ -1,4 +1,3 @@
-from schema.proposals import Proposal
 from schema.partner import *
 from schema.selectors import Selectors
 from schema.proposal import *
@@ -6,9 +5,8 @@ from data.proposal import get_proposals
 from data.partner import get_partners
 from data.selectors import get_selectors_data
 from schema.instruments import *
-from schema.user import *
 import graphene
-from graphene import relay, Field, List, String
+from graphene import Field, List, String
 
 
 class Query(graphene.ObjectType):

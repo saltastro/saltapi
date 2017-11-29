@@ -51,13 +51,9 @@ class Semester:
             except ValueError:
                 return None
         conn = sdb_connect()
-        try:
-            data = pd.read_sql(sql, conn)
-            conn.close()
-            return [Semester().__make_semester(data=s) for i, s in data.iterrows()][0]
-        except Exception as err:
-            log(1, err)
-            raise RuntimeError("Failed to get semester data")
+        data = pd.read_sql(sql, conn)
+        conn.close()
+        return [Semester().__make_semester(data=s) for i, s in data.iterrows()][0]
 
     def __make_semester(self, data):
         # Todo This method is called only by get semester it is suppose to be a private method for semester

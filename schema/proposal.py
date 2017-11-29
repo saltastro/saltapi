@@ -1,5 +1,4 @@
-from flask import g
-from graphene import ObjectType, String, ID, Boolean, Field, Int, List, Float, resolve_only_args
+from graphene import ObjectType, String, ID, Boolean, Field, Int, List, Float
 from schema.instruments import Instruments
 from schema.target import Target
 
@@ -51,4 +50,3 @@ class Proposals(ObjectType):
     targets = Field(List(Target))
     pi = Field(PI)
     tech_report = String()
-
