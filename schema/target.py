@@ -1,4 +1,4 @@
-from graphene import ObjectType, String, ID, Float, Field
+from graphene import ObjectType, String, ID, Float, Field, Boolean
 
 
 class Coordinates(ObjectType):
@@ -21,6 +21,8 @@ class Magnitudes(ObjectType):
 class Target(ObjectType):
     id = ID()
     name = String()
+    proposal_code = String()
+    optional = Boolean()
     coordinates = Field(Coordinates)
     magnitudes = Field(Magnitudes)
     moving = Field(Moving)
