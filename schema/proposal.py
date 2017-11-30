@@ -26,7 +26,7 @@ class PI(ObjectType):
 class Distribution(ObjectType):
     partner_name = String()
     partner_code = String()
-    time = String()
+    time = Int()
 
 
 class RequestedTimeM(ObjectType):

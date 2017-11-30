@@ -1,6 +1,7 @@
 from pymysql.connections import Connection
 import pandas as pd
 from data import sdb_connect
+from data.targets import get_targets
 from data.instruments import get_instruments
 from schema.proposals import Proposal
 
@@ -52,6 +53,7 @@ def query_proposal_data(**args):
                 transparency=row["Transparency"],
                 max_seeing=row["MaxSeeing"],
                 time_requests=[],
+                targets=[],
                 pi=PI(
                     name=row["FirstName"],
                     surname=row["Surname"],
@@ -96,12 +98,12 @@ def query_proposal_data(**args):
                     Distribution(
                         partner_name=row['Partner_Name'],
                         partner_code=row['Partner_Code'],
-                        time=row['TimePerPartner']
+                        time=int(row['TimePerPartner'])
                     )
                 )
 
     get_instruments(ids, proposals)
-    #  get_targets(ids, proposals)
+    # get_targets(ids=ids, proposals=proposals)
 
     return proposals.values()
 
