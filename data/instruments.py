@@ -29,9 +29,11 @@ def get_instruments(ids, proposals):
                       '   left join P1Bvit using(P1Bvit_Id) ' \
                       '   left join BvitFilter using(BvitFilter_Id) ' \
                       '   left join P1Hrs using(P1Hrs_Id) ' \
-                      '   left join HrsMode using(HrsMode_Id) ' \
-                      ' where ProposalCode_Id in {codes} order by Proposal_Code ' \
-                      ''.format(codes=tuple(ids["ProposalCode_Ids"]))
+                      '   left join HrsMode using(HrsMode_Id) '
+    if len(ids['ProposalIds']) == 1:
+        instruments_sql += "  where ProposalCode_Id = {id}".format(id=ids['ProposalCode_Ids'][0])
+    else:
+        instruments_sql += "  where ProposalCode_Id in {ids}".format(ids=tuple(ids['ProposalCode_Ids']))
     conn = sdb_connect()
 
     i_results = pd.read_sql(instruments_sql, conn)

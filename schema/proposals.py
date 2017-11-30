@@ -20,10 +20,10 @@ class Proposal:
             sql = sql + " AND mp.Semester_Id = {semester_id} ".format(semester_id=semester.id)
 
         if 'partner_code' in args and args['partner_code'] is not None:
-            sql = sql + "AND pa.Partner_Code = '{parner_code}' ".format(parner_code=args['partner_code'])
+            sql = sql + " AND pa.Partner_Code = '{parner_code}' ".format(parner_code=args['partner_code'])
 
         if 'proposal_code' in args and args['proposal_code'] is not None:
-            sql = sql + "AND pc.Proposal_Code = '{proposal_code}' ".format(proposal_code=args['proposal_code'])
+            sql = sql + " AND pc.Proposal_Code = '{proposal_code}' ".format(proposal_code=args['proposal_code'])
 
         if g.user.user_value == 0:
             return {'ProposalIds': [], 'ProposalCode_Ids': []}
@@ -35,6 +35,9 @@ class Proposal:
         conn = sdb_connect()
         results = pd.read_sql(sql, conn)
         conn.close()
-        ids = [int(x) for x in list(results['Ids'].values)]
-        pcode_ids = [int(x) for x in list(results['PCode_Ids'].values)]
+        ids = []
+        pcode_ids = []
+        for index, r in results.iterrows():
+            ids.append(r['Ids'])
+            pcode_ids.append(r['PCode_Ids'])
         return {'ProposalIds': ids, 'ProposalCode_Ids': pcode_ids}

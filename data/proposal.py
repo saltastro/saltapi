@@ -15,8 +15,6 @@ def query_proposal_data(**args):
     ids = Proposal.get_proposal_ids(**args)
     conn = sdb_connect()
     proposals = {}
-    print(ids['ProposalCode_Ids'])
-
     proposal_sql = " select *,  concat(s.Year, '-', s.Semester) as CurSemester from Proposal as p " \
                    "       join ProposalCode as prc on (prc.ProposalCode_Id = p.ProposalCode_Id) " \
                    "       join ProposalGeneralInfo as pgi on (pgi.ProposalCode_Id = p.ProposalCode_Id) " \
@@ -35,8 +33,12 @@ def query_proposal_data(**args):
                    "       join Investigator as i on (i.Investigator_Id = pc.Leader_Id) " \
                    "       left join P1Thesis as thesis on (thesis.ProposalCode_Id = p.ProposalCode_Id)" \
                    "       left join ProposalTechReport as pt on (pt.ProposalCode_Id = p.ProposalCode_Id) " \
-                   "  where P1RequestedTime > 0  and Proposal_Id in {ids} order by Proposal_Id" \
-                   " ".format(ids=tuple(ids['ProposalIds']))
+                   "  where P1RequestedTime > 0 " \
+                   " "
+    if len(ids['ProposalIds']) == 1:
+        proposal_sql += "  and Proposal_Id = {id} order by Proposal_Id".format(id=ids['ProposalIds'][0])
+    else:
+        proposal_sql += "  and Proposal_Id in {ids} order by Proposal_Id".format(ids=tuple(ids['ProposalIds']))
     results = pd.read_sql(proposal_sql, conn)
     conn.close()
 
@@ -82,9 +84,11 @@ def query_proposal_data(**args):
                        "       from ProposalCode  " \
                        "           join MultiPartner using (ProposalCode_Id) " \
                        "           join Semester as s using (Semester_Id) " \
-                       "           join Partner using(Partner_Id) " \
-                       "  where ProposalCode_Id in {ids}" \
-                       " ".format(ids=tuple(ids['ProposalCode_Ids']))
+                       "           join Partner using(Partner_Id) "
+    if len(ids['ProposalIds']) == 1:
+        partner_time_sql += "  where ProposalCode_Id = {id}".format(id=ids['ProposalCode_Ids'][0])
+    else:
+        partner_time_sql += "  where ProposalCode_Id in {ids}".format(ids=tuple(ids['ProposalCode_Ids']))
     conn = sdb_connect()
     results = pd.read_sql(partner_time_sql, conn)
     conn.close()
@@ -103,7 +107,7 @@ def query_proposal_data(**args):
                 )
 
     get_instruments(ids, proposals)
-    # get_targets(ids=ids, proposals=proposals)
+    get_targets(ids=ids, proposals=proposals)
 
     return proposals.values()
 
