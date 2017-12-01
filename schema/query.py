@@ -12,8 +12,9 @@ from graphene import Field, List, String
 
 class Query(graphene.ObjectType):
     proposals = Field(List(Proposals), semester=String(), partner_code=String(), proposal_code=String(),
-                      description="List of proposals per semester. Can be reduced to per partner or per proposal. " 
-                                  " Semester must be provided in all cases"
+                      all_proposals=Boolean(), description="List of proposals per semester. Can be reduced to per "
+                                                           "partner or per proposal. Semester must be provided in all "
+                                                           "cases"
                       )
     targets = Field(List(Target), semester=String(), partner_code=String(), proposal_code=String(),
                     description="List of targets per semester can be reduced to per partner or per proposal. " 
