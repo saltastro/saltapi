@@ -30,7 +30,7 @@ def make_proposal(row, all_proposals):
                 bvit=[],
                 scam=[]
             ),
-            is_thesis=not pd.isnull(row["ThesisType_Id"]), 
+            is_thesis=not pd.isnull(row["ThesisType_Id"]),
         )
     else:
         proposal = Proposals(
