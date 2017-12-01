@@ -23,13 +23,17 @@ class Query(graphene.ObjectType):
                                  description="List of all allocations of SALT Partners")
     selectors = Field(Selectors)
 
-    def resolve_proposals(self, context, info, args, partner_code=None, proposal_code=None):
+    def resolve_proposals(self, context, info, args, partner_code=None, proposal_code=None, all_proposals=False):
         if 'partner_code' in context:
             partner_code = context['partner_code']
 
         if 'proposal_code' in context:
             proposal_code = context['proposal_code']
-        return get_proposals(semester=context['semester'], partner_code=partner_code, proposal_code=proposal_code)
+
+        if 'all_proposals' in context:
+            all_proposals = context['all_proposals']
+        return get_proposals(semester=context['semester'], partner_code=partner_code, proposal_code=proposal_code,
+                             all_proposals=all_proposals)
 
     def resolve_targets(self, context, info, args, partner_code=None, proposal_code=None):
         if 'partner_code' in context:

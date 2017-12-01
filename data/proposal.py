@@ -1,18 +1,98 @@
-from pymysql.connections import Connection
 import pandas as pd
 from data import sdb_connect
 from data.targets import get_targets
 from data.instruments import get_instruments
-from schema.proposals import Proposal
+from data.common import get_proposal_ids
 
 proposal_data = {}
 
-
-def query_proposal_data(**args):
-    from schema.proposal import Proposals, RequestedTimeM, ProposalInfoM, PI, Distribution
+def make_proposal(row, all_proposals):
+    from schema.proposal import Proposals, PI
     from schema.instruments import Instruments
+    if all_proposals:
+        proposal = Proposals(
+            id="Proposal: " + str(row["Proposal_Id"]),
+            code=row["Proposal_Code"],
+            is_p4=row["P4"] == 1,
+            status=row["Status"],
+            transparency=row["Transparency"],
+            max_seeing=row["MaxSeeing"],
+            time_requests=[],
+            targets=[],
+            pi=PI(
+                name=None,
+                surname=None,
+                email=None
+            ),
+            instruments=Instruments(
+                rss=[],
+                hrs=[],
+                bvit=[],
+                scam=[]
+            ),
+            is_thesis=not pd.isnull(row["ThesisType_Id"]), 
+        )
+    else:
+        proposal = Proposals(
+            id="Proposal: " + str(row["Proposal_Id"]),
+            code=row["Proposal_Code"],
+            title=row["Title"],
+            abstract=row["Abstract"],
+            is_p4=row["P4"] == 1,
+            status=row["Status"],
+            transparency=row["Transparency"],
+            max_seeing=row["MaxSeeing"],
+            time_requests=[],
+            targets=[],
+            pi=PI(
+                name=row["FirstName"],
+                surname=row["Surname"],
+                email=row["Email"]
+            ),
+            instruments=Instruments(
+                rss=[],
+                hrs=[],
+                bvit=[],
+                scam=[]
+            ),
+            is_thesis=not pd.isnull(row["ThesisType_Id"]),
+            tech_report=row['TechReport']
+        )
 
-    ids = Proposal.get_proposal_ids(**args)
+    return proposal
+
+
+def make_query(ids=None):
+    proposal_sql = " select *,  concat(s.Year, '-', s.Semester) as CurSemester from Proposal as p " \
+                   "       join ProposalCode as prc on (prc.ProposalCode_Id = p.ProposalCode_Id) " \
+                   "       join ProposalGeneralInfo as pgi on (pgi.ProposalCode_Id = p.ProposalCode_Id) " \
+                   "       join P1RequestedTime as p1 using (Proposal_Id) " \
+                   "       join Moon as mo on (mo.Moon_Id=p1.Moon_Id) " \
+                   "       join ProposalStatus using (ProposalStatus_Id) " \
+                   "       join Semester as s on (s.Semester_Id = p1.Semester_Id) " \
+                   "       join P1ObservingConditions  as p1o on (p1o.ProposalCode_Id = p.ProposalCode_Id) " \
+                   "       left join ProposalText as prt on " \
+                   "                (prt.ProposalCode_Id = p.ProposalCode_Id and prt.Semester_Id = s.Semester_Id) " \
+                   "       join Transparency using (Transparency_Id) " \
+                   "       join ProposalContact as pc on (pc.ProposalCode_Id = p.ProposalCode_Id) " \
+                   "       join P1MinTime as p1t on " \
+                   "                (p.ProposalCode_Id = p1t.ProposalCode_Id and p1t.Semester_Id = s.Semester_Id) " \
+                   " " \
+                   "       join Investigator as i on (i.Investigator_Id = pc.Leader_Id) " \
+                   "       left join P1Thesis as thesis on (thesis.ProposalCode_Id = p.ProposalCode_Id)" \
+                   "       left join ProposalTechReport as pt on (pt.ProposalCode_Id = p.ProposalCode_Id) " \
+                   "  where P1RequestedTime > 0 " \
+                   " "
+    if len(ids['ProposalIds']) == 1:
+        proposal_sql += "  and Proposal_Id = {id} order by Proposal_Id".format(id=ids['ProposalIds'][0])
+    else:
+        proposal_sql += "  and Proposal_Id in {ids} order by Proposal_Id".format(ids=tuple(ids['ProposalIds']))
+
+
+def query_proposal_data(semester, partner_code=None, proposal_code=None, all_proposals=False):
+    from schema.proposal import RequestedTimeM, Distribution
+
+    ids = get_proposal_ids(semester, partner_code=partner_code, proposal_code=proposal_code)
     conn = sdb_connect()
     proposals = {}
     proposal_sql = " select *,  concat(s.Year, '-', s.Semester) as CurSemester from Proposal as p " \
@@ -42,35 +122,9 @@ def query_proposal_data(**args):
     results = pd.read_sql(proposal_sql, conn)
     conn.close()
 
-    pc = []  # I am using pc to control proposals that are checked
     for index, row in results.iterrows():
         if row["Proposal_Code"] not in proposals:
-            proposals[row["Proposal_Code"]] = Proposals(
-                id="Proposal: " + str(row["Proposal_Id"]),
-                code=row["Proposal_Code"],
-                title=row["Title"],
-                abstract=row["Abstract"],
-                is_p4=row["P4"] == 1,
-                status=row["Status"],
-                transparency=row["Transparency"],
-                max_seeing=row["MaxSeeing"],
-                time_requests=[],
-                targets=[],
-                pi=PI(
-                    name=row["FirstName"],
-                    surname=row["Surname"],
-                    email=row["Email"]
-                ),
-                instruments=Instruments(
-                    rss=[],
-                    hrs=[],
-                    bvit=[],
-                    scam=[]
-                ),
-                is_thesis=not pd.isnull(row["ThesisType_Id"]),  # concluded that none thesis proposals have null on
-                # P1Thesis
-                tech_report=row['TechReport']
-            )
+            proposals[row["Proposal_Code"]] = make_proposal(row, all_proposals)
         proposals[row["Proposal_Code"]].time_requests.append(
             RequestedTimeM(
                 minimum_useful_time=row["P1MinimumUsefulTime"],
