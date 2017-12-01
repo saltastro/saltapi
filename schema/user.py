@@ -110,29 +110,29 @@ class User:
     @staticmethod
     def current_user(user_id):
         if user_id is not None:
-            sql = "SELECT PiptUser_Id, PiptSetting_Id, Value " \
+            sql = "SELECT * " \
                   "     FROM PiptUserSetting  " \
-                  "         JOIN PiptUserTAC" \
+                  "         LEFT JOIN PiptUserTAC using (PiptUser_Id) " \
                   "     WHERE PiptSetting_Id = 20 " \
                   "         AND PiptUser_Id = {user_id}".format(user_id=user_id)
             conn = sdb_connect()
             result = pd.read_sql(sql, conn)
             conn.close()
 
-            # user Default values
+            tac = []
             user = -1
             setting = -1
             value = 0
-            tac = []
-            for i, user in result.iterrows():
-                user = user["PiptUser_Id"]
-                setting = user["PiptSetting_Id"]
-                value = user["Value"]
-                if not pd.isnull(user["Partner_Id"]):
+            for i, u in result.iterrows():
+
+                user = u["PiptUser_Id"]
+                setting = u["PiptSetting_Id"]
+                value = u["Value"]
+                if not pd.isnull(u["Partner_Id"]):
                     tac.append(
                         {
-                            "is_chair": pd.isnull(user["Partner_Id"]),
-                            "partner_id": user["Partner_Id"]
+                            "is_chair": pd.isnull(u["Partner_Id"]),
+                            "partner_id": u["Partner_Id"]
                         }
                     )
             g.user = User(user, setting, value, tac)
