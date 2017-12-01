@@ -1,5 +1,5 @@
 from schema.target import Target, Coordinates
-from schema.proposals import Proposal
+from data.common import get_proposal_ids
 import pandas as pd
 from data import sdb_connect
 
@@ -43,7 +43,7 @@ def get_targets(ids=None, proposals=None, semester=None, partner_code=None, prop
     if ids is None:
         if semester is None:
             raise ValueError("semester must be provided when query for Targets")
-        ids = Proposal.get_proposal_ids(semester=semester, partner_code=partner_code, proposal_code=proposal_code)
+        ids = get_proposal_ids(semester=semester, partner_code=partner_code, proposal_code=proposal_code)
 
     sql = "select * " \
           "  from Proposal" \
