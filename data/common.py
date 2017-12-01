@@ -5,65 +5,47 @@ import datetime
 import warnings
 from dateutil.relativedelta import relativedelta
 
-semester_data = {}
 
+def get_proposal_ids(semester, partner_code=None, proposal_code=None, all_proposals=False):
+    sql = " SELECT MAX(p.Proposal_Id) as Ids, pc.ProposalCode_Id as PCode_Ids, pc.Proposal_Code as PCD " \
+          "  FROM Proposal AS p " \
+          "    JOIN ProposalCode AS pc ON (p.ProposalCode_Id=pc.ProposalCode_Id) " \
+          "    JOIN MultiPartner AS mp ON (p.ProposalCode_Id=mp.ProposalCode_Id) " \
+          "    JOIN Partner AS pa ON (mp.Partner_Id=pa.Partner_Id) " \
+          "    JOIN Semester AS sm ON (mp.Semester_Id=sm.Semester_Id) " \
+          "    JOIN ProposalGeneralInfo AS pgi ON (pgi.ProposalCode_Id=p.ProposalCode_Id) " \
+          "    JOIN ProposalInvestigator AS pi ON (pi.ProposalCode_Id=p.ProposalCode_Id) " \
+          "  WHERE Phase=1 AND ProposalStatus_Id not in (4, 9, 6, 8, 5, 3, 100) " \
+          "     AND CONCAT(sm.Year, '-', sm.Semester) = '{semester}' ".format(semester=semester)
 
-class Semester:
-    id = None
-    semester = None
-    start_semester = None
-    end_semester = None
+    if partner_code is not None:
+        sql = sql + " AND pa.Partner_Code = '{parner_code}' ".format(parner_code=partner_code)
 
-    @staticmethod
-    def get_semester(active=False, semester_code=None):
-        """
-        :return:
-        """
-        sql = 'SELECT  Semester_Id, CONCAT(Year,"_", Semester) as SemesterCode, StartSemester, EndSemester ' \
-              ' FROM  Semester '
+    if proposal_code is not None:
+        sql = sql + " AND pc.Proposal_Code = '{proposal_code}' ".format(proposal_code=proposal_code)
 
-        date = datetime.datetime.now().date()
-        date_3 = date + relativedelta(months=3)
+    if g.user.user_value == 0:
+        return {'ProposalIds': [], 'ProposalCode_Ids': []}
 
-        if active:
-            if not pd.isnull(semester_code):
-                warnings.warn("Semester id or Semester code is provided and active=True, active semester is returned. "
-                              "Set active=False if you need none active semester if you query for none active semester."
-                              "Returned is active Semester")
+    elif g.user.user_value == 1:
+        if len(g.user.tac) > 0:
+            partners = [t.partner_id for t in g.user.tac]
+            if len(partners) == 1:
+                sql = sql + " AND pa.Partner_Id in ({partner_id})".format(partner_id=partners[0])
+            else:
+                sql = sql + " AND pa.Partner_Id in {partner_id}".format(partner_id=tuple(partners))
 
-            sql = sql + ' where StartSemester <= "{date_}" and "{date_}" < EndSemester;'.format(date_=date_3)
         else:
-            try:
-                if not pd.isnull(semester_code):
-                    int(semester_code[:4])
-                    int(semester_code[5:])
-                    if "_" in semester_code:
-                        semester_code = semester_code.replace("_", "-")
-                    if len(semester_code) != 6:
-                        raise ValueError("{semester_code} is not a semester".format(semester_code=semester_code))
+            sql = sql + " AND pi.Investigator_Id = {investigator_id}".format(investigator_id=g.user.user_id)
 
-                    sql = sql + ' WHERE (CONCAT(Year, "-", Semester) = "{semester_code}") ' \
-                        .format(semester_code=semester_code)
-                else:
-                    raise ValueError(
-                        "Set active=True for active semester, or provide semester_id or semester like '2017_1'  "
-                        "or '2017-1'")
-            except ValueError:
-                return None
-        conn = sdb_connect()
-        data = pd.read_sql(sql, conn)
-        conn.close()
-        return [Semester().__make_semester(data=s) for i, s in data.iterrows()][0]
+    sql = sql + " GROUP BY pc.ProposalCode_Id "
+    conn = sdb_connect()
+    results = pd.read_sql(sql, conn)
+    conn.close()
 
-    def __make_semester(self, data):
-        # Todo This method is called only by get semester it is suppose to be a private method for semester
-        """
-         make a data received a
-        :param data:
-        :return:
-        """
-        self.id = data['Semester_Id']
-        self.semester = data['SemesterCode']
-        self.start_semester = data['StartSemester']
-        self.end_semester = data['EndSemester']
-        return self
+    ids = []
+    pcode_ids = []
+    for index, r in results.iterrows():
+        ids.append(r['Ids'])
+        pcode_ids.append(r['PCode_Ids'])
+    return {'ProposalIds': ids, 'ProposalCode_Ids': pcode_ids}
