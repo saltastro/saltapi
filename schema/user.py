@@ -8,11 +8,14 @@ class User:
     user_id = None
     user_setting = None
     user_value = None
+    tac = []
 
-    def __init__(self, user_id, setting, value):
+    def __init__(self, user_id, setting, value, tac):
         self.user_id = user_id
         self.user_setting = setting
         self.user_value = value
+        self.is_tac = tac
+
 
     @staticmethod
     def get_user_token(credentials):
@@ -107,9 +110,29 @@ class User:
     @staticmethod
     def current_user(user_id):
         if user_id is not None:
-            sql = "SELECT PiptUser_Id, PiptSetting_Id, Value FROM PiptUserSetting WHERE PiptSetting_Id = 20 " \
-                  "  AND PiptUser_Id = {user_id}".format(user_id=user_id)
+            sql = "SELECT PiptUser_Id, PiptSetting_Id, Value " \
+                  "     FROM PiptUserSetting  " \
+                  "         JOIN PiptUserTAC" \
+                  "     WHERE PiptSetting_Id = 20 " \
+                  "         AND PiptUser_Id = {user_id}".format(user_id=user_id)
             conn = sdb_connect()
             result = pd.read_sql(sql, conn)
-            g.user = User(result.iloc[0]['PiptUser_Id'], result.iloc[0]['PiptSetting_Id'], result.iloc[0]['Value'], )
             conn.close()
+
+            # user Default values
+            user = -1
+            setting = -1
+            value = 0
+            tac = []
+            for i, user in result.iterrows():
+                user = user["PiptUser_Id"]
+                setting = user["PiptSetting_Id"]
+                value = user["Value"]
+                if not pd.isnull(user["Partner_Id"]):
+                    tac.append(
+                        {
+                            "is_chair": pd.isnull(user["Partner_Id"]),
+                            "partner_id": user["Partner_Id"]
+                        }
+                    )
+            g.user = User(user, setting, value, tac)
