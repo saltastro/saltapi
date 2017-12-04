@@ -51,9 +51,6 @@ def create_sql(semester, proposal_code=None, partner_code=None, all_proposals=Fa
     if partner_code is not None:
         return sql + " AND pa.Partner_Code = '{partner_code}' ".format(partner_code=partner_code)
 
-
-
-
     return sql
 
 

@@ -19,7 +19,7 @@ class Query(graphene.ObjectType):
     targets = Field(List(Target), semester=String(), partner_code=String(), proposal_code=String(),
                     description="List of targets per semester can be reduced to per partner or per proposal. " 
                                 " Semester must be provided in all cases")
-    partners_allocations = Field(List(PartnersAllocations), semester=String(), partner_code=String(),
+    partner_allocations = Field(PartnerAllocations, semester=String(), partner_code=String(),
                                  description="List of all allocations of SALT Partners")
     selectors = Field(Selectors)
 
@@ -44,14 +44,8 @@ class Query(graphene.ObjectType):
 
         return get_targets(semester=context['semester'], partner_code=partner_code, proposal_code=proposal_code)
 
-    def resolve_partners_allocations(self, context, info, args, partner_code=None, semester=None):
-        if 'partner_code' in context:
-            partner_code = context['partner_code']
-
-        if 'semester' in context:
-            semester = context['semester']
-
-        return get_partners(semester=semester, partner_code=partner_code)
+    def resolve_partner_allocations(self, context, info, args):
+        return get_partners(semester=context['semester'], partner=context['partner_code'])
 
     def resolve_selectors(self, context, info, args):
         return get_selectors_data()

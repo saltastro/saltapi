@@ -2,37 +2,25 @@ import pandas as pd
 from data import sdb_connect
 
 
-def query_partner_data(**args):
-    from schema.partner import PartnersAllocations, AllocatedTime
+def get_partners(semester, partner):
+    from schema.partner import PartnerAllocations, AllocatedTime
 
     sql = ' select * from  PeriodTimeDist ' \
           '    join Partner using(Partner_Id)  ' \
-          '    join Semester using(Semester_Id)  '
-
-    if args['semester'] is not None:
-        sql = sql + ' where concat(Year,"-", Semester) = "{semester}"'.format(semester=args['semester'])
-
-    if args['partner_code'] is not None:
-        if "where" in sql:
-            sql += " and Partner_Code = '{partner_code}'".format(partner_code=args['partner_code'])
-        else:
-            sql += " where Partner_Code = '{partner_code}'".format(partner_code=args['partner_code'])
+          '    join Semester using(Semester_Id)  ' \
+          ' where concat(Year,"-", Semester) = "{semester}" ' \
+          ' and Partner_Code = "{partner_code}" ' \
+          ' '.format(semester=semester, partner_code=partner)
 
     conn = sdb_connect()
-    results = pd.read_sql(sql + " order by Partner_Code", conn)
+    results = pd.read_sql(sql, conn)
     conn.close()
-    partners, pc = [], []
+    partner = PartnerAllocations()
     for index, row in results.iterrows():
-        if row["Partner_Code"] not in pc:
-            partners.append(PartnersAllocations(
-                id="Partner: " + str(row["Partner_Id"]),
-                name=row["Partner_Name"],
-                code=row["Partner_Code"],
-                allocated_time=[]
-
-            ))
-        partners[len(partners) - 1].allocated_time.append(
-            AllocatedTime(
+            partner.id = "Partner: " + str(row["Partner_Id"]),
+            partner.name = row["Partner_Name"],
+            partner.code = row["Partner_Code"],
+            partner.allocated_time = AllocatedTime(
                 for_semester=str(row['Year'])+"-"+str(row['Semester']),
 
                 Allocated_p0_p1=row['Alloc0and1'],
@@ -42,13 +30,7 @@ def query_partner_data(**args):
                 used_p0_p1=row['Used0and1'],
                 used_p2=row['Used2'],
                 used_p3=row['Used3']
-            ))
-        pc.append(row["Partner_Code"])
+            )
 
+    return partner
 
-    return partners
-
-
-def get_partners(**args):
-    data = query_partner_data(**args)
-    return data

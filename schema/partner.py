@@ -1,4 +1,4 @@
-from graphene import ObjectType, ID, Int, String, Float, List
+from graphene import ObjectType, ID, Int, String, Float, List, Field
 
 
 class AllocatedTime(ObjectType):
@@ -13,14 +13,6 @@ class AllocatedTime(ObjectType):
     used_p3 = Float()
 
 
-class RequestedTime(ObjectType):
-    p0 = Int()
-    p1 = Int()
-    p2 = Int()
-    p3 = Int()
-    p4 = Int()
-
-
 class ScienceTime(ObjectType):
     p0 = Int()
     p1 = Int()
@@ -29,10 +21,9 @@ class ScienceTime(ObjectType):
     p4 = Int()
 
 
-class PartnersAllocations(ObjectType):
+class PartnerAllocations(ObjectType):
     id = ID()
     name = String()
     code = String()
-    allocated_time = List(AllocatedTime)
-    requested_time = List(RequestedTime)
+    allocated_time = Field(AllocatedTime)
     science_time = List(ScienceTime)
