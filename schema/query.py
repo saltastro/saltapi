@@ -6,6 +6,8 @@ from data.partner import get_partners
 from data.targets import get_targets
 from data.selectors import get_selectors_data
 from schema.instruments import *
+from schema.user import UserModel
+from data.user import get_user
 import graphene
 from graphene import Field, List, String
 
@@ -22,6 +24,7 @@ class Query(graphene.ObjectType):
     partner_allocations = Field(List(PartnerAllocations), semester=String(), partner_code=String(),
                                 description="List of all allocations of SALT Partners")
     selectors = Field(Selectors)
+    user = Field(UserModel)
 
     def resolve_proposals(self, context, info, args, partner_code=None, proposal_code=None, all_proposals=False):
         if 'partner_code' in context:
@@ -51,6 +54,9 @@ class Query(graphene.ObjectType):
 
     def resolve_selectors(self, context, info, args):
         return get_selectors_data()
+
+    def resolve_user(self, context, info, args):
+        return get_user()
 
 
 schema = graphene.Schema(query=Query, types=[HRS, RSS, BVIT, SCAM])
