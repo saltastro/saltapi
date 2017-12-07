@@ -2,6 +2,7 @@ from flask import g
 import pandas as pd
 from data.common import sdb_connect
 import jwt
+from graphene import ObjectType, String, List, Field
 
 
 class User:
@@ -136,3 +137,16 @@ class User:
                         }
                     )
             g.user = User(user, setting, value, tac)
+
+
+class Role(ObjectType):
+    type = String()
+    partners = Field(List(String))
+
+
+class UserModel(ObjectType):
+    first_name = String()
+    last_name = String()
+    email = String()
+    username = String()
+    role = Field(List(Role))
