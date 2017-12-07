@@ -15,7 +15,6 @@ def get_role(row):
     conn = sdb_connect()
     results = pd.read_sql(sql, conn)
     conn.close()
-    print(results)
 
     role = []
     if not pd.isnull(row["Astro"]):
@@ -68,7 +67,6 @@ def get_user():
     results = pd.read_sql(sql, conn)
     conn.close()
     username = ''
-    print("In Admin -------------\n", results)
     for index, row in results.iterrows():
         username = row["Username"]
         if username not in user:
