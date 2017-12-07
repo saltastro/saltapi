@@ -34,3 +34,18 @@ def get_partners(semester, partner):
         )) for index, row in results.iterrows()]
 
     return partners
+
+
+def get_partners_for_role(ids=None):
+    par = 'select Partner_Code from Partner '
+    if ids is not None:
+        if len(ids) == 1:
+            par = par + ' where Partner_Id = {id}'.format(id=ids[0])
+        else:
+            par = par + ' where Partner_Id in {ids}'.format(ids=tuple(ids))
+
+    conn = sdb_connect()
+    results = pd.read_sql(par, conn)
+    conn.close()
+
+    return [row["Partner_Code"] for i, row in results.iterrows()]
