@@ -96,25 +96,24 @@ def query_proposal_data(semester, partner_code=None, proposal_code=None, all_pro
     conn = sdb_connect()
     proposals = {}
     proposal_sql = " select *,  concat(s.Year, '-', s.Semester) as CurSemester from Proposal as p " \
-                   "       join ProposalCode as prc on (prc.ProposalCode_Id = p.ProposalCode_Id) " \
-                   "       join ProposalGeneralInfo as pgi on (pgi.ProposalCode_Id = p.ProposalCode_Id) " \
-                   "       join P1RequestedTime as p1 using (Proposal_Id) " \
-                   "       join Moon as mo on (mo.Moon_Id=p1.Moon_Id) " \
-                   "       join ProposalStatus using (ProposalStatus_Id) " \
-                   "       join Semester as s on (s.Semester_Id = p1.Semester_Id) " \
-                   "       join P1ObservingConditions  as p1o on (p1o.ProposalCode_Id = p.ProposalCode_Id) " \
-                   "       left join ProposalText as prt on " \
-                   "                (prt.ProposalCode_Id = p.ProposalCode_Id and prt.Semester_Id = s.Semester_Id) " \
-                   "       join Transparency using (Transparency_Id) " \
-                   "       join ProposalContact as pc on (pc.ProposalCode_Id = p.ProposalCode_Id) " \
-                   "       join P1MinTime as p1t on " \
+                   "   join ProposalCode as prc on (prc.ProposalCode_Id = p.ProposalCode_Id) " \
+                   "   join ProposalGeneralInfo as pgi on (pgi.ProposalCode_Id = p.ProposalCode_Id) " \
+                   "   join P1RequestedTime as p1 using (Proposal_Id) " \
+                   "   join Moon as mo on (mo.Moon_Id=p1.Moon_Id) " \
+                   "   join ProposalStatus using (ProposalStatus_Id) " \
+                   "   join Semester as s on (s.Semester_Id = p1.Semester_Id) " \
+                   "   join P1ObservingConditions  as p1o on (p1o.ProposalCode_Id = p.ProposalCode_Id) " \
+                   "   left join ProposalText as prt on " \
+                   "            (prt.ProposalCode_Id = p.ProposalCode_Id and prt.Semester_Id = s.Semester_Id) " \
+                   "   join Transparency using (Transparency_Id) " \
+                   "   join ProposalContact as pc on (pc.ProposalCode_Id = p.ProposalCode_Id) " \
+                   "   join P1MinTime as p1t on " \
                    "                (p.ProposalCode_Id = p1t.ProposalCode_Id and p1t.Semester_Id = s.Semester_Id) " \
                    " " \
-                   "       join Investigator as i on (i.Investigator_Id = pc.Leader_Id) " \
-                   "       left join P1Thesis as thesis on (thesis.ProposalCode_Id = p.ProposalCode_Id)" \
-                   "       left join ProposalTechReport as pt on (pt.ProposalCode_Id = p.ProposalCode_Id) " \
-                   "  where P1RequestedTime > 0 " \
-                   " "
+                   "   join Investigator as i on (i.Investigator_Id = pc.Leader_Id) " \
+                   "   left join P1Thesis as thesis on (thesis.ProposalCode_Id = p.ProposalCode_Id)" \
+                   "   left join ProposalTechReport as pt on (pt.ProposalCode_Id = p.ProposalCode_Id) " \
+                   "  where P1RequestedTime > 0 "
     if len(ids['ProposalIds']) == 1:
         proposal_sql += "  and Proposal_Id = {id} order by Proposal_Id".format(id=ids['ProposalIds'][0])
     else:

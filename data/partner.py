@@ -31,7 +31,22 @@ def get_partners(semester, partner):
             used_p0_p1=row['Used0and1'],
             used_p2=row['Used2'],
             used_p3=row['Used3']
-        )) for index, row in results.iterrows()]
+        )) for index, row in results.iterrows()] if partner is not None else \
+        [PartnerAllocations(
+            id="Partner: " + str(row["Partner_Id"]),
+            name=None,
+            code=None,
+            allocated_time=AllocatedTime(
+                for_semester=str(row['Year']) + "-" + str(row['Semester']),
+
+                Allocated_p0_p1=row['Alloc0and1'],
+                Allocated_p2=row['Alloc2'],
+                Allocated_p3=row['Alloc3'],
+
+                used_p0_p1=row['Used0and1'],
+                used_p2=row['Used2'],
+                used_p3=row['Used3']
+            )) for index, row in results.iterrows()]
 
     return partners
 
