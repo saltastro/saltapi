@@ -35,6 +35,13 @@ class RequestedTimeM(ObjectType):
     minimum_useful_time = Int()
 
 
+class AllocatedTime(ObjectType):
+    p0_p1 = Float()
+    p2 = Float()
+    p3 = Float()
+    p4 = Float()
+
+
 class Proposals(ObjectType):
     id = ID()
     code = String()
@@ -50,3 +57,4 @@ class Proposals(ObjectType):
     targets = Field(List(Target))
     pi = Field(PI)
     tech_report = String()
+    allocated_time = Field(AllocatedTime)
