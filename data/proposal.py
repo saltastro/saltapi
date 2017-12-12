@@ -6,6 +6,23 @@ from data.common import get_proposal_ids
 
 proposal_data = {}
 
+
+def priority(p, time, pat):
+
+    if p == 0:
+        pat.p0 = time
+    if p == 1:
+        pat.p1 = time
+    if p == 2:
+        pat.p2 = time
+    if p == 3:
+        pat.p3 = time
+    if p == 4:
+        pat.p4 = time
+
+    return pat
+
+
 def make_proposal(row, all_proposals):
     from schema.proposal import Proposals, PI
     from schema.instruments import Instruments
@@ -19,6 +36,7 @@ def make_proposal(row, all_proposals):
             max_seeing=row["MaxSeeing"],
             time_requests=[],
             targets=[],
+            allocated_time=[],
             pi=PI(
                 name=None,
                 surname=None,
@@ -43,6 +61,7 @@ def make_proposal(row, all_proposals):
             transparency=row["Transparency"],
             max_seeing=row["MaxSeeing"],
             time_requests=[],
+            allocated_time=[],
             targets=[],
             pi=PI(
                 name=row["FirstName"],
@@ -90,7 +109,7 @@ def make_query(ids=None):
 
 
 def query_proposal_data(semester, partner_code=None, proposal_code=None, all_proposals=False):
-    from schema.proposal import RequestedTimeM, Distribution
+    from schema.proposal import RequestedTimeM, Distribution, ProposalAllocatedTime
 
     ids = get_proposal_ids(semester, partner_code=partner_code, proposal_code=proposal_code)
     conn = sdb_connect()
@@ -161,6 +180,48 @@ def query_proposal_data(semester, partner_code=None, proposal_code=None, all_pro
 
     get_instruments(ids, proposals)
     get_targets(ids=ids, proposals=proposals)
+
+    all_time_sql = 'SELECT * FROM PriorityAlloc ' \
+                   '    join MultiPartner using (MultiPartner_Id) ' \
+                   '    join Partner using(Partner_Id) ' \
+                   '    join Semester using (Semester_Id) ' \
+                   '    join ProposalCode using (ProposalCode_Id)' \
+                   ' where Concat(Year, "-", Semester) = "{semester}" order by Proposal_Code' .format(semester=semester)
+
+    conn = sdb_connect()
+    alloc_results = pd.read_sql(all_time_sql, conn)
+    conn.close()
+
+    for index, row in alloc_results.iterrows():
+        partner, proposal = row['Partner_Code'], row["Proposal_Code"]
+        pat = ProposalAllocatedTime(
+            partner_code=row['Partner_Code'],
+            partner_name=row['Partner_Name']
+        )
+        if proposal in proposals:
+            if len(proposals[proposal].allocated_time) == 0:
+                proposals[proposal].allocated_time.append(
+                        priority(row['Priority'],
+                                 row['TimeAlloc'],
+                                 pat
+                                 )
+                    )
+                prev_partner, prev_proposal = partner, proposal
+            else:
+                if partner == prev_partner and proposal == prev_proposal:
+                        proposals[proposal].allocated_time[len(proposals[proposal].allocated_time) - 1] = \
+                            priority(
+                                row['Priority'],
+                                row['TimeAlloc'],
+                                proposals[proposal].allocated_time[len(proposals[proposal].allocated_time)-1])
+                else:
+                    proposals[proposal].allocated_time.append(
+                        priority(row['Priority'],
+                                 row['TimeAlloc'],
+                                 pat
+                                 )
+                    )
+                prev_partner, prev_proposal = partner, proposal
 
     return proposals.values()
 
