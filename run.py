@@ -86,9 +86,21 @@ def home():
     return render_template('home.html')
 
 
+@app.route("/update-time-allocs", methods=['POST'])
+def update_time_allocs():
+    from util.time_allocations import update_time_allocations
+
+    allocations = request.json['time_allocations']
+
+    return jsonify({
+        'result': update_time_allocations(allocations, 'RSA', '2017-2')
+    })
+
+
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'errors': 'Not found'}), 404)
+
 
 @app.errorhandler(500)
 def not_found(error):
