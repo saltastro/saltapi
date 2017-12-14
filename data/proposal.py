@@ -8,7 +8,6 @@ proposal_data = {}
 
 
 def priority(p, time, pat):
-
     if p == 0:
         pat.p0 = time
     if p == 1:
@@ -186,7 +185,7 @@ def query_proposal_data(semester, partner_code=None, proposal_code=None, all_pro
                    '    join Partner using(Partner_Id) ' \
                    '    join Semester using (Semester_Id) ' \
                    '    join ProposalCode using (ProposalCode_Id)' \
-                   ' where Concat(Year, "-", Semester) = "{semester}" order by Proposal_Code' .format(semester=semester)
+                   ' where Concat(Year, "-", Semester) = "{semester}" order by Proposal_Code'.format(semester=semester)
 
     conn = sdb_connect()
     alloc_results = pd.read_sql(all_time_sql, conn)

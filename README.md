@@ -40,8 +40,6 @@ which are the connection to the sdb, for development I am using sdb sandbox
     API_HOST = sdb host
     API_PASSWORD = sdb password
     API_DATABASE = sdb database name
-    DATABASE_URI = mysql+pymysql://user:password@host/database_name  (sqlAlchemy database uri)
-    MODE = "DEVELOPMENT"  (Development mode either PRODUCTION, TESTING or DEVELOPMENT)
 ```
 
 Now ready to start the graphql
