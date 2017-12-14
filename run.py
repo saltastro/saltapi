@@ -87,6 +87,7 @@ def home():
 
 
 @app.route("/update-time-allocs", methods=['POST'])
+@token_auth.login_required
 def update_time_allocs():
     from util.time_allocations import update_time_allocations
 
