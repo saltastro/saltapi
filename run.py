@@ -91,9 +91,11 @@ def update_time_allocs():
     from util.time_allocations import update_time_allocations
 
     allocations = request.json['time_allocations']
+    partner = request.json['partner']
+    semester = request.json['semester']
 
     return jsonify({
-        'result': update_time_allocations(allocations, 'RSA', '2017-2')
+        'result': update_time_allocations(allocations, partner, semester)
     })
 
 
