@@ -6,7 +6,7 @@ from functools import wraps
 from flask_cors import CORS
 
 from schema.query import schema
-from schema.user import User
+from util.user import basic_login, get_user_token, is_valid_token
 
 app = Flask(__name__)
 app.debug = True
@@ -21,7 +21,7 @@ multi_auth = MultiAuth(HTTPBasicAuth, HTTPTokenAuth)
 def verify_token(token):
     g.user_id = None
     try:
-        is_valid = User.is_valid_token(token)
+        is_valid = is_valid_token(token)
 
         return is_valid
     except:
@@ -32,7 +32,7 @@ def check_auth(username, password):
     """This function is called to check if a username /
     password combination is valid.
     """
-    return User.basic_login(username, password)
+    return basic_login(username, password)
 
 
 def authenticate():
@@ -57,7 +57,7 @@ def requires_auth(f):
 @app.route("/token", methods=['POST'])
 def token():
     if request.json:
-        tok = User.get_user_token(request.json)
+        tok = get_user_token(request.json)
         if "errors" in tok:
             return jsonify(tok), 401
         return jsonify({"user": {"token": tok}}), 200
