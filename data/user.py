@@ -1,7 +1,7 @@
 from flask import g
 import pandas as pd
 from data.common import sdb_connect
-from schema.user import UserModel, Role
+from schema.user import UserModel, Role, RoleType
 from data.partner import get_partners_for_role
 
 
@@ -20,7 +20,7 @@ def get_role(row, user_id):
     if not pd.isnull(row["Astro"]):
         role.append(
             Role(
-                type="SALT_ASTRONOMER",
+                type=RoleType.SALT_ASTRONOMER,
                 partners=all_partner
             )
         )
@@ -28,7 +28,7 @@ def get_role(row, user_id):
         partner = get_partners_for_role(ids=[row["TacPartner"]])
         role.append(
             Role(
-                type="TAC_MEMBER",
+                type=RoleType.TAC_MEMBER,
                 partners=partner
             )
         )
@@ -37,7 +37,7 @@ def get_role(row, user_id):
         partner = get_partners_for_role(ids=[row["TacPartner"]])
         role.append(
             Role(
-                type="TAC_CHAIR",
+                type=RoleType.TAC_CHAIR,
                 partners=partner
             )
         )
@@ -45,7 +45,7 @@ def get_role(row, user_id):
 
         role.append(
             Role(
-                type="ADMINISTRATOR",
+                type=RoleType.ADMINISTRATOR,
                 partners=all_partner
             )
         )
