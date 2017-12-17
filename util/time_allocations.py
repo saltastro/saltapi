@@ -1,5 +1,7 @@
 import pandas as pd
+from flask import g
 from data import sdb_connect
+from util.action import Action
 
 def multipartner_ids(proposal_codes, partner, semester):
     """
@@ -38,9 +40,14 @@ def multipartner_ids(proposal_codes, partner, semester):
         year=year,
         semester=sem)
 
-    df = pd.read_sql(sql, sdb_connect())
+    connection = sdb_connect()
+    df = pd.read_sql(sql, connection)
+    connection.close()
 
     return {item['Proposal_Code']: item['MultiPartner_Id'] for item in df.to_dict('records')}
+
+def check_time_allocations(allocations, partner, semester):
+    print(g.user.may_perform(Action.UPDATE_TIME_ALLOCATIONS, partner, semester))
 
 def update_time_allocations(time_allocations, partner, semester):
     """
@@ -62,6 +69,7 @@ def update_time_allocations(time_allocations, partner, semester):
     multipartner_id_map = multipartner_ids(proposal_codes, partner, semester)
 
     # TODO: Perform checks!
+    check_time_allocations(time_allocations, partner, semester)
 
     # FIXME: hard-coded id
     moon_id = 6
