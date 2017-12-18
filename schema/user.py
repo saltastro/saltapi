@@ -1,147 +1,36 @@
-from flask import g
-import pandas as pd
-from data.common import sdb_connect
-import jwt
-from graphene import ObjectType, String, List, Field
+from graphene import Enum, ObjectType, String, List, Field
+from util.action import Action
 
+class RoleType(Enum):
+    """
+    An enumeration of all the available roles a user can have.
+    """
 
-class User:
-    user_id = None
-    user_setting = None
-    user_value = None
-    tac = []
+    ADMINISTRATOR = 1
+    SALT_ASTRONOMER = 2
+    TAC_MEMBER = 3
+    TAC_CHAIR = 4
 
-    def __init__(self, user_id, setting, value, tac):
-        self.user_id = user_id
-        self.user_setting = setting
-        self.user_value = value
-        self.is_tac = tac
-
-
-    @staticmethod
-    def get_user_token(credentials):
-        if credentials is None:
-            return User._user_error(not_provided=True)
-        try:
-
-            username = credentials['credentials']['username']
-            password = credentials['credentials']['password']
-        except KeyError:
-            return User._user_error(not_provided=True)
-
-        user_id = User.query_id(username, password)
-
-        if user_id is None:
-            return User._user_error(not_found=True)
-        return User.create_token(user_id)
-
-    @staticmethod
-    def basic_login(username, password):
-        user_id = User.query_id(username, password)
-        if user_id is None:
-            return False
-        User.current_user(user_id)
-        return True
-
-    @staticmethod
-    def _user_error(not_provided=False, not_found=False):
-        if not_provided:
-            return {'errors': {'global': 'username or password not provide'}}
-
-        if not_found:
-            return {'errors': {'global': 'user not found'}}
-
-    @staticmethod
-    def query_id(username, password):
-        """
-        :param username: username
-        :param password: password
-        :return: PiptUser_Id or no if not found
-        """
-        sql = "SELECT PiptUser_Id From PiptUser where Username='{username}' AND Password=MD5('{password}')"\
-            .format(username=username, password=password)
-
-        conn = sdb_connect()
-        try:
-            result = pd.read_sql(sql, conn)
-            conn.close()
-            return result.iloc[0]['PiptUser_Id']
-        except IndexError:
-            return None
-
-    @staticmethod
-    def create_token(user_id):
-        """
-        Create a token containing the given user id.
-
-        :param user_id:
-        :return: the token
-        """
-        user = {
-            'user_id': '{user_id}'.format(user_id=user_id)
-        }
-        token = jwt.encode(user, "SECRET-KEY", algorithm='HS256').decode('utf-8')
-
-        return token
-
-    @staticmethod
-    def is_valid_token(token):
-        try:
-            user = jwt.decode(token, "SECRET-KEY", algorithm='HS256')
-
-            if 'user_id' in user:
-                User.current_user(user['user_id'])
-                return True
-            return False
-        except:
-            return False
-
-    @staticmethod
-    def user_if_from_token(token):
-        try:
-            user = jwt.decode(token, "SECRET-KEY", algorithm='HS256')
-
-            if 'user_id' in user:
-                User.current_user(user['user_id'])
-                return True
-            return False
-        except:
-            return False
-
-    @staticmethod
-    def current_user(user_id):
-        if user_id is not None:
-            sql = "SELECT * " \
-                  "     FROM PiptUserSetting  " \
-                  "         LEFT JOIN PiptUserTAC using (PiptUser_Id) " \
-                  "     WHERE PiptSetting_Id = 20 " \
-                  "         AND PiptUser_Id = {user_id}".format(user_id=user_id)
-            conn = sdb_connect()
-            result = pd.read_sql(sql, conn)
-            conn.close()
-
-            tac = []
-            user = -1
-            setting = -1
-            value = 0
-            for i, u in result.iterrows():
-
-                user = u["PiptUser_Id"]
-                setting = u["PiptSetting_Id"]
-                value = u["Value"]
-                if not pd.isnull(u["Partner_Id"]):
-                    tac.append(
-                        {
-                            "is_chair": pd.isnull(u["Partner_Id"]),
-                            "partner_id": u["Partner_Id"]
-                        }
-                    )
-            g.user = User(user, setting, value, tac)
+    @property
+    def description(self):
+        if self == RoleType.ADMINISTRATOR:
+            return 'Site administrator'
+        elif self == RoleType.SALT_ASTRONOMER:
+            return 'SALT Astronomer'
+        elif self == RoleType.TAC_MEMBER:
+            return 'Member of a Time Allocation Committee'
+        elif self == RoleType.TAC_CHAIR:
+            return 'Chair of a Time Allocation Committee'
+        else:
+            return str(self)
 
 
 class Role(ObjectType):
-    type = String()
+    type = RoleType()
     partners = Field(List(String))
+
+    def resolve_type(self, *args, **kwargs):
+        return self.type.value
 
 
 class UserModel(ObjectType):
@@ -150,3 +39,46 @@ class UserModel(ObjectType):
     email = String()
     username = String()
     role = Field(List(Role))
+
+    def has_role(self, role, partner):
+        """
+        Check whether this user has a role for a partner.
+
+        Parameters
+        ----------
+        role : RoleType or int
+            The role, such as `TAC_CHAIR` or `SALT_ASTRONOMER`.
+        partner
+            The partner for which the role is checked.
+
+        Returns
+        -------
+        hasrole: bool
+            Bool indicating whether this user has the role for the partner.
+        """
+
+        return any(r.type == role and partner in r.partners for r in self.role)
+
+    def may_perform(self, action, partner, semester):
+        """
+        Check whether this user may perform an action.
+
+        Parameters
+        ----------
+        action : util.Action
+            The action.
+        partner : str
+            The partner code of the partner forv which the action would be performed.
+        semester : str
+            The semester, such as `2017-2` or `2018-1`, for which the action would be performed.
+
+        Returns
+        -------
+        mayperform : bool
+            Bool indicating whether this user may perform the action.
+        """
+
+        if action == Action.UPDATE_TIME_ALLOCATIONS:
+            return self.has_role(RoleType.ADMINISTRATOR, partner) or self.has_role(RoleType.TAC_CHAIR, partner)
+
+        return False

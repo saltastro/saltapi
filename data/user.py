@@ -1,17 +1,17 @@
 from flask import g
 import pandas as pd
 from data.common import sdb_connect
-from schema.user import UserModel, Role
+from schema.user import UserModel, Role, RoleType
 from data.partner import get_partners_for_role
 
 
-def get_role(row):
+def get_role(row, user_id):
     all_partner = get_partners_for_role()
     sql = "SELECT * " \
           "     FROM PiptUserSetting  " \
           "         LEFT JOIN PiptUserTAC using (PiptUser_Id) " \
           "     WHERE PiptSetting_Id = 22 " \
-          "         AND PiptUser_Id = {user_id}".format(user_id=g.user.user_id)
+          "         AND PiptUser_Id = {user_id}".format(user_id=user_id)
     conn = sdb_connect()
     results = pd.read_sql(sql, conn)
     conn.close()
@@ -20,7 +20,7 @@ def get_role(row):
     if not pd.isnull(row["Astro"]):
         role.append(
             Role(
-                type="SALT_ASTRONOMER",
+                type=RoleType.SALT_ASTRONOMER,
                 partners=all_partner
             )
         )
@@ -28,7 +28,7 @@ def get_role(row):
         partner = get_partners_for_role(ids=[row["TacPartner"]])
         role.append(
             Role(
-                type="TAC_MEMBER",
+                type=RoleType.TAC_MEMBER,
                 partners=partner
             )
         )
@@ -37,7 +37,7 @@ def get_role(row):
         partner = get_partners_for_role(ids=[row["TacPartner"]])
         role.append(
             Role(
-                type="TAC_CHAIR",
+                type=RoleType.TAC_CHAIR,
                 partners=partner
             )
         )
@@ -45,7 +45,7 @@ def get_role(row):
 
         role.append(
             Role(
-                type="ADMINISTRATOR",
+                type=RoleType.ADMINISTRATOR,
                 partners=all_partner
             )
         )
@@ -53,8 +53,7 @@ def get_role(row):
     return role
 
 
-def get_user():
-    user_id = g.user.user_id
+def get_user(user_id):
     user = {}
 
     sql = " select *, t.PiptUser_Id as Tac, t.Partner_Id as TacPartner, a.Investigator_Id as Astro " \
@@ -77,5 +76,5 @@ def get_user():
                 email=row["Email"],
                 role=[]
             )
-        user[username].role += get_role(row)
+        user[username].role += get_role(row, user_id)
     return user[username]
