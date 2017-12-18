@@ -86,20 +86,6 @@ def home():
     return render_template('home.html')
 
 
-@app.route("/update-time-allocs", methods=['POST'])
-@token_auth.login_required
-def update_time_allocs():
-    from util.time_allocations import update_time_allocations
-
-    allocations = request.json['time_allocations']
-    partner = request.json['partner']
-    semester = request.json['semester']
-
-    return jsonify({
-        'result': update_time_allocations(allocations, partner, semester)
-    })
-
-
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'errors': 'Not found'}), 404)

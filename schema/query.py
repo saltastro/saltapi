@@ -1,5 +1,4 @@
 import graphene
-from graphene import Field, List, String
 from flask import g
 from schema.partner import *
 from schema.selectors import Selectors
@@ -10,6 +9,7 @@ from data.targets import get_targets
 from data.selectors import get_selectors_data
 from schema.instruments import *
 from schema.user import UserModel
+from schema.mutations import Mutations
 
 
 class Query(graphene.ObjectType):
@@ -59,4 +59,4 @@ class Query(graphene.ObjectType):
         return g.user
 
 
-schema = graphene.Schema(query=Query, types=[HRS, RSS, BVIT, SCAM])
+schema = graphene.Schema(query=Query, mutation=Mutations, types=[HRS, RSS, BVIT, SCAM])
