@@ -47,7 +47,8 @@ def multipartner_ids(proposal_codes, partner, semester):
     return {item['Proposal_Code']: item['MultiPartner_Id'] for item in df.to_dict('records')}
 
 def check_time_allocations(allocations, partner, semester):
-    print(g.user.may_perform(Action.UPDATE_TIME_ALLOCATIONS, partner, semester))
+    if not g.user.may_perform(Action.UPDATE_TIME_ALLOCATIONS, partner, semester):
+        raise Exception('You are not allowed to update the time allocations.')
 
 def update_time_allocations(time_allocations, partner, semester):
     """
