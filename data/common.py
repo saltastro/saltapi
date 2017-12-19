@@ -27,6 +27,7 @@ def get_proposal_ids(semester, partner_code=None):
     conn = sdb_connect()
     all_proposals = [str(p["Ids"]) for i, p in pd.read_sql(all_sql, conn).iterrows()]
 
+
     partners = [partner for partner in g.ALL_PARTNERS if g.user.may_perform(Action.VIEW_PARTNER_PROPOSALS, partner)]
 
     sql += """ AND (
@@ -38,7 +39,7 @@ def get_proposal_ids(semester, partner_code=None):
                        email=g.user.email)
 
     if partner_code is not None:
-        return sql + " AND pa.Partner_Code = '{partner_code}' ".format(partner_code=partner_code)
+        sql += " AND pa.Partner_Code = '{partner_code}' ".format(partner_code=partner_code)
 
     ids = []
     pcode_ids = []

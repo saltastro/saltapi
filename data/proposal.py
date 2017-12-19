@@ -153,28 +153,36 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
                 distribution=[]
             )
         )
-
-    partner_time_sql = " select Proposal_Code, ReqTimeAmount*ReqTimePercent/100.0 as TimePerPartner, " \
-                       "    Partner_Id, Partner_Name, Partner_Code, concat(s.Year,'-', s.Semester) as CurSemester " \
-                       "       from ProposalCode  " \
-                       "           join MultiPartner using (ProposalCode_Id) " \
-                       "           join Semester as s using (Semester_Id) " \
-                       "           join Partner using(Partner_Id) "
-    partner_time_sql += "  where ProposalCode_Id in ({ids})".format(ids=', '.join(ids['ProposalCode_Ids']))
+    print(', '.join(ids["ProposalCode_Ids"]))
+    print(ids["ProposalIds"])
+    print(ids["all_proposals"])
+    partner_time_sql = """
+                        SELECT Proposal_Code, ReqTimeAmount*ReqTimePercent/100.0 as TimePerPartner, 
+                           Partner_Id, Partner_Name, Partner_Code, concat(s.Year,'-', s.Semester) as CurSemester 
+                              from ProposalCode  
+                                  join MultiPartner using (ProposalCode_Id) 
+                                  join Semester as s using (Semester_Id) 
+                                  join Partner using(Partner_Id) 
+                         WHERE ProposalCode_Id in ({ids})
+                       """.format(ids=', '.join(ids['ProposalCode_Ids']))
 
     conn = sdb_connect()
     for index, row in pd.read_sql(partner_time_sql, conn).iterrows():
-        proposal = proposals[row["Proposal_Code"]]
+        try:
+            proposal = proposals[row["Proposal_Code"]]
 
-        for p in proposal.time_requests:
-            if p.semester == row['CurSemester']:
-                p.distribution.append(
-                    Distribution(
-                        partner_name=row['Partner_Name'],
-                        partner_code=row['Partner_Code'],
-                        time=int(row['TimePerPartner'])
+            for p in proposal.time_requests:
+
+                if p.semester == row['CurSemester']:
+                    p.distribution.append(
+                        Distribution(
+                            partner_name=row['Partner_Name'],
+                            partner_code=row['Partner_Code'],
+                            time=int(row['TimePerPartner'])
+                        )
                     )
-                )
+        except KeyError:
+            pass
     conn.close()
 
     get_instruments(ids, proposals)

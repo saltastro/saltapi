@@ -58,9 +58,12 @@ def get_targets(ids=None, proposals=None, semester=None, partner_code=None):
     results = pd.read_sql(sql, conn)
     conn.close()
     for i, row in results.iterrows():
-        if proposals is None:
-            targets.append(target(row))
-        else:
-            proposals[row["Proposal_Code"]].targets.append(target(row))
+        try:
+            if proposals is None:
+                targets.append(target(row))
+            else:
+                proposals[row["Proposal_Code"]].targets.append(target(row))
+        except KeyError:
+            pass
 
     return targets
