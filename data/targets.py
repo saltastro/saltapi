@@ -21,7 +21,7 @@ def target(row):
         )
 
 
-def get_targets(ids=None, proposals=None, semester=None, partner_code=None, proposal_code=None):
+def get_targets(ids=None, proposals=None, semester=None, partner_code=None):
     """
         If you do not provide ids you must provide semester or vise versa. value error will be raised if none is 
             provide.
@@ -34,7 +34,6 @@ def get_targets(ids=None, proposals=None, semester=None, partner_code=None, prop
     :param proposals: Dict of proposals with they code as keys (if you need a list of targets in a proposal)
     :param semester: semester querying for (if you need a list of targets)
     :param partner_code: partner querying for (if you need a list of targets)
-    :param proposal_code: proposal code querying for (if you need a list of targets)
     :return: list of targets (used by graphQL query) (if you need a list of targets)
     """
     if ids is not None and semester is not None:
@@ -43,18 +42,17 @@ def get_targets(ids=None, proposals=None, semester=None, partner_code=None, prop
     if ids is None:
         if semester is None:
             raise ValueError("semester must be provided when query for Targets")
-        ids = get_proposal_ids(semester=semester, partner_code=partner_code, proposal_code=proposal_code)
+        ids = get_proposal_ids(semester=semester, partner_code=partner_code)
 
-    sql = "select * " \
-          "  from Proposal" \
-          "         join ProposalCode using (ProposalCode_Id) " \
-          "         join P1ProposalTarget using (ProposalCode_Id) " \
-          "         join Target as tp on (P1ProposalTarget.Target_Id = tp.Target_Id) " \
-          "         join TargetCoordinates using(TargetCoordinates_Id) "
-    if len(ids['ProposalIds']) == 1:
-        sql += "  where Proposal_Id = {id} order by Proposal_Id".format(id=ids['ProposalIds'][0])
-    else:
-        sql += "  where Proposal_Id in {ids} order by Proposal_Id".format(ids=tuple(ids['ProposalIds']))
+    sql = """
+            SELECT * 
+                FROM Proposal
+                    JOIN ProposalCode using (ProposalCode_Id) 
+                    JOIN P1ProposalTarget using (ProposalCode_Id) 
+                    JOIN Target as tp on (P1ProposalTarget.Target_Id = tp.Target_Id) 
+                    JOIN TargetCoordinates using(TargetCoordinates_Id) 
+           """
+    sql += "  WHERE Proposal_Id in ({ids}) order by Proposal_Id".format(ids=", ".join(ids['ProposalIds']))
 
     conn = sdb_connect()
     results = pd.read_sql(sql, conn)

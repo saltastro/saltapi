@@ -31,14 +31,10 @@ class Query(graphene.ObjectType):
             raise ValueError("please provide argument \"semester\"")
         return get_proposals(semester=semester, partner_code=partner_code, all_proposals=all_proposals)
 
-    def resolve_targets(self, context, info, args, partner_code=None, proposal_code=None):
-        if 'partner_code' in context:
-            partner_code = context['partner_code']
-
-        if 'proposal_code' in context:
-            proposal_code = context['proposal_code']
-
-        return get_targets(semester=context['semester'], partner_code=partner_code, proposal_code=proposal_code)
+    def resolve_targets(self, info, semester=None, partner_code=None,):
+        if semester is None:
+            raise ValueError("please provide argument \"semester\"")
+        return get_targets(semester=semester, partner_code=partner_code)
 
     def resolve_partner_allocations(self, context, info, args, partner_code=None):
         if 'partner_code' in context:
