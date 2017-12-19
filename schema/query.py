@@ -23,7 +23,6 @@ class Query(graphene.ObjectType):
                                 " Semester must be provided in all cases")
     partner_allocations = Field(List(PartnerAllocations), semester=String(), partner_code=String(),
                                 description="List of all allocations of SALT Partners")
-    selectors = Field(Selectors)
     user = Field(UserModel)
 
     def resolve_proposals(self, info, semester=None, partner_code=None, all_proposals=False):
@@ -36,15 +35,12 @@ class Query(graphene.ObjectType):
             raise ValueError("please provide argument \"semester\"")
         return get_targets(semester=semester, partner_code=partner_code)
 
-    def resolve_partner_allocations(self, context, info, args, partner_code=None):
-        if 'partner_code' in context:
-            partner_code = context['partner_code']
-        return get_partners(semester=context['semester'], partner=partner_code)
+    def resolve_partner_allocations(self, info, semester=None, partner_code=None):
+        if semester is None:
+            raise ValueError("please provide argument \"semester\"")
+        return get_partners(semester=semester, partner=partner_code)
 
-    def resolve_selectors(self, context, info, args):
-        return get_selectors_data()
-
-    def resolve_user(self, context, info, args):
+    def resolve_user(self, info):
         return g.user
 
 
