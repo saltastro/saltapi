@@ -7,3 +7,4 @@ class Action(Enum):
     """
 
     UPDATE_TIME_ALLOCATIONS = 1
+    VIEW_PARTNER_PROPOSALS = 2
