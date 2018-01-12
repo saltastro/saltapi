@@ -155,9 +155,6 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
                 distribution=[]
             )
         )
-    print(', '.join(ids["ProposalCode_Ids"]))
-    print(ids["ProposalIds"])
-    print(ids["all_proposals"])
     partner_time_sql = """
                         SELECT Proposal_Code, ReqTimeAmount*ReqTimePercent/100.0 as TimePerPartner, 
                            Partner_Id, Partner_Name, Partner_Code, concat(s.Year,'-', s.Semester) as CurSemester 
