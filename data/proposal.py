@@ -36,6 +36,7 @@ def make_proposal(row, ids):
             time_requests=[],
             targets=[],
             allocated_time=[],
+            tac_comment=[],
             pi=PI(
                 name=None,
                 surname=None,
@@ -62,6 +63,7 @@ def make_proposal(row, ids):
             time_requests=[],
             allocated_time=[],
             targets=[],
+            tac_comment=[],
             pi=PI(
                 name=row["FirstName"],
                 surname=row["Surname"],
@@ -108,7 +110,7 @@ def make_query(ids=None):
 
 
 def query_proposal_data(semester, partner_code=None, all_proposals=False):
-    from schema.proposal import RequestedTimeM, Distribution, ProposalAllocatedTime
+    from schema.proposal import RequestedTimeM, Distribution, ProposalAllocatedTime, TacComment
 
     ids = get_proposal_ids(semester, partner_code=partner_code)
     conn = sdb_connect()
@@ -188,12 +190,15 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
     get_instruments(ids, proposals)
     get_targets(ids=ids, proposals=proposals)
 
-    all_time_sql = 'SELECT * FROM PriorityAlloc ' \
-                   '    join MultiPartner using (MultiPartner_Id) ' \
-                   '    join Partner using(Partner_Id) ' \
-                   '    join Semester using (Semester_Id) ' \
-                   '    join ProposalCode using (ProposalCode_Id)' \
-                   ' where Concat(Year, "-", Semester) = "{semester}" order by Proposal_Code'.format(semester=semester)
+    all_time_sql = """
+            SELECT * FROM PriorityAlloc
+                    join MultiPartner using (MultiPartner_Id)
+                    join Partner using(Partner_Id)
+                    join Semester using (Semester_Id)
+                    join ProposalCode using (ProposalCode_Id)
+                    left join TacProposalComment using (MultiPartner_Id)
+                where Concat(Year, "-", Semester) = "{semester}"
+                    order by Proposal_Code""".format(semester=semester)
 
     conn = sdb_connect()
     prev_partner, prev_proposal = '', ''
@@ -203,7 +208,16 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
             partner_code=row['Partner_Code'],
             partner_name=row['Partner_Name']
         )
+        tac_comment = TacComment(
+                    partner_code=row['Partner_Code'],
+                    comment=row['TacComment']
+                )
         if proposal in proposals:
+            if tac_comment not in proposals[proposal].tac_comment:
+                proposals[proposal].tac_comment.append(
+                    tac_comment
+                )
+
             if len(proposals[proposal].allocated_time) == 0:
                 proposals[proposal].allocated_time.append(
                         priority(row['Priority'],
