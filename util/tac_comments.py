@@ -3,6 +3,12 @@ from data import sdb_connect
 from util.action import Action
 from util.multipartner import multipartner_ids
 
+
+def check_tac_comments(comments, partner, semester):
+    if not g.user.may_perform(Action.UPDATE_TAC_COMMENTS, partner, semester):
+        raise Exception('You are not allowed to update the time allocations.')
+
+
 def update_tac_comments(tac_comments, partner, semester):
     """
     Update the database with a list of tac comments.
@@ -21,6 +27,8 @@ def update_tac_comments(tac_comments, partner, semester):
 
     proposal_codes = [comme['proposal_code'] for comme in tac_comments]
     multipartner_id_map = multipartner_ids(proposal_codes, partner, semester)
+
+    check_tac_comments(tac_comments, partner, semester)
 
     # list of values in the form '(proposal code, tac comment)
 

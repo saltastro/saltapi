@@ -78,7 +78,7 @@ class UserModel(ObjectType):
             Bool indicating whether this user may perform the action.
         """
 
-        if action == Action.UPDATE_TIME_ALLOCATIONS:
+        if action == Action.UPDATE_TIME_ALLOCATIONS or action == Action.UPDATE_TAC_COMMENTS:
             return self.has_role(RoleType.ADMINISTRATOR, partner) or self.has_role(RoleType.TAC_CHAIR, partner)
         elif action == Action.VIEW_PARTNER_PROPOSALS:
             return self.has_role(RoleType.ADMINISTRATOR, partner) or self.has_role(RoleType.TAC_CHAIR, partner) or \

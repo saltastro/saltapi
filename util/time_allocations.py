@@ -8,6 +8,18 @@ def check_time_allocations(allocations, partner, semester):
     if not g.user.may_perform(Action.UPDATE_TIME_ALLOCATIONS, partner, semester):
         raise Exception('You are not allowed to update the time allocations.')
 
+    for alloc in allocations:
+        if isinstance(alloc["time"], float) or isinstance(alloc["time"], int):
+            if alloc["time"] >= 0 \
+                    and isinstance(alloc["priority"], int) \
+                    and alloc["priority"] in [0, 1, 2, 3, 4] \
+                    and isinstance(alloc["proposal_code"], str):
+                pass  # proposal have meet minimum requirements
+            else:
+                raise ValueError("Some of your values are not proper time allocations")
+        else:
+            raise ValueError("Some of your values are not proper time allocations")
+
 
 def update_time_allocations(time_allocations, partner, semester):
     """
@@ -28,7 +40,7 @@ def update_time_allocations(time_allocations, partner, semester):
     proposal_codes = [alloc['proposal_code'] for alloc in time_allocations]
     multipartner_id_map = multipartner_ids(proposal_codes, partner, semester)
 
-    # TODO: Perform checks!
+
     check_time_allocations(time_allocations, partner, semester)
 
     # FIXME: hard-coded id
@@ -50,18 +62,6 @@ def update_time_allocations(time_allocations, partner, semester):
                         TimeAlloc=VALUES(TimeAlloc),
                         Moon_Id=VALUES(Moon_Id)'''.format(values=', '.join(values_list))
 
-    comment_list = ['({multipartner_id}, {tac_comment})'
-                        .format(multipartner_id=int(multipartner_id_map[alloc['proposal_code']]),
-                                tac_comment=str(alloc['priority']))
-                    for alloc in time_allocations
-                    if alloc['proposal_code'] in multipartner_id_map.keys()]
-    print("tac Comment", comment_list)
-
-    tac_comment_sql = '''INSERT INTO TacProposalComment (MultiPartner_Id, TacComment)
-                        VALUES {values}
-                        ON DUPLICATE KEY UPDATE
-                            MultiPartner_Id=VALUES(MultiPartner_Id),
-                            TacComment=VALUES(TacComment)'''.format(values=', '.join(comment_list))
     connection = sdb_connect()
     try:
         with connection.cursor() as cursor:
