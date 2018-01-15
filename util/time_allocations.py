@@ -38,7 +38,6 @@ def update_time_allocations(partner, semester, time_allocations, tac_comments):
         such as `{'proposal_code': '2017-2-SCI-042', 'comment': 'this is a tac comment for this proposal'}`.
 
     """
-    print(tac_comments)
     proposal_codes = [alloc['proposal_code'] for alloc in time_allocations]
     multipartner_id_map = multipartner_ids(proposal_codes, partner, semester)
 
