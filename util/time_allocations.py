@@ -5,20 +5,19 @@ from util.multipartner import multipartner_ids
 
 
 def check_time_allocations(allocations, partner, semester):
+    is_correct = False
     if not g.user.may_perform(Action.UPDATE_TIME_ALLOCATIONS, partner, semester):
-        raise Exception('You are not allowed to update the time allocations.')
+        return is_correct
 
+    is_correct = True
     for alloc in allocations:
         if isinstance(alloc["time"], float) or isinstance(alloc["time"], int):
-            if alloc["time"] >= 0 \
-                    and isinstance(alloc["priority"], int) \
-                    and alloc["priority"] in [0, 1, 2, 3, 4] \
-                    and isinstance(alloc["proposal_code"], str):
-                pass  # proposal have meet minimum requirements
-            else:
-                raise ValueError("Some of your values are not proper time allocations")
-        else:
-            raise ValueError("Some of your values are not proper time allocations")
+            if alloc["time"] < 0 \
+                    or alloc["priority"] not in [0, 1, 2, 3, 4] \
+                    or not isinstance(alloc["proposal_code"], str):
+                is_correct = False  # proposal have meet minimum requirements
+
+    return is_correct
 
 
 def update_time_allocations(time_allocations, partner, semester):
@@ -40,8 +39,8 @@ def update_time_allocations(time_allocations, partner, semester):
     proposal_codes = [alloc['proposal_code'] for alloc in time_allocations]
     multipartner_id_map = multipartner_ids(proposal_codes, partner, semester)
 
-
-    check_time_allocations(time_allocations, partner, semester)
+    if not check_time_allocations(time_allocations, partner, semester):
+        return False
 
     # FIXME: hard-coded id
     moon_id = 6
@@ -67,7 +66,7 @@ def update_time_allocations(time_allocations, partner, semester):
         with connection.cursor() as cursor:
             cursor.execute(sql)
             connection.commit()
+
     finally:
         connection.close()
-
     return True

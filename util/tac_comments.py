@@ -5,8 +5,9 @@ from util.multipartner import multipartner_ids
 
 
 def check_tac_comments(comments, partner, semester):
-    if not g.user.may_perform(Action.UPDATE_TAC_COMMENTS, partner, semester):
-        raise Exception('You are not allowed to update the time allocations.')
+    if g.user.may_perform(Action.UPDATE_TAC_COMMENTS, partner, semester):
+        return True
+    return False
 
 
 def update_tac_comments(tac_comments, partner, semester):
@@ -28,7 +29,8 @@ def update_tac_comments(tac_comments, partner, semester):
     proposal_codes = [comme['proposal_code'] for comme in tac_comments]
     multipartner_id_map = multipartner_ids(proposal_codes, partner, semester)
 
-    check_tac_comments(tac_comments, partner, semester)
+    if not check_tac_comments(tac_comments, partner, semester):
+        return False
 
     # list of values in the form '(proposal code, tac comment)
 
@@ -51,5 +53,4 @@ def update_tac_comments(tac_comments, partner, semester):
             pass
     finally:
         connection.close()
-
     return True

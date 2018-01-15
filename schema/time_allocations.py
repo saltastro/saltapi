@@ -35,7 +35,7 @@ class UpdateTimeAllocations(Mutation):
     success = Boolean()
 
     def mutate(self, info, time_allocations):
-        update_time_allocations(partner=time_allocations['partner'],
+        is_updated = update_time_allocations(partner=time_allocations['partner'],
                                 semester=time_allocations['semester'],
                                 time_allocations=time_allocations['time_allocations'])
-        return UpdateTimeAllocations(True)
+        return UpdateTimeAllocations(is_updated)
