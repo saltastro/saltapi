@@ -1,5 +1,7 @@
 import pandas as pd
+from flask import g
 from data import sdb_connect
+from schema.user import RoleType
 
 
 def get_partners(semester, partner):
@@ -12,7 +14,7 @@ def get_partners(semester, partner):
               where concat(Year,"-", Semester) = "{semester}" 
            '''.format(semester=semester)
     if partner is not None:
-        sql = sql + ' and Partner_Code = "{partner_code}" '.format(partner_code=partner)
+        sql += ' and Partner_Code = "{partner_code}" '.format(partner_code=partner)
 
     conn = sdb_connect()
     results = pd.read_sql(sql, conn)
@@ -35,8 +37,8 @@ def get_partners(semester, partner):
         )) for index, row in results.iterrows()] if partner is not None else \
         [PartnerAllocations(
             id="Partner: " + str(row["Partner_Id"]),
-            name=None,
-            code=None,
+            name=row["Partner_Name"] if g.user.has_role(RoleType.ADMINISTRATOR, row["Partner_Code"]) else None,
+            code=row["Partner_Code"] if g.user.has_role(RoleType.ADMINISTRATOR, row["Partner_Code"]) else None,
             allocated_time=AllocatedTime(
                 for_semester=str(row['Year']) + "-" + str(row['Semester']),
 
@@ -55,7 +57,7 @@ def get_partners(semester, partner):
 def get_partners_for_role(ids=None):
     par = 'select Partner_Code from Partner '
     if ids is not None:
-        par = par + ' where Partner_Id in ({ids})'.format(ids=", ".join(ids))
+        par += ' where Partner_Id in ({ids})'.format(ids=", ".join(ids))
 
     conn = sdb_connect()
     results = pd.read_sql(par, conn)
