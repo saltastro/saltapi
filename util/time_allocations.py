@@ -20,22 +20,25 @@ def check_time_allocations(allocations, partner, semester):
     return is_correct
 
 
-def update_time_allocations(time_allocations, partner, semester):
+def update_time_allocations(partner, semester, time_allocations, tac_comments):
     """
     Update the database with a list of time allocations.
 
     Parameters
     ----------
-    time_allocations : iterable
-        The list of time allocations. Each time allocation must be a dictionary with a proposal code, a priority
-        and a time in seconds, such as `{'proposal_code': '2017-2-SCI-042', 'priority': 2, 'time': 2400}`.
     partner : str
         The partner code of the partner for whom the time allocations are updated.
     semester : str
         The semester, such as `2017-2` or `2018-1`, for which the time allocations are updated.
+    time_allocations : iterable
+        The list of time allocations. Each time allocation must be a dictionary with a proposal code, a priority
+        and a time in seconds, such as `{'proposal_code': '2017-2-SCI-042', 'priority': 2, 'time': 2400}`.
+    tac_comments : iterable
+        The list of tac comments. Each tac comment must be a dictionary with a proposal code and a comment,
+        such as `{'proposal_code': '2017-2-SCI-042', 'comment': 'this is a tac comment for this proposal'}`.
 
     """
-
+    print(tac_comments)
     proposal_codes = [alloc['proposal_code'] for alloc in time_allocations]
     multipartner_id_map = multipartner_ids(proposal_codes, partner, semester)
 
@@ -61,12 +64,26 @@ def update_time_allocations(time_allocations, partner, semester):
                         TimeAlloc=VALUES(TimeAlloc),
                         Moon_Id=VALUES(Moon_Id)'''.format(values=', '.join(values_list))
 
+    comment_list = ['({multipartner_id}, "{tac_comment}")'
+                        .format(multipartner_id=int(multipartner_id_map[comme['proposal_code']]),
+                                tac_comment=str(comme['comment']))
+                    for comme in tac_comments
+                    if comme['proposal_code'] in multipartner_id_map.keys()]
+
+    tac_comment_sql = '''INSERT INTO TacProposalComment (MultiPartner_Id, TacComment)
+                            VALUES {values}
+                            ON DUPLICATE KEY UPDATE
+                                MultiPartner_Id=VALUES(MultiPartner_Id),
+                                TacComment=VALUES(TacComment)'''.format(values=', '.join(comment_list))
+
     connection = sdb_connect()
     try:
         with connection.cursor() as cursor:
             cursor.execute(sql)
+            cursor.execute(tac_comment_sql)
             connection.commit()
-
+    except:
+        return False
     finally:
         connection.close()
     return True
