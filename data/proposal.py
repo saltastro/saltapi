@@ -22,9 +22,13 @@ def priority(p, time, pat):
     return pat
 
 
-def make_proposal(row, ids):
+def make_proposal(row, ids, text):
     from schema.proposal import Proposals, PI
     from schema.instruments import Instruments
+
+    title = text[row["Proposal_Code"]]["title"] if row["Title"] is None else row["Title"]
+    abstract = text[row["Proposal_Code"]]["abstract"]if row["Abstract"] is None else row["Abstract"]
+
     if row["Proposal_Id"] in ids["ProposalIds"]:
         proposal = Proposals(
             id="Proposal: " + str(row["Proposal_Id"]),
@@ -54,8 +58,8 @@ def make_proposal(row, ids):
         proposal = Proposals(
             id="Proposal: " + str(row["Proposal_Id"]),
             code=row["Proposal_Code"],
-            title=row["Title"],
-            abstract=row["Abstract"],
+            title=title,
+            abstract=abstract,
             is_p4=row["P4"] == 1,
             status=row["Status"],
             transparency=row["Transparency"],
@@ -113,30 +117,45 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
     from schema.proposal import RequestedTimeM, Distribution, ProposalAllocatedTime, TacComment
 
     ids = get_proposal_ids(semester, partner_code=partner_code)
-    conn = sdb_connect()
+
     proposals = {}
-    proposal_sql = """ 
-                    select *,  concat(s.Year, '-', s.Semester) as CurSemester 
-                        from Proposal as p 
-                            join ProposalCode as prc on (prc.ProposalCode_Id = p.ProposalCode_Id) 
-                            join ProposalGeneralInfo as pgi on (pgi.ProposalCode_Id = p.ProposalCode_Id) 
-                            join P1RequestedTime as p1 using (Proposal_Id) 
-                            join Moon as mo on (mo.Moon_Id=p1.Moon_Id) 
-                            join ProposalStatus using (ProposalStatus_Id) 
-                            join Semester as s on (s.Semester_Id = p1.Semester_Id) 
-                            join P1ObservingConditions  as p1o on (p1o.ProposalCode_Id = p.ProposalCode_Id) 
-                            left join ProposalText as prt on 
-                                (prt.ProposalCode_Id = p.ProposalCode_Id and prt.Semester_Id = s.Semester_Id) 
-                            join Transparency using (Transparency_Id) 
-                            join ProposalContact as pc on (pc.ProposalCode_Id = p.ProposalCode_Id) 
-                            join P1MinTime as p1t on 
-                                   (p.ProposalCode_Id = p1t.ProposalCode_Id and p1t.Semester_Id = s.Semester_Id) 
-                            join Investigator as i on (i.Investigator_Id = pc.Leader_Id) 
+    proposals_text = {}
+    proposal_sql = """
+                    select *,  concat(s.Year, '-', s.Semester) as CurSemester
+                        from Proposal as p
+                            join ProposalCode as prc on (prc.ProposalCode_Id = p.ProposalCode_Id)
+                            join ProposalGeneralInfo as pgi on (pgi.ProposalCode_Id = p.ProposalCode_Id)
+                            join P1RequestedTime as p1 using (Proposal_Id)
+                            join Moon as mo on (mo.Moon_Id=p1.Moon_Id)
+                            join ProposalStatus using (ProposalStatus_Id)
+                            join Semester as s on (s.Semester_Id = p1.Semester_Id)
+                            join P1ObservingConditions  as p1o on (p1o.ProposalCode_Id = p.ProposalCode_Id)
+                            left join ProposalText as prt on
+                                (prt.ProposalCode_Id = p.ProposalCode_Id and prt.Semester_Id = s.Semester_Id)
+                            join Transparency using (Transparency_Id)
+                            join ProposalContact as pc on (pc.ProposalCode_Id = p.ProposalCode_Id)
+                            join P1MinTime as p1t on
+                                   (p.ProposalCode_Id = p1t.ProposalCode_Id and p1t.Semester_Id = s.Semester_Id)
+                            join Investigator as i on (i.Investigator_Id = pc.Leader_Id)
                             left join P1Thesis as thesis on (thesis.ProposalCode_Id = p.ProposalCode_Id)
-                            left join ProposalTechReport as pt on (pt.ProposalCode_Id = p.ProposalCode_Id) 
+                            left join ProposalTechReport as pt on (pt.ProposalCode_Id = p.ProposalCode_Id)
                         where P1RequestedTime > 0 AND CONCAT(s.Year, '-', s.Semester) = \"{semester}\"
                      """.format(semester=semester)
 
+    proposals_text_sql = """
+                    SELECT * FROM ProposalText
+                        join ProposalCode using(ProposalCode_Id)
+                    WHERE ProposalCode_Id in ({ids})
+                        order by Semester_Id desc """.format(ids=', '.join(ids['ProposalCode_Ids']))
+    conn = sdb_connect()
+    for index, row in pd.read_sql(proposals_text_sql, conn).iterrows():
+        if row["Proposal_Code"] not in proposals_text:
+            proposals_text[row["Proposal_Code"]] = {
+                "title": row["Title"], "abstract": row["Abstract"]
+            }
+    conn.close()
+
+    conn = sdb_connect()
     if all_proposals:
         proposal_sql += "  AND Proposal_Id IN ({ids}) order by Proposal_Id".format(ids=', '.join(ids['all_proposals']))
         results = pd.read_sql(proposal_sql, conn)
@@ -144,10 +163,9 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
         proposal_sql += "  AND Proposal_Id IN ({ids}) order by Proposal_Id".format(ids=', '.join(ids['ProposalIds']))
         results = pd.read_sql(proposal_sql, conn)
     conn.close()
-
     for index, row in results.iterrows():
         if row["Proposal_Code"] not in proposals:
-            proposals[row["Proposal_Code"]] = make_proposal(row, ids)
+            proposals[row["Proposal_Code"]] = make_proposal(row, ids, proposals_text)
         proposals[row["Proposal_Code"]].time_requests.append(
             RequestedTimeM(
                 minimum_useful_time=row["P1MinimumUsefulTime"],
