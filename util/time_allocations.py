@@ -46,6 +46,7 @@ def update_time_allocations(partner, semester, time_allocations, tac_comments):
 
     # FIXME: hard-coded id
     moon_id = 6
+    print(tac_comments)
 
     # list of values in the form '(proposal code, priority, time in seconds)
     values_list = ['({multipartner_id}, {priority}, {time}, {moon_id})'
@@ -65,7 +66,7 @@ def update_time_allocations(partner, semester, time_allocations, tac_comments):
 
     comment_list = ['({multipartner_id}, "{tac_comment}")'
                         .format(multipartner_id=int(multipartner_id_map[comme['proposal_code']]),
-                                tac_comment=str(comme['comment']))
+                                tac_comment=str(comme['comment'].replace('"', '\\"')))
                     for comme in tac_comments
                     if comme['proposal_code'] in multipartner_id_map.keys()]
 
