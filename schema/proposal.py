@@ -1,5 +1,6 @@
 from graphene import ObjectType, String, ID, Boolean, Field, Int, List, Float
 from schema.instruments import Instruments
+from schema.salt_astronomer import SALTAstronomer
 from schema.target import Target
 
 
@@ -70,3 +71,4 @@ class Proposals(ObjectType):
     time_requests = List(RequestedTimeM)
     title = String()
     transparency = String()
+    S_a_l_t_astronomer = Field(SALTAstronomer)
