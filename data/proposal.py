@@ -23,7 +23,7 @@ def priority(p, time, pat):
 
 
 def make_proposal(row, ids, text):
-    from schema.proposal import Proposals, PI
+    from schema.proposal import Proposals, PI, SALTAstronomer
     from schema.instruments import Instruments
 
     title = text[row["Proposal_Code"]]["title"] if row["Title"] is None else row["Title"]
@@ -45,6 +45,12 @@ def make_proposal(row, ids, text):
                 name=None,
                 surname=None,
                 email=None
+            ),
+            S_a_l_t_astronomer=SALTAstronomer(
+                name=row["SAFname"],
+                surname=row["SASname"],
+                email=row["SAEmail"],
+                username=row["SAUsername"],
             ),
             instruments=Instruments(
                 rss=[],
@@ -69,9 +75,9 @@ def make_proposal(row, ids, text):
             targets=[],
             tac_comment=[],
             pi=PI(
-                name=row["FirstName"],
-                surname=row["Surname"],
-                email=row["Email"]
+                name=row["PIFname"],
+                surname=row["PISname"],
+                email=row["PIEmail"]
             ),
             instruments=Instruments(
                 rss=[],
@@ -80,9 +86,14 @@ def make_proposal(row, ids, text):
                 scam=[]
             ),
             is_thesis=not pd.isnull(row["ThesisType_Id"]),
-            tech_report=row['TechReport']
+            tech_report=row['TechReport'],
+            S_a_l_t_astronomer=SALTAstronomer(
+                name=row["SAFname"],
+                surname=row["SASname"],
+                email=row["SAEmail"],
+                username=row["SAUsername"],
+            )
         )
-
     return proposal
 
 
@@ -121,7 +132,10 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
     proposals = {}
     proposals_text = {}
     proposal_sql = """
-                    select *,  concat(s.Year, '-', s.Semester) as CurSemester
+                    select *,  concat(s.Year, '-', s.Semester) as CurSemester,
+                            i.FirstName as PIFname, i.Surname as PISname, i.Email as PIEmail,
+                            tsa.FirstName as SAFname, tsa.Surname as SASname, tsa.Email as SAEmail,
+                            sau.Username as SAUsername
                         from Proposal as p
                             join ProposalCode as prc on (prc.ProposalCode_Id = p.ProposalCode_Id)
                             join ProposalGeneralInfo as pgi on (pgi.ProposalCode_Id = p.ProposalCode_Id)
@@ -139,8 +153,11 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
                             join Investigator as i on (i.Investigator_Id = pc.Leader_Id)
                             left join P1Thesis as thesis on (thesis.ProposalCode_Id = p.ProposalCode_Id)
                             left join ProposalTechReport as pt on (pt.ProposalCode_Id = p.ProposalCode_Id)
+                            left join Investigator as tsa on (tsa.Investigator_Id = pt.Astronomer_Id)
+                            left join PiptUser as sau on (sau.Investigator_Id = pt.Astronomer_Id)
                         where P1RequestedTime > 0 AND CONCAT(s.Year, '-', s.Semester) = \"{semester}\"
                      """.format(semester=semester)
+    print("PROPS\n", proposal_sql)
 
     proposals_text_sql = """
                     SELECT * FROM ProposalText
