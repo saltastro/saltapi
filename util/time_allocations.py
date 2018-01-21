@@ -3,6 +3,7 @@ from flask import g
 from data import sdb_connect
 from util.action import Action
 
+
 def multipartner_ids(proposal_codes, partner, semester):
     """
     Map proposal codes to multipartner ids.
@@ -46,9 +47,11 @@ def multipartner_ids(proposal_codes, partner, semester):
 
     return {item['Proposal_Code']: item['MultiPartner_Id'] for item in df.to_dict('records')}
 
-def check_time_allocations(allocations, partner, semester):
-    if not g.user.may_perform(Action.UPDATE_TIME_ALLOCATIONS, partner, semester):
+
+def check_time_allocations(allocations, partner):
+    if not g.user.may_perform(Action.UPDATE_TIME_ALLOCATIONS, partner=partner):
         raise Exception('You are not allowed to update the time allocations.')
+
 
 def update_time_allocations(time_allocations, partner, semester):
     """
