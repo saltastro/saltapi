@@ -59,7 +59,7 @@ class UserModel(ObjectType):
 
         return any(r.type == role and partner in r.partners for r in self.role)
 
-    def may_perform(self, action, partner=None, semester=None):
+    def may_perform(self, action, **kwargs):
         """
         Check whether this user may perform an action.
 
@@ -67,16 +67,17 @@ class UserModel(ObjectType):
         ----------
         action : util.Action
             The action.
-        partner : str
-            The partner code of the partner for which the action would be performed.
-        semester : str
-            The semester, such as `2017-2` or `2018-1`, for which the action would be performed.
+        **kwargs : kwargs
+            Additional keyword arguments, as required by the action.
 
         Returns
         -------
         mayperform : bool
             Bool indicating whether this user may perform the action.
         """
+
+        partner = kwargs.get('partner')
+        proposal = kwargs.get('proposal')
 
         if action == Action.UPDATE_TIME_ALLOCATIONS or action == Action.UPDATE_TAC_COMMENTS:
             return self.has_role(RoleType.ADMINISTRATOR, partner) or self.has_role(RoleType.TAC_CHAIR, partner)
