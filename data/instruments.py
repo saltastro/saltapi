@@ -40,49 +40,52 @@ def get_instruments(ids, proposals):
 
     conn.close()
     for index, row in i_results.iterrows():
-        if not pd.isnull(row["P1Rss_Id"]):
-            proposals[row["Proposal_Code"]].instruments.rss.append(
-                RSS(
-                    type="RSS",
-                    dictator_mode=row['RSDetectorMode'],
-                    xml_dictator_mode=row['RSXmlDetectorMode'],
-                    mode=row['Mode'],
-                    spectroscopy=Spectroscopy(
-                        grating=row["Grating"]
-                    ),
-                    fabry_perot=FabryPerot(
-                        mode=row['FabryPerot_Mode'],
-                        description=row['FabryPerot_Description'],
-                        etalon_config=row['EtalonConfig'],
-                    ),
-                    polarimetry=Polarimetry(
-                        pattern_name=row['PatternName']
-                    ),
-                    mask=Mask(
-                        type=row['RssMaskType'],
-                        mos_description=row['MosDescription']
+        try:
+            if not pd.isnull(row["P1Rss_Id"]):
+                proposals[row["Proposal_Code"]].instruments.rss.append(
+                    RSS(
+                        type="RSS",
+                        dictator_mode=row['RSDetectorMode'],
+                        xml_dictator_mode=row['RSXmlDetectorMode'],
+                        mode=row['Mode'],
+                        spectroscopy=Spectroscopy(
+                            grating=row["Grating"]
+                        ),
+                        fabry_perot=FabryPerot(
+                            mode=row['FabryPerot_Mode'],
+                            description=row['FabryPerot_Description'],
+                            etalon_config=row['EtalonConfig'],
+                        ),
+                        polarimetry=Polarimetry(
+                            pattern_name=row['PatternName']
+                        ),
+                        mask=Mask(
+                            type=row['RssMaskType'],
+                            mos_description=row['MosDescription']
+                        )
                     )
                 )
-            )
-        if not pd.isnull(row["P1Hrs_Id"]):
-            proposals[row["Proposal_Code"]].instruments.hrs.append(
-                HRS(
-                    type="HRS",
-                    exposure_mode=row["ExposureMode"]
+            if not pd.isnull(row["P1Hrs_Id"]):
+                proposals[row["Proposal_Code"]].instruments.hrs.append(
+                    HRS(
+                        type="HRS",
+                        exposure_mode=row["ExposureMode"]
+                    )
                 )
-            )
-        if not pd.isnull(row["P1Bvit_Id"]):
-            proposals[row["Proposal_Code"]].instruments.bvit.append(
-                BVIT(
-                    type="BVIT",
-                    filter_name=row['BvitFilter_Name']
+            if not pd.isnull(row["P1Bvit_Id"]):
+                proposals[row["Proposal_Code"]].instruments.bvit.append(
+                    BVIT(
+                        type="BVIT",
+                        filter_name=row['BvitFilter_Name']
+                    )
                 )
-            )
-        if not pd.isnull(row["P1Salticam_Id"]):
-            proposals[row["Proposal_Code"]].instruments.scam.append(
-                SCAM(
-                    type="SCAM",
-                    dictator_mode=row['SCDetectorMode'],
-                    xml_dictator_mode=row['SCXmlDetectorMode']
+            if not pd.isnull(row["P1Salticam_Id"]):
+                proposals[row["Proposal_Code"]].instruments.scam.append(
+                    SCAM(
+                        type="SCAM",
+                        dictator_mode=row['SCDetectorMode'],
+                        xml_dictator_mode=row['SCXmlDetectorMode']
+                    )
                 )
-            )
+        except KeyError:
+            pass

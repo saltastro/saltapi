@@ -59,7 +59,7 @@ class UserModel(ObjectType):
 
         return any(r.type == role and partner in r.partners for r in self.role)
 
-    def may_perform(self, action, **kwargs):
+    def may_perform(self, action, partner=None, semester=None):
         """
         Check whether this user may perform an action.
 
@@ -67,8 +67,10 @@ class UserModel(ObjectType):
         ----------
         action : util.Action
             The action.
-        kwargs : kwargs
-            Any additional required arguments, which depend on the action.
+        partner : str
+            The partner code of the partner for which the action would be performed.
+        semester : str
+            The semester, such as `2017-2` or `2018-1`, for which the action would be performed.
 
         Returns
         -------
@@ -76,10 +78,13 @@ class UserModel(ObjectType):
             Bool indicating whether this user may perform the action.
         """
 
-        partner = kwargs.get('partner')
-
-        if action == Action.UPDATE_TIME_ALLOCATIONS:
-            return self.has_role(RoleType.ADMINISTRATOR, partner)\
-                   or self.has_role(RoleType.TAC_CHAIR, partner)
+        if action == Action.UPDATE_TIME_ALLOCATIONS or action == Action.UPDATE_TAC_COMMENTS:
+            return self.has_role(RoleType.ADMINISTRATOR, partner) or self.has_role(RoleType.TAC_CHAIR, partner)
+        elif action == Action.VIEW_PARTNER_PROPOSALS:
+            return self.has_role(RoleType.ADMINISTRATOR, partner) or self.has_role(RoleType.TAC_CHAIR, partner) or \
+                   self.has_role(RoleType.TAC_MEMBER, partner) or self.has_role(RoleType.SALT_ASTRONOMER, partner)
 
         return False
+
+    def __str__(self):
+        return "username: {username}, role: {role}".format(username=self.username, role=self.role)

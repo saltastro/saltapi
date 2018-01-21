@@ -1,82 +1,52 @@
-import pandas as pd
 from flask import g
 from data import sdb_connect
 from util.action import Action
+from util.multipartner import multipartner_ids
 
 
-def multipartner_ids(proposal_codes, partner, semester):
-    """
-    Map proposal codes to multipartner ids.
+def check_time_allocations(allocations, partner, semester):
+    is_correct = False
+    if not g.user.may_perform(Action.UPDATE_TIME_ALLOCATIONS, partner, semester):
+        return is_correct
 
-    Proposal codes are ignored if the proposal doesn't have a multipartner entry for the partner and semester.
+    is_correct = True
+    for alloc in allocations:
+        if isinstance(alloc["time"], float) or isinstance(alloc["time"], int):
+            if alloc["time"] < 0 \
+                    or alloc["priority"] not in [0, 1, 2, 3, 4] \
+                    or not isinstance(alloc["proposal_code"], str):
+                is_correct = False  # proposal have meet minimum requirements
 
-    Parameters
-    ----------
-    proposal_codes : iterable
-        The proposal codes to map.
-    partner : str
-        The partner code, such as `RSA` or `IUCAA`.
-    semester : str
-        The semester, such as `2017-2` or `2018-1`.
-
-    Returns
-    -------
-    ids: dict
-       A dictionary of proposal codes and multipartner ids.
-    """
-
-    year, sem = semester.split('-')
-    proposal_code_strings = ["'{proposal_code}'".format(proposal_code=proposal_code)
-                             for proposal_code in proposal_codes]
-    sql = '''SELECT pc.Proposal_Code, mp.MultiPartner_Id
-                    FROM MultiPartner AS mp
-                    JOIN ProposalCode AS pc USING (ProposalCode_Id)
-                    JOIN Partner AS p USING (Partner_Id)
-                    JOIN Semester AS s USING (Semester_Id)
-                    WHERE pc.Proposal_Code IN ({proposal_codes})
-                          AND p.Partner_Code='{partner_code}'
-                          AND (s.Year={year} AND s.Semester={semester})'''.format(
-        proposal_codes=', '.join(proposal_code_strings),
-        partner_code=partner,
-        year=year,
-        semester=sem)
-
-    connection = sdb_connect()
-    df = pd.read_sql(sql, connection)
-    connection.close()
-
-    return {item['Proposal_Code']: item['MultiPartner_Id'] for item in df.to_dict('records')}
+    return is_correct
 
 
-def check_time_allocations(allocations, partner):
-    if not g.user.may_perform(Action.UPDATE_TIME_ALLOCATIONS, partner=partner):
-        raise Exception('You are not allowed to update the time allocations.')
-
-
-def update_time_allocations(time_allocations, partner, semester):
+def update_time_allocations(partner, semester, time_allocations, tac_comments):
     """
     Update the database with a list of time allocations.
 
     Parameters
     ----------
-    time_allocations : iterable
-        The list of time allocations. Each time allocation must be a dictionary with a proposal code, a priority
-        and a time in seconds, such as `{'proposal_code': '2017-2-SCI-042', 'priority': 2, 'time': 2400}`.
     partner : str
         The partner code of the partner for whom the time allocations are updated.
     semester : str
         The semester, such as `2017-2` or `2018-1`, for which the time allocations are updated.
+    time_allocations : iterable
+        The list of time allocations. Each time allocation must be a dictionary with a proposal code, a priority
+        and a time in seconds, such as `{'proposal_code': '2017-2-SCI-042', 'priority': 2, 'time': 2400}`.
+    tac_comments : iterable
+        The list of tac comments. Each tac comment must be a dictionary with a proposal code and a comment,
+        such as `{'proposal_code': '2017-2-SCI-042', 'comment': 'this is a tac comment for this proposal'}`.
 
     """
-
     proposal_codes = [alloc['proposal_code'] for alloc in time_allocations]
     multipartner_id_map = multipartner_ids(proposal_codes, partner, semester)
 
-    # TODO: Perform checks!
-    check_time_allocations(time_allocations, partner, semester)
+    if not check_time_allocations(time_allocations, partner, semester):
+        return False
 
     # FIXME: hard-coded id
     moon_id = 6
+    print(tac_comments)
 
     # list of values in the form '(proposal code, priority, time in seconds)
     values_list = ['({multipartner_id}, {priority}, {time}, {moon_id})'
@@ -94,12 +64,26 @@ def update_time_allocations(time_allocations, partner, semester):
                         TimeAlloc=VALUES(TimeAlloc),
                         Moon_Id=VALUES(Moon_Id)'''.format(values=', '.join(values_list))
 
+    comment_list = ['({multipartner_id}, "{tac_comment}")'
+                        .format(multipartner_id=int(multipartner_id_map[comme['proposal_code']]),
+                                tac_comment=str(comme['comment'].replace('"', '\\"')))
+                    for comme in tac_comments
+                    if comme['proposal_code'] in multipartner_id_map.keys()]
+
+    tac_comment_sql = '''INSERT INTO TacProposalComment (MultiPartner_Id, TacComment)
+                            VALUES {values}
+                            ON DUPLICATE KEY UPDATE
+                                MultiPartner_Id=VALUES(MultiPartner_Id),
+                                TacComment=VALUES(TacComment)'''.format(values=', '.join(comment_list))
+
     connection = sdb_connect()
     try:
         with connection.cursor() as cursor:
             cursor.execute(sql)
+            cursor.execute(tac_comment_sql)
             connection.commit()
+    except:
+        return False
     finally:
         connection.close()
-
     return True

@@ -1,5 +1,6 @@
 from graphene import ObjectType, String, ID, Boolean, Field, Int, List, Float
 from schema.instruments import Instruments
+from schema.salt_astronomer import SALTAstronomer
 from schema.target import Target
 
 
@@ -45,19 +46,29 @@ class ProposalAllocatedTime(ObjectType):
     p4 = Float()
 
 
+class TacComment(ObjectType):
+    partner_code = String()
+    comment = String()
+
+    def __eq__(self, other):
+        return self.partner_code == other.partner_code and self.comment == other.comment
+
+
 class Proposals(ObjectType):
-    id = ID()
-    code = String()
-    title = String()
     abstract = String()
-    is_p4 = Boolean()
-    status = String()
-    transparency = String()
-    max_seeing = Float()
-    time_requests = List(RequestedTimeM)
-    is_thesis = Boolean()
-    instruments = Field(Instruments)
-    targets = Field(List(Target))
-    pi = Field(PI)
-    tech_report = String()
     allocated_time = List(ProposalAllocatedTime)
+    code = String()
+    id = ID()
+    instruments = Field(Instruments)
+    is_p4 = Boolean()
+    is_thesis = Boolean()
+    max_seeing = Float()
+    pi = Field(PI)
+    status = String()
+    tac_comment = List(TacComment)
+    targets = Field(List(Target))
+    tech_report = String()
+    time_requests = List(RequestedTimeM)
+    title = String()
+    transparency = String()
+    S_a_l_t_astronomer = Field(SALTAstronomer)

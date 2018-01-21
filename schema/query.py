@@ -6,6 +6,7 @@ from schema.proposal import *
 from data.proposal import get_proposals
 from data.partner import get_partners
 from data.targets import get_targets
+from data.salt_astronomer import get_salt_astronomer
 from data.selectors import get_selectors_data
 from schema.instruments import *
 from schema.user import UserModel
@@ -13,7 +14,7 @@ from schema.mutations import Mutations
 
 
 class Query(graphene.ObjectType):
-    proposals = Field(List(Proposals), semester=String(), partner_code=String(), proposal_code=String(),
+    proposals = Field(List(Proposals), semester=String(), partner_code=String(),
                       all_proposals=Boolean(), description="List of proposals per semester. Can be reduced to per "
                                                            "partner or per proposal. Semester must be provided in all "
                                                            "cases"
@@ -23,40 +24,29 @@ class Query(graphene.ObjectType):
                                 " Semester must be provided in all cases")
     partner_allocations = Field(List(PartnerAllocations), semester=String(), partner_code=String(),
                                 description="List of all allocations of SALT Partners")
-    selectors = Field(Selectors)
     user = Field(UserModel)
+    S_a_l_t_astronomers = Field(List(SALTAstronomer))
 
-    def resolve_proposals(self, context, info, args, partner_code=None, proposal_code=None, all_proposals=False):
-        if 'partner_code' in context:
-            partner_code = context['partner_code']
+    def resolve_proposals(self, info, semester=None, partner_code=None, all_proposals=False):
+        if semester is None:
+            raise ValueError("please provide argument \"semester\"")
+        return get_proposals(semester=semester, partner_code=partner_code, all_proposals=all_proposals)
 
-        if 'proposal_code' in context:
-            proposal_code = context['proposal_code']
+    def resolve_targets(self, info, semester=None, partner_code=None,):
+        if semester is None:
+            raise ValueError("please provide argument \"semester\"")
+        return get_targets(semester=semester, partner_code=partner_code)
 
-        if 'all_proposals' in context:
-            all_proposals = context['all_proposals']
-        return get_proposals(semester=context['semester'], partner_code=partner_code, proposal_code=proposal_code,
-                             all_proposals=all_proposals)
+    def resolve_partner_allocations(self, info, semester=None, partner_code=None):
+        if semester is None:
+            raise ValueError("please provide argument \"semester\"")
+        return get_partners(semester=semester, partner=partner_code)
 
-    def resolve_targets(self, context, info, args, partner_code=None, proposal_code=None):
-        if 'partner_code' in context:
-            partner_code = context['partner_code']
-
-        if 'proposal_code' in context:
-            proposal_code = context['proposal_code']
-
-        return get_targets(semester=context['semester'], partner_code=partner_code, proposal_code=proposal_code)
-
-    def resolve_partner_allocations(self, context, info, args, partner_code=None):
-        if 'partner_code' in context:
-            partner_code = context['partner_code']
-        return get_partners(semester=context['semester'], partner=partner_code)
-
-    def resolve_selectors(self, context, info, args):
-        return get_selectors_data()
-
-    def resolve_user(self, context, info, args):
+    def resolve_user(self, info):
         return g.user
+
+    def resolve_S_a_l_t_astronomers(self, info):
+        return get_salt_astronomer()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutations, types=[HRS, RSS, BVIT, SCAM])
