@@ -1,5 +1,6 @@
 from graphene import Enum, ObjectType, String, List, Field
 from util.action import Action
+from data.proposal import liaison_astronomer
 
 class RoleType(Enum):
     """
@@ -80,13 +81,23 @@ class UserModel(ObjectType):
         """
 
         partner = kwargs.get('partner')
-        proposal = kwargs.get('proposal')
+        proposal_code = kwargs.get('proposal_code')
 
         if action == Action.UPDATE_TIME_ALLOCATIONS or action == Action.UPDATE_TAC_COMMENTS:
             return self.has_role(RoleType.ADMINISTRATOR, partner) or self.has_role(RoleType.TAC_CHAIR, partner)
-        elif action == Action.VIEW_PARTNER_PROPOSALS:
-            return self.has_role(RoleType.ADMINISTRATOR, partner) or self.has_role(RoleType.TAC_CHAIR, partner) or \
-                   self.has_role(RoleType.TAC_MEMBER, partner) or self.has_role(RoleType.SALT_ASTRONOMER, partner)
+
+        if action == Action.VIEW_PARTNER_PROPOSALS:
+            return self.has_role(RoleType.ADMINISTRATOR, partner) or \
+                   self.has_role(RoleType.TAC_CHAIR, partner) or \
+                   self.has_role(RoleType.TAC_MEMBER, partner) or \
+                   self.has_role(RoleType.SALT_ASTRONOMER, partner)
+
+        if action == Action.UPDATE_TAC_COMMENTS:
+            return self.has_role(RoleType.ADMINISTRATOR, partner)
+
+        if action == Action.UPDATE_TECHNICAL_REPORT:
+            return self.has_role(RoleType.ADMINISTRATOR, partner) or \
+                   self.has_role(RoleType.SALT_ASTRONOMER, partner)
 
         return False
 
