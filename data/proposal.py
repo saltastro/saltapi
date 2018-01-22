@@ -281,3 +281,15 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
 def get_proposals(**args):
     data = query_proposal_data(**args)
     return data
+
+
+def liaison_astronomer(proposal_code):
+    sql = '''SELECT PiptUser.Username AS LiaisonAstronomer
+       FROM PiptUser
+       RIGHT JOIN Investigator USING (PiptUser_Id)
+       RIGHT JOIN ProposalContact ON Investigator.Investigator_Id = ProposalContact.Astronomer_Id
+       RIGHT JOIN ProposalCode USING (ProposalCode_Id)
+       WHERE ProposalCode.Proposal_Code=%s'''
+    result = pd.read_sql(sql, params=(proposal_code,), con=sdb_connect())
+
+    return result['LiaisonAstronomer'][0]

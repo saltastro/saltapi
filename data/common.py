@@ -28,7 +28,7 @@ def get_proposal_ids(semester, partner_code=None):
     all_proposals = [str(p["Ids"]) for i, p in pd.read_sql(all_sql, conn).iterrows()]
 
 
-    partners = [partner for partner in g.ALL_PARTNERS if g.user.may_perform(Action.VIEW_PARTNER_PROPOSALS, partner)]
+    partners = [partner for partner in g.ALL_PARTNERS if g.user.may_perform(Action.VIEW_PARTNER_PROPOSALS, partner=partner)]
 
     sql += """ AND (
                     pa.Partner_Code in ("{partner_codes}")

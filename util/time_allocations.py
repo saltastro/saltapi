@@ -6,7 +6,7 @@ from util.multipartner import multipartner_ids
 
 def check_time_allocations(allocations, partner, semester):
     is_correct = False
-    if not g.user.may_perform(Action.UPDATE_TIME_ALLOCATIONS, partner, semester):
+    if not g.user.may_perform(Action.UPDATE_TIME_ALLOCATIONS, partner=partner, semester=semester):
         return is_correct
 
     is_correct = True
