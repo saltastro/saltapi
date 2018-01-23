@@ -157,7 +157,6 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
                             left join PiptUser as sau on (sau.Investigator_Id = pt.Astronomer_Id)
                         where P1RequestedTime > 0 AND CONCAT(s.Year, '-', s.Semester) = \"{semester}\"
                      """.format(semester=semester)
-    print("PROPS\n", proposal_sql)
 
     proposals_text_sql = """
                     SELECT * FROM ProposalText

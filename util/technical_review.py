@@ -17,7 +17,6 @@ def update_tech_comments(semester, S_a_l_t_astronomer, tech_comments):
         such as `{'proposal_code': '2017-2-SCI-042', 'comment': 'this is a tac comment for this proposal'}`.
 
     """
-    print(semester, S_a_l_t_astronomer, tech_comments)
     connection = sdb_connect()
     try:
         with connection.cursor() as cursor:
@@ -42,7 +41,6 @@ def update_liaison_astronomers(semester, proposals_assigned):
     proposals_assigned : List
         ####TODO
     """
-    print(semester, proposals_assigned)
     connection = sdb_connect()
     try:
         with connection.cursor() as cursor:
