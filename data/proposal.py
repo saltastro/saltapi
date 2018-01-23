@@ -28,6 +28,11 @@ def make_proposal(row, ids, text):
 
     title = text[row["Proposal_Code"]]["title"] if row["Title"] is None else row["Title"]
     abstract = text[row["Proposal_Code"]]["abstract"]if row["Abstract"] is None else row["Abstract"]
+    sa = SALTAstronomer(
+                name=row["SAFname"],
+                surname=row["SASname"],
+                email=row["SAEmail"],
+                username=row["SAUsername"]) if row["SAFname"] is not None else None
 
     if row["Proposal_Id"] in ids["ProposalIds"]:
         proposal = Proposals(
@@ -87,12 +92,7 @@ def make_proposal(row, ids, text):
             ),
             is_thesis=not pd.isnull(row["ThesisType_Id"]),
             tech_report=row['TechReport'],
-            S_a_l_t_astronomer=SALTAstronomer(
-                name=row["SAFname"],
-                surname=row["SASname"],
-                email=row["SAEmail"],
-                username=row["SAUsername"],
-            )
+            S_a_l_t_astronomer=sa,
         )
     return proposal
 
@@ -153,7 +153,7 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
                             join Investigator as i on (i.Investigator_Id = pc.Leader_Id)
                             left join P1Thesis as thesis on (thesis.ProposalCode_Id = p.ProposalCode_Id)
                             left join ProposalTechReport as pt on (pt.ProposalCode_Id = p.ProposalCode_Id)
-                            left join Investigator as tsa on (tsa.Investigator_Id = pt.Astronomer_Id)
+                            left join Investigator as tsa on (tsa.Investigator_Id = pc.Astronomer_Id)
                             left join PiptUser as sau on (sau.Investigator_Id = pt.Astronomer_Id)
                         where P1RequestedTime > 0 AND CONCAT(s.Year, '-', s.Semester) = \"{semester}\"
                      """.format(semester=semester)
