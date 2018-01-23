@@ -85,13 +85,15 @@ def update_liaison_astronomer(proposal_code, liaison_astronomer, cursor):
                        (SELECT ProposalCode.ProposalCode_Id
                         FROM ProposalCode
                         WHERE ProposalCode.Proposal_Code=%s)'''
+        params = (liaison_astronomer, proposal_code)
     else:
         sql = '''UPDATE ProposalContact SET Astronomer_Id=NULL
                  WHERE ProposalContact.ProposalCode_Id=
                        (SELECT ProposalCode.ProposalCode_Id
                         FROM ProposalCode
                         WHERE ProposalCode.Proposal_Code=%s)'''
-    cursor.execute(sql, (liaison_astronomer, proposal_code))
+        params = (proposal_code,)
+    cursor.execute(sql, params)
 
 
 def update_technical_report(proposal_code, semester, report, cursor):
