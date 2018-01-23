@@ -7,6 +7,7 @@ from flask_cors import CORS
 
 from schema.query import schema
 from util.user import basic_login, get_user_token, is_valid_token
+from data.technical_review import update_liaison_astronomers, update_technical_reports
 
 app = Flask(__name__)
 app.debug = True
@@ -84,6 +85,25 @@ def about():
 @app.route("/")
 def home():
     return render_template('home.html')
+
+
+@app.route("/liaison-astronomers", methods=['POST'])
+@token_auth.login_required
+def liaison_astronomers():
+    data = request.json
+    assignments = data['assignments']
+    update_liaison_astronomers(assignments)
+    return jsonify(dict(success=True))
+
+
+@app.route("/technical-reports", methods=['POST'])
+@token_auth.login_required
+def technical_reports():
+    data = request.json
+    semester = data['semester']
+    reports = data['reports']
+    update_technical_reports(semester, reports)
+    return jsonify(dict(success=True))
 
 
 @app.errorhandler(404)
