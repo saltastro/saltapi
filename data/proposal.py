@@ -154,7 +154,7 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
                             left join P1Thesis as thesis on (thesis.ProposalCode_Id = p.ProposalCode_Id)
                             left join ProposalTechReport as pt on (pt.ProposalCode_Id = p.ProposalCode_Id and pt.Semester_Id = s.Semester_Id)
                             left join Investigator as tsa on (tsa.Investigator_Id = pc.Astronomer_Id)
-                            left join PiptUser as sau on (sau.Investigator_Id = pt.Astronomer_Id)
+                            left join PiptUser as sau on (sau.Investigator_Id = pc.Astronomer_Id)
                         where P1RequestedTime > 0 AND CONCAT(s.Year, '-', s.Semester) = \"{semester}\"
                      """.format(semester=semester)
 
