@@ -46,7 +46,6 @@ def update_time_allocations(partner, semester, time_allocations, tac_comments):
 
     # FIXME: hard-coded id
     moon_id = 6
-    print(tac_comments)
 
     # list of values in the form '(proposal code, priority, time in seconds)
     values_list = ['({multipartner_id}, {priority}, {time}, {moon_id})'
