@@ -31,8 +31,8 @@ and install reqirements.txt
 ```bazaar
 pip install -r reqirements.txt
 ```
-# Enironment valiables
-The app will require some Enironment valiables to be set
+# Environment variables
+The app will require some Environment variables to be set
 `API_USER, API_HOST, API_PASSWORD, API_DATABASE, MODE, DATABASE_URI `
 which are the connection to the sdb, for development I am using sdb sandbox
 ```
@@ -40,6 +40,7 @@ which are the connection to the sdb, for development I am using sdb sandbox
     API_HOST = sdb host
     API_PASSWORD = sdb password
     API_DATABASE = sdb database name
+    PROPOSALS_DIR = directory containing all the proposal content
 ```
 
 Now ready to start the graphql
