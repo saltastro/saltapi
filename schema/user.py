@@ -1,6 +1,8 @@
 from graphene import Enum, ObjectType, String, List, Field
 from util.action import Action
-from data.proposal import liaison_astronomer
+from data.proposal import liaison_astronomer, is_investigator
+from util.time_requests import time_requests
+
 
 class RoleType(Enum):
     """
@@ -106,6 +108,22 @@ class UserModel(ObjectType):
         if action == Action.UPDATE_TECHNICAL_REPORT:
             return self.has_role(RoleType.ADMINISTRATOR, partner) or \
                    self.has_role(RoleType.SALT_ASTRONOMER, partner)
+
+        if action == Action.VIEW_PROPOSAL:
+            if self.has_role(RoleType.ADMINISTRATOR) or self.has_role(RoleType.SALT_ASTRONOMER):
+                return True
+
+            if is_investigator(g.user.username, proposal_code):
+                return True
+
+            # Is the user on the TAC for a partner from which time is requested?
+            proposal_partners = set([tr.partner for tr in time_requests(proposal_code) if tr.time_request > 1])
+            for partner in proposal_partners:
+                if self.has_role(RoleType.TAC_CHAIR, partner) or self.has_role(RoleType.TAC_MEMBER, partner):
+                    return True
+
+            # The user doesn't have permission to view the proposal.
+            return False
 
         return False
 
