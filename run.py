@@ -1,10 +1,13 @@
-import os
-from flask import Flask, jsonify, request, g, make_response, Response, render_template
+import io
+import tempfile
+from flask import Flask, jsonify, request, g, make_response, Response, render_template, send_file
 from flask_graphql import GraphQLView
 from flask_httpauth import HTTPTokenAuth, HTTPBasicAuth, MultiAuth
 from functools import wraps
 from flask_cors import CORS
 
+from util.action import Action
+from util.proposal_summaries import zip_proposal_summaries
 from schema.query import schema
 from util.user import basic_login, get_user_token, is_valid_token
 from data.technical_review import update_liaison_astronomers, update_technical_reports
@@ -104,6 +107,23 @@ def technical_reports():
     reports = data['reports']
     update_technical_reports(semester, reports)
     return jsonify(dict(success=True))
+
+
+@app.route("/proposal-summaries", methods=['POST'])
+@token_auth.login_required
+def proposal_summaries():
+    data = request.json
+    proposal_codes = data['proposalCodes']
+
+    # check permission
+    for proposal_code in proposal_codes:
+        if not g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code='2018-1-SCI-005'):
+            raise Exception('You are not allowed to view the pdf summary of proposal {proposal_code}'
+                            .format(proposal_code=proposal_code))
+
+    with tempfile.NamedTemporaryFile('wb') as f:
+        zip_proposal_summaries(proposal_codes, f)
+        return send_file(f.name, mimetype='application/zip', attachment_filename='proposal_summaries.zip')
 
 
 @app.errorhandler(404)
