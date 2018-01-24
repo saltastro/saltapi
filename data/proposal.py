@@ -1,3 +1,4 @@
+import os
 import pandas as pd
 from data import sdb_connect
 from data.targets import get_targets
@@ -283,12 +284,118 @@ def get_proposals(**args):
 
 
 def liaison_astronomer(proposal_code):
+    """
+    The liaison astronomer for a proposal. The astronomer's username is returned.
+
+    Parameters
+    ----------
+    proposal_code : str
+        The proposal code, such as "2018-1-SCI-007".
+
+    Returns
+    -------
+    username : str
+        The liaison astronomer's username.
+
+    """
     sql = '''SELECT PiptUser.Username AS LiaisonAstronomer
        FROM PiptUser
        RIGHT JOIN Investigator USING (PiptUser_Id)
        RIGHT JOIN ProposalContact ON Investigator.Investigator_Id = ProposalContact.Astronomer_Id
        RIGHT JOIN ProposalCode USING (ProposalCode_Id)
        WHERE ProposalCode.Proposal_Code=%s'''
-    result = pd.read_sql(sql, params=(proposal_code,), con=sdb_connect())
+    df = pd.read_sql(sql, params=(proposal_code,), con=sdb_connect())
 
-    return result['LiaisonAstronomer'][0]
+    return df['LiaisonAstronomer'][0]
+
+
+def is_investigator(username, proposal_code):
+    """
+    Check whether a user is investigator on a proposal.
+
+    Parameters
+    ----------
+    username : str
+        The username.
+    proposal_code : str
+        The proposal code, such as "2018-1-SCI-007".
+
+    Returns
+    -------
+    isinvestigator : bool
+        Whether the user is an investigator on the proposal.
+    """
+
+    sql = '''
+SELECT COUNT(*) AS Count
+       FROM ProposalContact AS ProposalContact
+       JOIN ProposalCode ON ProposalContact.ProposalCode_Id = ProposalCode.ProposalCode_Id
+       JOIN Investigator ON ProposalContact.Astronomer_Id = Investigator.Investigator_Id
+       JOIN PiptUser ON Investigator.PiptUser_Id = PiptUser.PiptUser_Id
+WHERE ProposalCode.Proposal_Code = %s AND PiptUser.Username = %s
+'''
+    conn = sdb_connect()
+    df = pd.read_sql(sql, conn, params=(proposal_code, username))
+    conn.close()
+
+    return df['Count'][0] > 0
+
+
+def latest_version(proposal_code, phase):
+    """
+    The latest version number of a proposal, given a proposal phase.
+
+    This function requires the environment variable PROPOSALS_DIR to exist. Its value must be the absolute file path
+    to the directory containing all the proposal content.
+
+    Parameters
+    ----------
+    proposal_code : str
+        The proposal code, such as "2018-1-SCI-009".
+    phase : int
+        The proposal phase (1 or 2).
+
+    Returns
+    -------
+    version : number
+        The current version number.
+    """
+
+    sql = '''
+SELECT Proposal.Submission AS Submission
+       FROM Proposal
+       JOIN ProposalCode ON Proposal.ProposalCode_Id = ProposalCode.ProposalCode_Id
+WHERE ProposalCode.Proposal_Code = %s AND Proposal.Phase = %s
+ORDER BY Proposal.Submission DESC
+LIMIT 1
+'''
+    conn = sdb_connect()
+    df = pd.read_sql(sql, conn, params=(proposal_code, phase))
+    conn.close()
+
+    if not len(df['Submission']):
+        raise Exception('Proposal {proposal_code} does not have any submitted version for phase {phase}'
+                        .format(proposal_code=proposal_code, phase=phase))
+
+    return df['Submission'][0]
+
+
+def summary_file(proposal_code):
+    """
+    The file path of a proposal's summary file.
+
+    Parameters
+    ----------
+    proposal_code : str
+        The proposal code, such as "2018-1-SCI-005".
+
+    Returns
+    -------
+    filepath : str
+        The file path of the summary.
+    """
+
+    return os.path.join(os.environ['PROPOSALS_DIR'],
+                        proposal_code,
+                        str(latest_version(proposal_code, 1)),
+                        'Summary.pdf')
