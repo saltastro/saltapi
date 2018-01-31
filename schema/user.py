@@ -1,6 +1,6 @@
 from graphene import Enum, ObjectType, String, List, Field
 from util.action import Action
-from data.proposal import liaison_astronomer, is_investigator
+from data.proposal import liaison_astronomer, reviewer, is_investigator
 from util.time_requests import time_requests
 
 
@@ -103,7 +103,17 @@ class UserModel(ObjectType):
             return self.has_role(RoleType.ADMINISTRATOR, partner) or \
                    (self.has_role(RoleType.SALT_ASTRONOMER, partner) and
                     current_liaison is None and
-                    assigned_liaison == g.user.username)
+                    assigned_liaison == g.user.username) and \
+                   assigned_liaison is not None
+
+        if action == Action.UPDATE_REVIEWER:
+            assigned_reviewer = kwargs['reviewer']
+            current_reviewer = reviewer(proposal_code)
+            return self.has_role(RoleType.ADMINISTRATOR, partner) or \
+                   (self.has_role(RoleType.SALT_ASTRONOMER, partner) and
+                    current_reviewer is None and
+                    assigned_reviewer == g.user.username) and \
+                   assigned_reviewer is not None
 
         if action == Action.UPDATE_TECHNICAL_REPORT:
             return self.has_role(RoleType.ADMINISTRATOR, partner) or \

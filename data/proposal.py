@@ -309,6 +309,32 @@ def liaison_astronomer(proposal_code):
     return df['LiaisonAstronomer'][0]
 
 
+def reviewer(proposal_code):
+    """
+    The reviewer for a proposal. The reviewer's username is returned.
+
+    Parameters
+    ----------
+    proposal_code : str
+        The proposal code, such as "2018-1-SCI-007".
+
+    Returns
+    -------
+    username : str
+        The reviewer's username.
+
+    """
+    sql = '''SELECT PiptUser.Username AS Reviewer
+       FROM PiptUser
+       RIGHT JOIN Investigator USING (PiptUser_Id)
+       RIGHT JOIN ProposalTechReport ON Investigator.Investigator_Id = ProposalTechReport.Astronomer_Id
+       RIGHT JOIN ProposalCode USING (ProposalCode_Id)
+       WHERE ProposalCode.Proposal_Code=%s'''
+    df = pd.read_sql(sql, params=(proposal_code,), con=sdb_connect())
+
+    return df['Reviewer'][0]
+
+
 def is_investigator(username, proposal_code):
     """
     Check whether a user is investigator on a proposal.

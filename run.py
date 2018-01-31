@@ -10,7 +10,7 @@ from util.action import Action
 from util.proposal_summaries import zip_proposal_summaries
 from schema.query import schema
 from util.user import basic_login, get_user_token, is_valid_token
-from data.technical_review import update_liaison_astronomers, update_technical_reports
+from data.technical_review import update_liaison_astronomers, update_reviewers, update_technical_reports
 
 app = Flask(__name__)
 app.debug = True
@@ -96,6 +96,16 @@ def liaison_astronomers():
     data = request.json
     assignments = data['assignments']
     update_liaison_astronomers(assignments)
+    return jsonify(dict(success=True))
+
+
+@app.route("/reviewers", methods=['POST'])
+@token_auth.login_required
+def reviewers():
+    data = request.json
+    semester = data['semester']
+    assignments = data['assignments']
+    update_reviewers(semester=semester, assignments=assignments)
     return jsonify(dict(success=True))
 
 
