@@ -1,6 +1,6 @@
 from graphene import Enum, ObjectType, String, List, Field
 from util.action import Action
-from data.proposal import liaison_astronomer, reviewer, is_investigator
+from data.proposal import liaison_astronomer, technical_reviewer, is_investigator
 from util.time_requests import time_requests
 
 
@@ -108,7 +108,7 @@ class UserModel(ObjectType):
 
         if action == Action.UPDATE_REVIEWER:
             assigned_reviewer = kwargs['reviewer']
-            current_reviewer = reviewer(proposal_code)
+            current_reviewer = technical_reviewer(proposal_code)
             return self.has_role(RoleType.ADMINISTRATOR, partner) or \
                    (self.has_role(RoleType.SALT_ASTRONOMER, partner) and
                     current_reviewer is None and
