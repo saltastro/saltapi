@@ -30,10 +30,17 @@ def make_proposal(row, ids, text):
     title = text[row["Proposal_Code"]]["title"] if row["Title"] is None else row["Title"]
     abstract = text[row["Proposal_Code"]]["abstract"]if row["Abstract"] is None else row["Abstract"]
     sa = SALTAstronomer(
-                name=row["SAFname"],
-                surname=row["SASname"],
-                email=row["SAEmail"],
-                username=row["SAUsername"]) if row["SAFname"] is not None else None
+        name=row["SAFname"],
+        surname=row["SASname"],
+        email=row["SAEmail"],
+        username=row["SAUsername"]
+    ) if row["SAFname"] is not None else None
+    reviewer = SALTAstronomer(
+        name=row["ReviewerFName"],
+        surname=row["ReviewerSName"],
+        email=row["ReviewerEmail"],
+        username=row["ReviewerUsername"]
+    ) if row['ReviewerFName'] is not None else None
 
     if row["Proposal_Id"] in ids["ProposalIds"]:
         proposal = Proposals(
@@ -52,12 +59,8 @@ def make_proposal(row, ids, text):
                 surname=None,
                 email=None
             ),
-            S_a_l_t_astronomer=SALTAstronomer(
-                name=row["SAFname"],
-                surname=row["SASname"],
-                email=row["SAEmail"],
-                username=row["SAUsername"],
-            ),
+            S_a_l_t_astronomer=sa,
+            reviewer=reviewer,
             instruments=Instruments(
                 rss=[],
                 hrs=[],
@@ -94,6 +97,7 @@ def make_proposal(row, ids, text):
             is_thesis=not pd.isnull(row["ThesisType_Id"]),
             tech_report=row['TechReport'],
             S_a_l_t_astronomer=sa,
+            reviewer=reviewer
         )
     return proposal
 
@@ -309,7 +313,7 @@ def liaison_astronomer(proposal_code):
     return df['LiaisonAstronomer'][0]
 
 
-def reviewer(proposal_code):
+def technical_reviewer(proposal_code):
     """
     The reviewer for a proposal. The reviewer's username is returned.
 
