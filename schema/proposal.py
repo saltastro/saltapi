@@ -72,3 +72,4 @@ class Proposals(ObjectType):
     title = String()
     transparency = String()
     S_a_l_t_astronomer = Field(SALTAstronomer)
+    reviewer = Field(SALTAstronomer)

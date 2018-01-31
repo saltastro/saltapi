@@ -3,7 +3,7 @@ import pandas as pd
 from data import sdb_connect
 from data.targets import get_targets
 from data.instruments import get_instruments
-from data.common import get_proposal_ids
+from data.common import get_proposal_ids, sql_list_string
 
 proposal_data = {}
 
@@ -30,10 +30,17 @@ def make_proposal(row, ids, text):
     title = text[row["Proposal_Code"]]["title"] if row["Title"] is None else row["Title"]
     abstract = text[row["Proposal_Code"]]["abstract"]if row["Abstract"] is None else row["Abstract"]
     sa = SALTAstronomer(
-                name=row["SAFname"],
-                surname=row["SASname"],
-                email=row["SAEmail"],
-                username=row["SAUsername"]) if row["SAFname"] is not None else None
+        name=row["SAFname"],
+        surname=row["SASname"],
+        email=row["SAEmail"],
+        username=row["SAUsername"]
+    ) if row["SAFname"] is not None else None
+    reviewer = SALTAstronomer(
+        name=row["ReviewerFName"],
+        surname=row["ReviewerSName"],
+        email=row["ReviewerEmail"],
+        username=row["ReviewerUsername"]
+    ) if row['ReviewerFName'] is not None else None
 
     if row["Proposal_Id"] in ids["ProposalIds"]:
         proposal = Proposals(
@@ -52,12 +59,8 @@ def make_proposal(row, ids, text):
                 surname=None,
                 email=None
             ),
-            S_a_l_t_astronomer=SALTAstronomer(
-                name=row["SAFname"],
-                surname=row["SASname"],
-                email=row["SAEmail"],
-                username=row["SAUsername"],
-            ),
+            S_a_l_t_astronomer=sa,
+            reviewer=reviewer,
             instruments=Instruments(
                 rss=[],
                 hrs=[],
@@ -94,6 +97,7 @@ def make_proposal(row, ids, text):
             is_thesis=not pd.isnull(row["ThesisType_Id"]),
             tech_report=row['TechReport'],
             S_a_l_t_astronomer=sa,
+            reviewer=reviewer
         )
     return proposal
 
@@ -136,7 +140,10 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
                     select *,  concat(s.Year, '-', s.Semester) as CurSemester,
                             i.FirstName as PIFname, i.Surname as PISname, i.Email as PIEmail,
                             tsa.FirstName as SAFname, tsa.Surname as SASname, tsa.Email as SAEmail,
-                            sau.Username as SAUsername
+                            sau.Username as SAUsername,
+                            reviewer.FirstName AS ReviewerFName, reviewer.Surname AS ReviewerSName,
+                                                                 reviewer.email as ReviewerEmail,
+                            revieweruser.Username AS ReviewerUsername,
                         from Proposal as p
                             join ProposalCode as prc on (prc.ProposalCode_Id = p.ProposalCode_Id)
                             join ProposalGeneralInfo as pgi on (pgi.ProposalCode_Id = p.ProposalCode_Id)
@@ -155,15 +162,17 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
                             left join P1Thesis as thesis on (thesis.ProposalCode_Id = p.ProposalCode_Id)
                             left join ProposalTechReport as pt on (pt.ProposalCode_Id = p.ProposalCode_Id and pt.Semester_Id = s.Semester_Id)
                             left join Investigator as tsa on (tsa.Investigator_Id = pc.Astronomer_Id)
+                            left join Investigator as reviewer on (reviewer.Investigator_Id=pt.Astronomer_Id)
                             left join PiptUser as sau on (sau.Investigator_Id = pc.Astronomer_Id)
+                            left join PiptUser as revieweruser on (revieweruser.Investigator_Id = pt.Astronomer_Id)
                         where P1RequestedTime > 0 AND CONCAT(s.Year, '-', s.Semester) = \"{semester}\"
                      """.format(semester=semester)
 
     proposals_text_sql = """
                     SELECT * FROM ProposalText
                         join ProposalCode using(ProposalCode_Id)
-                    WHERE ProposalCode_Id in ({ids})
-                        order by Semester_Id desc """.format(ids=', '.join(ids['ProposalCode_Ids']))
+                    WHERE ProposalCode_Id in {id_list}
+                        order by Semester_Id desc """.format(id_list=sql_list_string(ids['ProposalCode_Ids']))
     conn = sdb_connect()
     for index, row in pd.read_sql(proposals_text_sql, conn).iterrows():
         if row["Proposal_Code"] not in proposals_text:
@@ -174,10 +183,10 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
 
     conn = sdb_connect()
     if all_proposals:
-        proposal_sql += "  AND Proposal_Id IN ({ids}) order by Proposal_Id".format(ids=', '.join(ids['all_proposals']))
+        proposal_sql += "  AND Proposal_Id IN {id_list} order by Proposal_Id".format(id_list=sql_list_string(ids['all_proposals']))
         results = pd.read_sql(proposal_sql, conn)
     else:
-        proposal_sql += "  AND Proposal_Id IN ({ids}) order by Proposal_Id".format(ids=', '.join(ids['ProposalIds']))
+        proposal_sql += "  AND Proposal_Id IN {id_list} order by Proposal_Id".format(id_list=sql_list_string(ids['ProposalIds']))
         results = pd.read_sql(proposal_sql, conn)
     conn.close()
     for index, row in results.iterrows():
@@ -197,8 +206,8 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
                                   join MultiPartner using (ProposalCode_Id) 
                                   join Semester as s using (Semester_Id) 
                                   join Partner using(Partner_Id) 
-                         WHERE ProposalCode_Id in ({ids})
-                       """.format(ids=', '.join(ids['ProposalCode_Ids']))
+                         WHERE ProposalCode_Id in {id_list}
+                       """.format(id_list=sql_list_string(ids['ProposalCode_Ids']))
 
     conn = sdb_connect()
     for index, row in pd.read_sql(partner_time_sql, conn).iterrows():
@@ -307,6 +316,32 @@ def liaison_astronomer(proposal_code):
     df = pd.read_sql(sql, params=(proposal_code,), con=sdb_connect())
 
     return df['LiaisonAstronomer'][0]
+
+
+def technical_reviewer(proposal_code):
+    """
+    The reviewer for a proposal. The reviewer's username is returned.
+
+    Parameters
+    ----------
+    proposal_code : str
+        The proposal code, such as "2018-1-SCI-007".
+
+    Returns
+    -------
+    username : str
+        The reviewer's username.
+
+    """
+    sql = '''SELECT PiptUser.Username AS Reviewer
+       FROM PiptUser
+       RIGHT JOIN Investigator USING (PiptUser_Id)
+       RIGHT JOIN ProposalTechReport ON Investigator.Investigator_Id = ProposalTechReport.Astronomer_Id
+       RIGHT JOIN ProposalCode USING (ProposalCode_Id)
+       WHERE ProposalCode.Proposal_Code=%s'''
+    df = pd.read_sql(sql, params=(proposal_code,), con=sdb_connect())
+
+    return df['Reviewer'][0]
 
 
 def is_investigator(username, proposal_code):
