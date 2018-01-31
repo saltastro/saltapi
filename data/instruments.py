@@ -1,6 +1,7 @@
 from pymysql.connections import Connection
 import pandas as pd
 from data import sdb_connect
+from data.common import sql_list_string
 
 
 def get_instruments(ids, proposals):
@@ -33,7 +34,7 @@ def get_instruments(ids, proposals):
     if len(ids['ProposalIds']) == 1:
         instruments_sql += "  where ProposalCode_Id = {id}".format(id=ids['ProposalCode_Ids'][0])
     else:
-        instruments_sql += "  where ProposalCode_Id in {ids}".format(ids=tuple(ids['ProposalCode_Ids']))
+        instruments_sql += "  where ProposalCode_Id in {id_list}".format(id_list=sql_list_string(ids['ProposalCode_Ids']))
     conn = sdb_connect()
 
     i_results = pd.read_sql(instruments_sql, conn)

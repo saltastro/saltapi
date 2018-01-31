@@ -3,7 +3,7 @@ import pandas as pd
 from data import sdb_connect
 from data.targets import get_targets
 from data.instruments import get_instruments
-from data.common import get_proposal_ids
+from data.common import get_proposal_ids, sql_list_string
 
 proposal_data = {}
 
@@ -166,8 +166,8 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
     proposals_text_sql = """
                     SELECT * FROM ProposalText
                         join ProposalCode using(ProposalCode_Id)
-                    WHERE ProposalCode_Id in ({ids})
-                        order by Semester_Id desc """.format(ids=', '.join(ids['ProposalCode_Ids']))
+                    WHERE ProposalCode_Id in {id_list}
+                        order by Semester_Id desc """.format(id_list=sql_list_string(ids['ProposalCode_Ids']))
     conn = sdb_connect()
     for index, row in pd.read_sql(proposals_text_sql, conn).iterrows():
         if row["Proposal_Code"] not in proposals_text:
@@ -178,10 +178,10 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
 
     conn = sdb_connect()
     if all_proposals:
-        proposal_sql += "  AND Proposal_Id IN ({ids}) order by Proposal_Id".format(ids=', '.join(ids['all_proposals']))
+        proposal_sql += "  AND Proposal_Id IN {id_list} order by Proposal_Id".format(id_list=sql_list_string(ids['all_proposals']))
         results = pd.read_sql(proposal_sql, conn)
     else:
-        proposal_sql += "  AND Proposal_Id IN ({ids}) order by Proposal_Id".format(ids=', '.join(ids['ProposalIds']))
+        proposal_sql += "  AND Proposal_Id IN {id_list} order by Proposal_Id".format(id_list=sql_list_string(ids['ProposalIds']))
         results = pd.read_sql(proposal_sql, conn)
     conn.close()
     for index, row in results.iterrows():
@@ -201,8 +201,8 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
                                   join MultiPartner using (ProposalCode_Id) 
                                   join Semester as s using (Semester_Id) 
                                   join Partner using(Partner_Id) 
-                         WHERE ProposalCode_Id in ({ids})
-                       """.format(ids=', '.join(ids['ProposalCode_Ids']))
+                         WHERE ProposalCode_Id in {id_list}
+                       """.format(id_list=sql_list_string(ids['ProposalCode_Ids']))
 
     conn = sdb_connect()
     for index, row in pd.read_sql(partner_time_sql, conn).iterrows():

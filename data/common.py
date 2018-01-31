@@ -48,3 +48,26 @@ def get_proposal_ids(semester, partner_code=None):
         pcode_ids.append(str(r['PCode_Ids']))
     conn.close()
     return {'ProposalIds': ids, 'ProposalCode_Ids': pcode_ids, "all_proposals": all_proposals}
+
+
+def sql_list_string(values):
+    """
+    Generate a string for a list to use with the MySQL IN operator.
+
+    For a non-empty list the list items are returned, separated by comma and surrounded by parentheses.
+    For an empty list the string "(NULL)" is returned.
+
+    Parameters
+    ----------
+    values : iterable of str
+        List values
+
+    Returns
+    -------
+    liststring : str
+        String to use with MySQL's IN operator.
+
+    """
+    if values:
+        return '({values})'.format(values=', '.join(values))
+    return '(NULL)'
