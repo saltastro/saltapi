@@ -65,7 +65,7 @@ def update_technical_report(proposal_code, semester, report, cursor):
                     SELECT pc.ProposalCode_Id, s.Semester_Id, u.Investigator_Id, %s
                            FROM ProposalCode AS pc, Semester AS s, PiptUser AS u
                            WHERE pc.Proposal_Code=%s AND (s.Year=%s AND s.Semester=%s) AND  u.Username=%s
-                    ON DUPLICATE KEY UPDATE Astronomer_Id=IF(TRIM(TechReport)!='', Astronomer_Id, u.Investigator_Id), TechReport=%s'''
+                    ON DUPLICATE KEY UPDATE TechReport=%s'''
     cursor.execute(sql, (report, proposal_code, year, sem, g.user.username, report))
 
 

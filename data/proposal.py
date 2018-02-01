@@ -23,8 +23,8 @@ def priority(p, time, pat):
     return pat
 
 
-def make_proposal(row, ids, text):
-    from schema.proposal import Proposals, PI, SALTAstronomer
+def make_proposal(row, ids, text, tech_report_entries):
+    from schema.proposal import Proposals, PI, SALTAstronomer, TechReview
     from schema.instruments import Instruments
 
     title = text[row["Proposal_Code"]]["title"] if row["Title"] is None else row["Title"]
@@ -35,13 +35,18 @@ def make_proposal(row, ids, text):
         email=row["SAEmail"],
         username=row["SAUsername"]
     ) if row["SAFname"] is not None else None
-    reviewer = SALTAstronomer(
-        name=row["ReviewerFName"],
-        surname=row["ReviewerSName"],
-        email=row["ReviewerEmail"],
-        username=row["ReviewerUsername"]
-    ) if row['ReviewerFName'] is not None else None
-
+    tech_reports = []
+    if row["Proposal_Id"] not in ids["ProposalIds"]:
+        for tre in tech_report_entries[row["Proposal_Code"]]:
+            reviewer = SALTAstronomer(
+                name=tre["ReviewerFName"],
+                surname=tre["ReviewerSName"],
+                email=tre["ReviewerEmail"],
+                username=tre["ReviewerUsername"]
+            ) if tre['ReviewerFName'] is not None else None
+            tech_reports.append(
+                TechReview(semester=tre['Semester'], reviewer=reviewer, report=tre['Report'])
+            )
     if row["Proposal_Id"] in ids["ProposalIds"]:
         proposal = Proposals(
             id="Proposal: " + str(row["Proposal_Id"]),
@@ -60,7 +65,6 @@ def make_proposal(row, ids, text):
                 email=None
             ),
             S_a_l_t_astronomer=sa,
-            reviewer=reviewer,
             instruments=Instruments(
                 rss=[],
                 hrs=[],
@@ -95,9 +99,8 @@ def make_proposal(row, ids, text):
                 scam=[]
             ),
             is_thesis=not pd.isnull(row["ThesisType_Id"]),
-            tech_report=row['TechReport'],
+            tech_reviews=tech_reports,
             S_a_l_t_astronomer=sa,
-            reviewer=reviewer
         )
     return proposal
 
@@ -140,10 +143,7 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
                     select *,  concat(s.Year, '-', s.Semester) as CurSemester,
                             i.FirstName as PIFname, i.Surname as PISname, i.Email as PIEmail,
                             tsa.FirstName as SAFname, tsa.Surname as SASname, tsa.Email as SAEmail,
-                            sau.Username as SAUsername,
-                            reviewer.FirstName AS ReviewerFName, reviewer.Surname AS ReviewerSName,
-                                                                 reviewer.email as ReviewerEmail,
-                            revieweruser.Username AS ReviewerUsername
+                            sau.Username as SAUsername
                         from Proposal as p
                             join ProposalCode as prc on (prc.ProposalCode_Id = p.ProposalCode_Id)
                             join ProposalGeneralInfo as pgi on (pgi.ProposalCode_Id = p.ProposalCode_Id)
@@ -160,11 +160,8 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
                                    (p.ProposalCode_Id = p1t.ProposalCode_Id and p1t.Semester_Id = s.Semester_Id)
                             join Investigator as i on (i.Investigator_Id = pc.Leader_Id)
                             left join P1Thesis as thesis on (thesis.ProposalCode_Id = p.ProposalCode_Id)
-                            left join ProposalTechReport as pt on (pt.ProposalCode_Id = p.ProposalCode_Id and pt.Semester_Id = s.Semester_Id)
                             left join Investigator as tsa on (tsa.Investigator_Id = pc.Astronomer_Id)
-                            left join Investigator as reviewer on (reviewer.Investigator_Id=pt.Astronomer_Id)
                             left join PiptUser as sau on (sau.Investigator_Id = pc.Astronomer_Id)
-                            left join PiptUser as revieweruser on (revieweruser.Investigator_Id = pt.Astronomer_Id)
                         where P1RequestedTime > 0 AND CONCAT(s.Year, '-', s.Semester) = \"{semester}\"
                      """.format(semester=semester)
 
@@ -181,6 +178,35 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
             }
     conn.close()
 
+    tech_reports = {}
+    tech_report_sql = """
+    SELECT Proposal_Code,
+           CONCAT(Semester.Year, '-', Semester.Semester) AS Semester,
+           FirstName, Surname, Email, Username,
+           TechReport
+    FROM ProposalTechReport
+         JOIN ProposalCode ON ProposalTechReport.ProposalCode_Id = ProposalCode.ProposalCode_Id
+         JOIN Semester ON ProposalTechReport.Semester_Id = Semester.Semester_Id
+         LEFT JOIN Investigator ON ProposalTechReport.Astronomer_Id=Investigator.Investigator_Id
+         LEFT JOIN PiptUser ON Investigator.PiptUser_Id=PiptUser.PiptUser_Id
+    WHERE ProposalCode.ProposalCode_Id IN {id_list}
+    ORDER BY Semester.Year ASC, Semester.Semester ASC
+    """.format(id_list=sql_list_string(ids['ProposalCode_Ids']))
+    conn = sdb_connect()
+    for index, row in pd.read_sql(tech_report_sql, conn).iterrows():
+        proposal_code = row['Proposal_Code']
+        if proposal_code not in tech_reports:
+            tech_reports[proposal_code] = []
+        tech_reports[proposal_code].append(
+            dict(Semester=row['Semester'],
+                 ReviewerFName=row['FirstName'],
+                 ReviewerSName=row['Surname'],
+                 ReviewerEmail=row['Email'],
+                 ReviewerUsername=row['Username'],
+                 Report=row['TechReport'])
+        )
+    conn.close()
+
     conn = sdb_connect()
     if all_proposals:
         proposal_sql += "  AND Proposal_Id IN {id_list} order by Proposal_Id".format(id_list=sql_list_string(ids['all_proposals']))
@@ -191,7 +217,7 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
     conn.close()
     for index, row in results.iterrows():
         if row["Proposal_Code"] not in proposals:
-            proposals[row["Proposal_Code"]] = make_proposal(row, ids, proposals_text)
+            proposals[row["Proposal_Code"]] = make_proposal(row, ids, proposals_text, tech_reports)
         proposals[row["Proposal_Code"]].time_requests.append(
             RequestedTimeM(
                 minimum_useful_time=row["P1MinimumUsefulTime"],

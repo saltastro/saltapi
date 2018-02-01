@@ -54,6 +54,12 @@ class TacComment(ObjectType):
         return self.partner_code == other.partner_code and self.comment == other.comment
 
 
+class TechReview(ObjectType):
+    semester = String()
+    reviewer = Field(SALTAstronomer)
+    report = String()
+
+
 class Proposals(ObjectType):
     abstract = String()
     allocated_time = List(ProposalAllocatedTime)
@@ -67,9 +73,8 @@ class Proposals(ObjectType):
     status = String()
     tac_comment = List(TacComment)
     targets = Field(List(Target))
-    tech_report = String()
+    tech_reviews = Field(List(TechReview))
     time_requests = List(RequestedTimeM)
     title = String()
     transparency = String()
     S_a_l_t_astronomer = Field(SALTAstronomer)
-    reviewer = Field(SALTAstronomer)
