@@ -143,7 +143,7 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
                             sau.Username as SAUsername,
                             reviewer.FirstName AS ReviewerFName, reviewer.Surname AS ReviewerSName,
                                                                  reviewer.email as ReviewerEmail,
-                            revieweruser.Username AS ReviewerUsername,
+                            revieweruser.Username AS ReviewerUsername
                         from Proposal as p
                             join ProposalCode as prc on (prc.ProposalCode_Id = p.ProposalCode_Id)
                             join ProposalGeneralInfo as pgi on (pgi.ProposalCode_Id = p.ProposalCode_Id)
