@@ -72,6 +72,10 @@ def token():
 @app.route("/token/<username>")
 @token_auth.login_required
 def other_user_token(username):
+    # check permission
+    if not g.user.may_perform(Action.SWITCH_USER):
+        raise Exception('You are not allowed to switch users')
+
     try:
         tok = create_token(username)
         return jsonify({"user": {"token": tok}}), 200

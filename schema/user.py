@@ -135,6 +135,9 @@ class UserModel(ObjectType):
             # The user doesn't have permission to view the proposal.
             return False
 
+        if action == Action.SWITCH_USER:
+            return self.has_role(RoleType.ADMINISTRATOR)
+
         return False
 
     def __str__(self):
