@@ -57,6 +57,7 @@ def get_partners(semester, partner):
 def get_partners_for_role(ids=None):
     par = 'select Partner_Code from Partner '
     if ids is not None:
+        ids = [str(id) for id in ids]
         par += ' where Partner_Id in ({ids})'.format(ids=", ".join(ids))
 
     conn = sdb_connect()

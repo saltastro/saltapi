@@ -13,3 +13,4 @@ class Action(Enum):
     UPDATE_LIAISON_ASTRONOMER = 5
     VIEW_PROPOSAL = 6
     UPDATE_REVIEWER = 7
+    SWITCH_USER = 8
