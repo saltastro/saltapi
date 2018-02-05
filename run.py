@@ -9,7 +9,7 @@ from flask_cors import CORS
 from util.action import Action
 from util.proposal_summaries import zip_proposal_summaries
 from schema.query import schema
-from util.user import basic_login, get_user_token, is_valid_token
+from util.user import basic_login, get_user_token, is_valid_token, create_token
 from data.technical_review import update_liaison_astronomers, update_reviewers, update_technical_reports
 
 app = Flask(__name__)
@@ -67,6 +67,16 @@ def token():
         return jsonify({"user": {"token": tok}}), 200
 
     return jsonify({"errors": {"global": "Invalid user"}}), 401
+
+
+@app.route("/token/<username>")
+@token_auth.login_required
+def other_user_token(username):
+    try:
+        tok = create_token(username)
+        return jsonify({"user": {"token": tok}}), 200
+    except Exception as e:
+        return jsonify({"errors": {"global": str(e)}}), 200
 
 
 def f():

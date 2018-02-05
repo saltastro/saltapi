@@ -17,13 +17,9 @@ def get_user_token(credentials):
 
     try:
         verify_user(username, password)
-        user_id = query_id(username)
+        return create_token(username)
     except Exception:
-        user_id = None
-
-    if user_id is None:
         return _user_error(not_found=True)
-    return create_token(user_id)
 
 
 def basic_login(username, password):
@@ -83,13 +79,17 @@ def query_id(username):
         return None
 
 
-def create_token(user_id):
+def create_token(username):
     """
     Create a token containing the given user id.
 
-    :param user_id:
+    :param username:
     :return: the token
     """
+
+    user_id = query_id(username)
+    if user_id is None:
+        raise Exception('User not found')
     user = {
         'user_id': '{user_id}'.format(user_id=user_id)
     }
