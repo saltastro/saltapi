@@ -1,31 +1,42 @@
 from flask import g
+import os
 import pandas as pd
 from data.common import sdb_connect
 from data.user import get_user
 import jwt
 
+
 def get_user_token(credentials):
     if credentials is None:
         return _user_error(not_provided=True)
     try:
-
         username = credentials['credentials']['username']
         password = credentials['credentials']['password']
     except KeyError:
         return _user_error(not_provided=True)
 
-    user_id = query_id(username, password)
+    try:
+        verify_user(username, password)
+        user_id = query_id(username)
+    except Exception:
+        user_id = None
 
     if user_id is None:
         return _user_error(not_found=True)
     return create_token(user_id)
 
+
 def basic_login(username, password):
-    user_id = query_id(username, password)
+    try:
+        verify_user(username, password)
+        user_id = query_id(username)
+    except Exception:
+        user_id = None
     if user_id is None:
         return False
-    current_user(user_id)
+    set_current_user(user_id)
     return True
+
 
 def _user_error(not_provided=False, not_found=False):
     if not_provided:
@@ -34,14 +45,34 @@ def _user_error(not_provided=False, not_found=False):
     if not_found:
         return {'errors': {'global': 'user not found'}}
 
-def query_id(username, password):
+
+def verify_user(username, password):
     """
     :param username: username
     :param password: password
-    :return: PiptUser_Id or no if not found
+    :return: PiptUser_Id or None if not found
     """
-    sql = "SELECT PiptUser_Id From PiptUser where Username='{username}' AND Password=MD5('{password}')" \
+    sql = """SELECT COUNT(PiptUser_Id) AS UserCount
+             FROM PiptUser
+             WHERE Username='{username}' AND Password=MD5('{password}')""" \
         .format(username=username, password=password)
+
+    conn = sdb_connect()
+    result = pd.read_sql(sql, conn)
+    conn.close()
+    if not result.iloc[0]['UserCount']:
+        raise Exception('Username or password wrong')
+
+
+def query_id(username):
+    """
+    :param username: username
+    :return: PiptUser_Id or None if not found
+    """
+    sql = """SELECT PiptUser_Id
+             FROM PiptUser
+             WHERE Username='{username}'""" \
+        .format(username=username)
 
     conn = sdb_connect()
     try:
@@ -50,6 +81,7 @@ def query_id(username, password):
         return result.iloc[0]['PiptUser_Id']
     except IndexError:
         return None
+
 
 def create_token(user_id):
     """
@@ -61,32 +93,35 @@ def create_token(user_id):
     user = {
         'user_id': '{user_id}'.format(user_id=user_id)
     }
-    token = jwt.encode(user, "SECRET-KEY", algorithm='HS256').decode('utf-8')
+    token = jwt.encode(user, os.environ['SECRET_TOKEN_KEY'], algorithm='HS256').decode('utf-8')
 
     return token
 
+
 def is_valid_token(token):
     try:
-        user = jwt.decode(token, "SECRET-KEY", algorithm='HS256')
+        user = jwt.decode(token, os.environ['SECRET_TOKEN_KEY'], algorithm='HS256')
 
         if 'user_id' in user:
-            current_user(user['user_id'])
+            set_current_user(user['user_id'])
             return True
         return False
     except Exception as e:
         return False
 
+
 def user_if_from_token(token):
     try:
-        user = jwt.decode(token, "SECRET-KEY", algorithm='HS256')
+        user = jwt.decode(token, os.environ['SECRET_TOKEN_KEY'], algorithm='HS256')
 
         if 'user_id' in user:
-            current_user(user['user_id'])
+            set_current_user(user['user_id'])
             return True
         return False
     except:
         return False
 
-def current_user(user_id):
+
+def set_current_user(user_id):
     if user_id is not None:
         g.user = get_user(user_id)
