@@ -41,6 +41,7 @@ which are the connection to the sdb, for development I am using sdb sandbox
     API_PASSWORD = sdb password
     API_DATABASE = sdb database name
     PROPOSALS_DIR = directory containing all the proposal content
+    SECRET_TOKEN_KEY = secret key for signing tokens
 ```
 
 Now ready to start the graphql
