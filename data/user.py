@@ -41,7 +41,7 @@ def get_role(row, user_id):
                 partners=partner
             )
         )
-    if len(results) > 0:
+    if not pd.isnull(row["Value"]) and row["Value"] > 1:
 
         role.append(
             Role(
