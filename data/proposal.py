@@ -37,16 +37,19 @@ def make_proposal(row, ids, text, tech_report_entries):
     ) if row["SAFname"] is not None else None
     tech_reports = []
     if row["Proposal_Id"] not in ids["ProposalIds"]:
-        for tre in tech_report_entries[row["Proposal_Code"]]:
-            reviewer = SALTAstronomer(
-                name=tre["ReviewerFName"],
-                surname=tre["ReviewerSName"],
-                email=tre["ReviewerEmail"],
-                username=tre["ReviewerUsername"]
-            ) if tre['ReviewerFName'] is not None else None
-            tech_reports.append(
-                TechReview(semester=tre['Semester'], reviewer=reviewer, report=tre['Report'])
-            )
+        try:
+            for tre in tech_report_entries[row["Proposal_Code"]]:
+                reviewer = SALTAstronomer(
+                    name=tre["ReviewerFName"],
+                    surname=tre["ReviewerSName"],
+                    email=tre["ReviewerEmail"],
+                    username=tre["ReviewerUsername"]
+                ) if tre['ReviewerFName'] is not None else None
+                tech_reports.append(
+                    TechReview(semester=tre['Semester'], reviewer=reviewer, report=tre['Report'])
+                )
+        except:
+            tech_reports = None
     if row["Proposal_Id"] in ids["ProposalIds"]:
         proposal = Proposals(
             id="Proposal: " + str(row["Proposal_Id"]),
