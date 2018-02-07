@@ -103,7 +103,7 @@ class UserModel(ObjectType):
             current_liaison = liaison_astronomer(proposal_code)
             return self.has_role(RoleType.ADMINISTRATOR, partner) or \
                    (self.has_role(RoleType.SALT_ASTRONOMER, partner) and
-                    current_liaison is None and
+                    (current_liaison is None or current_liaison == assigned_liaison) and
                     assigned_liaison == g.user.username) and \
                    assigned_liaison is not None
 
@@ -112,7 +112,7 @@ class UserModel(ObjectType):
             current_reviewer = technical_reviewer(proposal_code)
             return self.has_role(RoleType.ADMINISTRATOR, partner) or \
                    (self.has_role(RoleType.SALT_ASTRONOMER, partner) and
-                    current_reviewer is None and
+                    (current_reviewer is None or current_reviewer == assigned_reviewer) and
                     assigned_reviewer == g.user.username) and \
                    assigned_reviewer is not None
 
