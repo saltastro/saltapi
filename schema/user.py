@@ -1,3 +1,4 @@
+from flask import g
 from graphene import Enum, ObjectType, String, List, Field
 from util.action import Action
 from data.proposal import liaison_astronomer, technical_reviewer, is_investigator
