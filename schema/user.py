@@ -116,10 +116,6 @@ class UserModel(ObjectType):
                     assigned_reviewer == g.user.username) and \
                    assigned_reviewer is not None
 
-        if action == Action.UPDATE_TECHNICAL_REPORT:
-            return self.has_role(RoleType.ADMINISTRATOR, partner) or \
-                   self.has_role(RoleType.SALT_ASTRONOMER, partner)
-
         if action == Action.VIEW_PROPOSAL:
             if self.has_role(RoleType.ADMINISTRATOR) or self.has_role(RoleType.SALT_ASTRONOMER):
                 return True
