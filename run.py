@@ -1,16 +1,16 @@
-import io
 import tempfile
+from functools import wraps
+
 from flask import Flask, jsonify, request, g, make_response, Response, render_template, send_file
+from flask_cors import CORS
 from flask_graphql import GraphQLView
 from flask_httpauth import HTTPTokenAuth, HTTPBasicAuth, MultiAuth
-from functools import wraps
-from flask_cors import CORS
 
+from data.technical_review import update_liaison_astronomers, update_reviews
+from schema.query import schema
 from util.action import Action
 from util.proposal_summaries import zip_proposal_summaries
-from schema.query import schema
 from util.user import basic_login, get_user_token, is_valid_token, create_token
-from data.technical_review import update_liaison_astronomers, update_reviewers, update_technical_reports
 
 app = Flask(__name__)
 app.debug = True
@@ -113,23 +113,13 @@ def liaison_astronomers():
     return jsonify(dict(success=True))
 
 
-@app.route("/reviewers", methods=['POST'])
+@app.route("/technical-reviews", methods=['POST'])
 @token_auth.login_required
-def reviewers():
+def technical_reviews():
     data = request.json
     semester = data['semester']
-    assignments = data['assignments']
-    update_reviewers(semester=semester, assignments=assignments)
-    return jsonify(dict(success=True))
-
-
-@app.route("/technical-reports", methods=['POST'])
-@token_auth.login_required
-def technical_reports():
-    data = request.json
-    semester = data['semester']
-    reports = data['reports']
-    update_technical_reports(semester, reports)
+    reviews = data['reviews']
+    update_reviews(semester=semester, reviews=reviews)
     return jsonify(dict(success=True))
 
 

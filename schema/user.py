@@ -107,7 +107,7 @@ class UserModel(ObjectType):
                     assigned_liaison == g.user.username) and \
                    assigned_liaison is not None
 
-        if action == Action.UPDATE_REVIEWER:
+        if action == Action.UPDATE_TECHNICAL_REVIEWS:
             assigned_reviewer = kwargs['reviewer']
             current_reviewer = technical_reviewer(proposal_code)
             return self.has_role(RoleType.ADMINISTRATOR, partner) or \

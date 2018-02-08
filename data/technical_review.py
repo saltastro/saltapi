@@ -136,33 +136,35 @@ def update_liaison_astronomer(proposal_code, liaison_astronomer, cursor):
     cursor.execute(sql, params)
 
 
-def update_reviewers(semester, assignments):
+def update_reviews(semester, reviews):
     """
-    Update the database with a list of reviwers.
+    Update the database with a list of reviwes.
 
     Parameters
     ----------
     semester : str
         Semester, such as "2018-1".
-    assignments : iterable
-        The list of reviwewer assignments. Each assignment must be dictionary with a proposal code and
-        a username (of the SALT Astronomer to be assigned as reviewer to that proposal).
+    reviews : iterable
+        The list of reviwews. Each assignment must be dictionary with a proposal code,
+        a username (of the SALT Astronomer to be assigned as reviewer to that proposal)
+        and a technical report (which may be None).
     """
 
     connection = sdb_connect()
     try:
         with connection.cursor() as cursor:
-            for assignment in assignments:
-                update_reviewer(proposal_code=assignment['proposalCode'],
-                                semester=semester,
-                                reviewer=assignment['reviewer'],
-                                cursor=cursor)
+            for review in reviews:
+                update_review(proposal_code=review['proposalCode'],
+                              semester=semester,
+                              reviewer=review['reviewer'],
+                              report=review['report'],
+                              cursor=cursor)
             connection.commit()
     finally:
         connection.close()
 
 
-def update_reviewer(proposal_code, semester, reviewer, cursor):
+def update_review(proposal_code, semester, reviewer, report, cursor):
     """
     Update a proposal's reviewer.
 
@@ -174,6 +176,8 @@ def update_reviewer(proposal_code, semester, reviewer, cursor):
         Semester, such as "2018-1".
     reviewer : str
         Username of the reviewer.
+    report : str
+        Technical report.
     cursor : database cursor
         Cursor on which the database command is executed.
 
@@ -182,36 +186,25 @@ def update_reviewer(proposal_code, semester, reviewer, cursor):
     void
     """
 
-    if not g.user.may_perform(Action.UPDATE_REVIEWER,
+    if not g.user.may_perform(Action.UPDATE_TECHNICAL_REVIEWS,
                               proposal_code=proposal_code,
-                              reviewer=reviewer):
-        raise Exception('You are not allowed to update the reviewer of proposal {proposal_code}'
+                              reviewer=reviewer,
+                              report=report):
+        raise Exception('You are not allowed to make the requested review update for proposal {proposal_code}'
                         .format(proposal_code=proposal_code))
 
     year, sem = semester.split('-')
-    if reviewer is not None:
-        sql = '''UPDATE ProposalTechReport SET Astronomer_Id=
-                        (SELECT PiptUser.Investigator_Id
-                                FROM PiptUser
-                         WHERE PiptUser.Username=%s)
-                 WHERE ProposalTechReport.ProposalCode_Id=
-                       (SELECT ProposalCode.ProposalCode_Id
-                        FROM ProposalCode
-                        WHERE ProposalCode.Proposal_Code=%s)
-                       AND ProposalTechReport.Semester_Id=
-                           (SELECT Semester.Semester_Id
-                            FROM Semester
-                            WHERE Semester.Year=%s AND Semester.Semester=%s)'''
-        params = (reviewer, proposal_code, year, sem)
-    else:
-        sql = '''UPDATE ProposalTechReport SET Astronomer_Id=NULL
-                 WHERE ProposalTechReport.ProposalCode_Id=
-                       (SELECT ProposalCode.ProposalCode_Id
-                        FROM ProposalCode
-                        WHERE ProposalCode.Proposal_Code=%s)
-                       AND ProposalTechReport.Semester_Id=
-                           (SELECT Semester.Semester_Id
-                            FROM Semester
-                            WHERE Semester.Year=%s AND Semester.Semester=%s)'''
-        params = (proposal_code, year, sem)
+    sql = '''INSERT INTO ProposalTechReport (ProposalCode_Id, Semester_Id, Astronomer_Id, TechReport)
+                    SELECT pc.ProposalCode_Id, s.Semester_Id, u.Investigator_Id, %s
+                    FROM ProposalCode AS pc, Semester AS s, PiptUser AS u
+                       WHERE pc.Proposal_Code=%s AND (s.Year=%s AND s.Semester=%s) AND  u.Username=%s
+                ON DUPLICATE KEY UPDATE
+                    ProposalCode_Id=
+                        (SELECT ProposalCode_Id FROM ProposalCode WHERE Proposal_Code=%s),
+                    Semester_Id=
+                        (SELECT Semester_Id FROM Semester WHERE Year=%s AND Semester=%s),
+                    Astronomer_Id=
+                        (SELECT Investigator_Id FROM PiptUser WHERE Username=%s),
+                    TechReport=%s'''
+    params = (report, proposal_code, year, sem, reviewer, proposal_code, year, sem, reviewer, report)
     cursor.execute(sql, params)
