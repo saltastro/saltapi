@@ -6,6 +6,7 @@ from flask_cors import CORS
 from flask_graphql import GraphQLView
 from flask_httpauth import HTTPTokenAuth, HTTPBasicAuth, MultiAuth
 
+from data.proposal import summary_file
 from data.technical_review import update_liaison_astronomers, update_reviews
 from schema.query import schema
 from util.action import Action
@@ -121,6 +122,20 @@ def technical_reviews():
     reviews = data['reviews']
     update_reviews(semester=semester, reviews=reviews)
     return jsonify(dict(success=True))
+
+
+@app.route("/proposal-summary", methods=['POST'])
+@token_auth.login_required
+def proposal_summary():
+    data = request.json
+    proposal_code = data['proposalCode']
+
+    # check permission
+    if not g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code='2018-1-SCI-005'):
+        raise Exception('You are not allowed to view the pdf summary of proposal {proposal_code}'
+                        .format(proposal_code=proposal_code))
+
+    return send_file(summary_file(proposal_code))
 
 
 @app.route("/proposal-summaries", methods=['POST'])
