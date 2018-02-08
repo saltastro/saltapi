@@ -1,10 +1,7 @@
 import os
 import zipfile
 
-from flask import g
-
 from data.proposal import summary_file
-from util.action import Action
 
 
 def zip_proposal_summaries(proposal_codes, file):
@@ -21,11 +18,6 @@ def zip_proposal_summaries(proposal_codes, file):
 
     with zipfile.ZipFile(file, mode='w') as summary_zip:
         for proposal_code in proposal_codes:
-            # check permission
-            if not g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code=proposal_code):
-                raise Exception('You are not allowed to view the summary of proposal {proposal_code}'
-                                .format(proposal_code=proposal_code))
-
             summary = summary_file(proposal_code)
             if not os.path.exists(summary):
                 raise Exception('Summary file not found: {summary}'.format(summary=summary))
