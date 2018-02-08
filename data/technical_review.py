@@ -153,6 +153,9 @@ def update_review(proposal_code, semester, reviewer, report, cursor):
         raise Exception('You are not allowed to make the requested review update for proposal {proposal_code}'
                         .format(proposal_code=proposal_code))
 
+    if not reviewer:
+        raise Exception('A reviewer must be specified for a review')
+
     year, sem = semester.split('-')
     sql = '''INSERT INTO ProposalTechReport (ProposalCode_Id, Semester_Id, Astronomer_Id, TechReport)
                     SELECT pc.ProposalCode_Id, s.Semester_Id, u.Investigator_Id, %s
