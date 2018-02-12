@@ -3,32 +3,6 @@ from util.action import Action
 from data.common import sdb_connect
 
 
-def update_technical_reports(semester, reports):
-    """
-    Update the database with a list of technical reports.
-
-    Parameters
-    ----------
-    semester : str
-        The semester, such as `2017-2` or `2018-1`, for which the technical reports are updated.
-    reports : iterable
-        The list of technical reports. Each report must be a dictionary with a proposal code and a report,
-        such as `{'proposal_code': '2017-2-SCI-042', 'report': 'this is proposal is feasible'}`.
-    """
-
-    connection = sdb_connect()
-    try:
-        with connection.cursor() as cursor:
-            for report in reports:
-                update_technical_report(proposal_code=report['proposalCode'],
-                                        semester=semester,
-                                        report=report['report'],
-                                        cursor=cursor)
-            connection.commit()
-    finally:
-        connection.close()
-
-
 def update_liaison_astronomers(assignments):
     """
     Update the database with a list of time allocations.
