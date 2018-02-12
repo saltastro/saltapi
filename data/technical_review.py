@@ -1,6 +1,7 @@
 from flask import g
 from util.action import Action
 from data.common import sdb_connect
+from util.error import InvalidUsage
 
 
 def update_liaison_astronomers(assignments):
@@ -47,8 +48,9 @@ def update_liaison_astronomer(proposal_code, liaison_astronomer, cursor):
     if not g.user.may_perform(Action.UPDATE_LIAISON_ASTRONOMER,
                               proposal_code=proposal_code,
                               liaison_astronomer=liaison_astronomer):
-        raise Exception('You are not allowed to update the liaison astronomer of proposal {proposal_code}'
-                        .format(proposal_code=proposal_code))
+        raise InvalidUsage(message='You are not allowed to update the liaison astronomer of proposal {proposal_code}'
+                           .format(proposal_code=proposal_code),
+                           status_code=403)
 
     if liaison_astronomer is not None:
         sql = '''UPDATE ProposalContact SET Astronomer_Id=
@@ -124,11 +126,13 @@ def update_review(proposal_code, semester, reviewer, report, cursor):
                               proposal_code=proposal_code,
                               reviewer=reviewer,
                               report=report):
-        raise Exception('You are not allowed to make the requested review update for proposal {proposal_code}'
-                        .format(proposal_code=proposal_code))
+        raise InvalidUsage(message='You are not allowed to make the requested review update for proposal {proposal_code}'
+                           .format(proposal_code=proposal_code),
+                           status_code=403)
 
     if not reviewer:
-        raise Exception('A reviewer must be specified for a review')
+        raise InvalidUsage(message='A reviewer must be specified for a review',
+                           status_code=403)
 
     year, sem = semester.split('-')
     sql = '''INSERT INTO ProposalTechReport (ProposalCode_Id, Semester_Id, Astronomer_Id, TechReport)
