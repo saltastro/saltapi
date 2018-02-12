@@ -17,11 +17,8 @@ def get_user_token(credentials):
     except KeyError:
         raise InvalidUsage(message='Username or password not provided', status_code=400)
 
-    try:
-        verify_user(username, password)
-        return create_token(username)
-    except Exception:
-        raise InvalidUsage(message='Invalid username or password', status_code=400)
+    verify_user(username, password)
+    return create_token(username)
 
 
 def basic_login(username, password):
@@ -51,7 +48,7 @@ def verify_user(username, password):
     result = pd.read_sql(sql, conn)
     conn.close()
     if not result.iloc[0]['UserCount']:
-        raise Exception('Username or password wrong')
+        raise InvalidUsage('Username or password wrong')
 
 
 def query_id(username):
@@ -83,7 +80,7 @@ def create_token(username):
 
     user_id = query_id(username)
     if user_id is None:
-        raise Exception('User not found')
+        raise Exception('User not found: {username}'.format(username=username))
     user = {
         'user_id': '{user_id}'.format(user_id=user_id)
     }
