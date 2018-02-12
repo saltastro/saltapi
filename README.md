@@ -42,7 +42,10 @@ which are the connection to the sdb, for development I am using sdb sandbox
     API_DATABASE = sdb database name
     PROPOSALS_DIR = directory containing all the proposal content
     SECRET_TOKEN_KEY = secret key for signing tokens
+    SENTRY_DSN = URI for logging with Sentry
 ```
+
+The URL stored in `SENTRY_DSN` must be obtained from [Sentry](https://docs.sentry.io).
 
 Now ready to start the graphql
 

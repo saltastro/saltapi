@@ -1,3 +1,4 @@
+import os
 import tempfile
 from functools import wraps
 
@@ -5,6 +6,7 @@ from flask import Flask, jsonify, request, g, make_response, Response, render_te
 from flask_cors import CORS
 from flask_graphql import GraphQLView
 from flask_httpauth import HTTPTokenAuth, HTTPBasicAuth, MultiAuth
+from raven.contrib.flask import Sentry
 
 from data.proposal import summary_file
 from data.technical_review import update_liaison_astronomers, update_reviews
@@ -17,6 +19,7 @@ from util.user import basic_login, get_user_token, is_valid_token, create_token
 app = Flask(__name__)
 app.debug = True
 CORS(app)
+sentry = Sentry(app, dsn=os.environ['SENTRY_DSN'])
 
 token_auth = HTTPTokenAuth(scheme='Token')
 basic_auth = HTTPBasicAuth()
@@ -175,6 +178,7 @@ def handle_invalid_usage(error):
 
 @app.errorhandler(Exception)
 def handle_exception(error):
+    sentry.captureException()
     return make_response(jsonify(dict(error='Sorry, there has been an internal server error. :-(')), 500)
 
 
