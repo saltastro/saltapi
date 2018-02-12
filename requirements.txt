@@ -58,7 +58,8 @@ python-dateutil==2.6.1
 python-mimeparse==1.6.0
 pytz==2017.3
 PyYAML==3.12
-requests==2.11.1
+raven==6.5.0
+rrequests==2.11.1
 Rx==1.6.0
 singledispatch==3.4.0.3
 six==1.11.0
