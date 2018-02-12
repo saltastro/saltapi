@@ -112,8 +112,7 @@ class UserModel(ObjectType):
             current_reviewer = technical_reviewer(proposal_code)
             return self.has_role(RoleType.ADMINISTRATOR, partner) or \
                    (self.has_role(RoleType.SALT_ASTRONOMER, partner) and
-                    (current_reviewer is None or current_reviewer == assigned_reviewer) and
-                    assigned_reviewer == g.user.username) and \
+                    (current_reviewer is None or current_reviewer == assigned_reviewer)) and \
                    assigned_reviewer is not None
 
         if action == Action.VIEW_PROPOSAL:
