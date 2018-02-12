@@ -10,6 +10,7 @@ from data.proposal import summary_file
 from data.technical_review import update_liaison_astronomers, update_reviews
 from schema.query import schema
 from util.action import Action
+from util.error import InvalidUsage
 from util.proposal_summaries import zip_proposal_summaries
 from util.user import basic_login, get_user_token, is_valid_token, create_token
 
@@ -64,7 +65,7 @@ def token():
     if request.json:
         tok = get_user_token(request.json)
         if "errors" in tok:
-            return jsonify(tok), 401
+            raise InvalidUsage(message=tok, status_code=400)
         return jsonify({"user": {"token": tok}}), 200
 
     return jsonify({"errors": {"global": "Invalid user"}}), 401
@@ -132,8 +133,9 @@ def proposal_summary():
 
     # check permission
     if not g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code='2018-1-SCI-005'):
-        raise Exception('You are not allowed to view the pdf summary of proposal {proposal_code}'
-                        .format(proposal_code=proposal_code))
+        raise InvalidUsage(message='You are not allowed to view the pdf summary of proposal {proposal_code}'
+                        .format(proposal_code=proposal_code),
+                           status_code=403)
 
     return send_file(summary_file(proposal_code))
 
@@ -147,8 +149,9 @@ def proposal_summaries():
     # check permission
     for proposal_code in proposal_codes:
         if not g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code='2018-1-SCI-005'):
-            raise Exception('You are not allowed to view the pdf summary of proposal {proposal_code}'
-                            .format(proposal_code=proposal_code))
+            raise InvalidUsage(message='You are not allowed to view the pdf summary of proposal {proposal_code}'
+                            .format(proposal_code=proposal_code),
+                               status_code=403)
 
     with tempfile.NamedTemporaryFile('wb') as f:
         zip_proposal_summaries(proposal_codes, f)
@@ -162,7 +165,17 @@ def not_found(error):
 
 @app.errorhandler(500)
 def not_found(error):
-    return make_response(jsonify({'errors': 'Fail to connect to sdb'}), 500)
+    return make_response(jsonify({'errors': 'Something is wrong'}), 500)
+
+
+@app.errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    return make_response(jsonify(error.to_dict()), error.status_code)
+
+
+@app.errorhandler(Exception)
+def handle_exception(error):
+    return make_response(jsonify(dict(error='Sorry, there has been an internal server error. :-(')), 500)
 
 
 if __name__ == '__main__':

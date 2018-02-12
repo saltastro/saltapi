@@ -1,32 +1,7 @@
 from flask import g
 from util.action import Action
 from data.common import sdb_connect
-
-
-def update_technical_reports(semester, reports):
-    """
-    Update the database with a list of technical reports.
-
-    Parameters
-    ----------
-    semester : str
-        The semester, such as `2017-2` or `2018-1`, for which the technical reports are updated.
-    reports : iterable
-        The list of technical reports. Each report must be a dictionary with a proposal code and a report,
-        such as `{'proposal_code': '2017-2-SCI-042', 'report': 'this is proposal is feasible'}`.
-    """
-
-    connection = sdb_connect()
-    try:
-        with connection.cursor() as cursor:
-            for report in reports:
-                update_technical_report(proposal_code=report['proposalCode'],
-                                        semester=semester,
-                                        report=report['report'],
-                                        cursor=cursor)
-            connection.commit()
-    finally:
-        connection.close()
+from util.error import InvalidUsage
 
 
 def update_liaison_astronomers(assignments):
@@ -73,8 +48,9 @@ def update_liaison_astronomer(proposal_code, liaison_astronomer, cursor):
     if not g.user.may_perform(Action.UPDATE_LIAISON_ASTRONOMER,
                               proposal_code=proposal_code,
                               liaison_astronomer=liaison_astronomer):
-        raise Exception('You are not allowed to update the liaison astronomer of proposal {proposal_code}'
-                        .format(proposal_code=proposal_code))
+        raise InvalidUsage(message='You are not allowed to update the liaison astronomer of proposal {proposal_code}'
+                           .format(proposal_code=proposal_code),
+                           status_code=403)
 
     if liaison_astronomer is not None:
         sql = '''UPDATE ProposalContact SET Astronomer_Id=
@@ -150,11 +126,13 @@ def update_review(proposal_code, semester, reviewer, report, cursor):
                               proposal_code=proposal_code,
                               reviewer=reviewer,
                               report=report):
-        raise Exception('You are not allowed to make the requested review update for proposal {proposal_code}'
-                        .format(proposal_code=proposal_code))
+        raise InvalidUsage(message='You are not allowed to make the requested review update for proposal {proposal_code}'
+                           .format(proposal_code=proposal_code),
+                           status_code=403)
 
     if not reviewer:
-        raise Exception('A reviewer must be specified for a review')
+        raise InvalidUsage(message='A reviewer must be specified for a review',
+                           status_code=403)
 
     year, sem = semester.split('-')
     sql = '''INSERT INTO ProposalTechReport (ProposalCode_Id, Semester_Id, Astronomer_Id, TechReport)

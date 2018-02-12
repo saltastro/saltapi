@@ -5,21 +5,23 @@ from data.common import sdb_connect
 from data.user import get_user
 import jwt
 
+from util.error import InvalidUsage
+
 
 def get_user_token(credentials):
     if credentials is None:
-        return _user_error(not_provided=True)
+        raise InvalidUsage(message='Username or password not provided', status_code=400)
     try:
         username = credentials['credentials']['username']
         password = credentials['credentials']['password']
     except KeyError:
-        return _user_error(not_provided=True)
+        raise InvalidUsage(message='Username or password not provided', status_code=400)
 
     try:
         verify_user(username, password)
         return create_token(username)
     except Exception:
-        return _user_error(not_found=True)
+        raise InvalidUsage(message='Invalid username or password', status_code=400)
 
 
 def basic_login(username, password):
@@ -32,14 +34,6 @@ def basic_login(username, password):
         return False
     set_current_user(user_id)
     return True
-
-
-def _user_error(not_provided=False, not_found=False):
-    if not_provided:
-        return {'errors': {'global': 'username or password not provide'}}
-
-    if not_found:
-        return {'errors': {'global': 'user not found'}}
 
 
 def verify_user(username, password):
