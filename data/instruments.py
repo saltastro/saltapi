@@ -46,7 +46,7 @@ def get_instruments(ids, proposals):
                 proposals[row["Proposal_Code"]].instruments.rss.append(
                     RSS(
                         type="RSS",
-                        dictator_mode=row['RSDetectorMode'],
+                        detector_mode=row['RSDetectorMode'],
                         xml_dictator_mode=row['RSXmlDetectorMode'],
                         mode=row['Mode'],
                         spectroscopy=Spectroscopy(

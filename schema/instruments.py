@@ -39,7 +39,7 @@ class HRS(ObjectType):
 class RSS(ObjectType):
     type = String()
     mode = String()
-    dictator_mode = String()
+    detector_mode = String()
     xml_dictator_mode = String()
     spectroscopy = Field(Spectroscopy)
     fabry_perot = Field(FabryPerot)
