@@ -31,7 +31,7 @@ def get_instruments(ids, proposals):
                       '   left join BvitFilter using(BvitFilter_Id) ' \
                       '   left join P1Hrs using(P1Hrs_Id) ' \
                       '   left join HrsMode using(HrsMode_Id) '
-    if len(ids['ProposalIds']) == 1:
+    if len(ids['ProposalCode_Ids']) == 1:
         instruments_sql += "  where ProposalCode_Id = {id}".format(id=ids['ProposalCode_Ids'][0])
     else:
         instruments_sql += "  where ProposalCode_Id in {id_list}".format(id_list=sql_list_string(ids['ProposalCode_Ids']))
@@ -47,7 +47,7 @@ def get_instruments(ids, proposals):
                     RSS(
                         type="RSS",
                         detector_mode=row['RSDetectorMode'],
-                        xml_dictator_mode=row['RSXmlDetectorMode'],
+                        xml_detector_mode=row['RSXmlDetectorMode'],
                         mode=row['Mode'],
                         spectroscopy=Spectroscopy(
                             grating=row["Grating"]
@@ -84,8 +84,8 @@ def get_instruments(ids, proposals):
                 proposals[row["Proposal_Code"]].instruments.scam.append(
                     SCAM(
                         type="SCAM",
-                        dictator_mode=row['SCDetectorMode'],
-                        xml_dictator_mode=row['SCXmlDetectorMode']
+                        detector_mode=row['SCDetectorMode'],
+                        xml_detector_mode=row['SCXmlDetectorMode']
                     )
                 )
         except KeyError:
