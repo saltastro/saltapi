@@ -7,47 +7,44 @@ from util.action import Action
 def get_proposal_ids(semester, partner_code=None):
 
     conn = sdb_connect()
-    g.ALL_PARTNERS = [p['Partner_Code'] for i, p in pd.read_sql("SELECT Partner_Code FROM Partner", conn).iterrows()]
+    all_partners = [p['Partner_Code'] for i, p in pd.read_sql("SELECT Partner_Code FROM Partner", conn).iterrows()]
     conn.close()
 
-    sql = """ 
-            SELECT MAX(p.Proposal_Id) as Ids, pc.ProposalCode_Id as PCode_Ids, pc.Proposal_Code as PCD 
-                FROM Proposal AS p 
-                    JOIN ProposalCode AS pc ON (p.ProposalCode_Id=pc.ProposalCode_Id) 
-                    JOIN MultiPartner AS mp ON (p.ProposalCode_Id=mp.ProposalCode_Id) 
-                    JOIN Partner AS pa ON (mp.Partner_Id=pa.Partner_Id) 
-                    JOIN Semester AS sm ON (mp.Semester_Id=sm.Semester_Id) 
-                    JOIN ProposalGeneralInfo AS pgi ON (pgi.ProposalCode_Id=p.ProposalCode_Id) 
-                    JOIN ProposalInvestigator AS pi ON (pi.ProposalCode_Id=p.ProposalCode_Id) 
-                    JOIN Investigator as i ON (i.Investigator_Id = pi.Investigator_Id) 
-                WHERE Phase=1 AND ProposalStatus_Id not in (4, 9, 6, 8, 5, 3, 100) 
-                    AND CONCAT(sm.Year, '-', sm.Semester) = '{semester}' 
-               """.format(semester=semester)
-    all_sql = sql + " GROUP BY pc.ProposalCode_Id "
+    sql = """
+        select distinct Partner.Partner_Code as PartnerCode, ProposalCode_Id, Proposal_Code, Surname, ProposalStatus_Id , CONCAT(Year, '-', Semester) as Semester
+            from ProposalCode
+                join ProposalGeneralInfo using (ProposalCode_Id)
+                join MultiPartner using (ProposalCode_Id)
+                join ProposalContact using (ProposalCode_Id)
+                join Investigator on (Leader_Id=Investigator_Id)
+                join Semester using (Semester_Id)
+                join Partner on (MultiPartner.Partner_Id = Partner.Partner_Id)
+            Group by ProposalCode_Id, Semester_Id having Semester = "{semester}"
+                and sum(ReqTimeAmount) > 0
+                and ProposalStatus_Id NOT IN (9, 3)
+                """.format(semester=semester)
+
     conn = sdb_connect()
-    all_proposals = [str(p["Ids"]) for i, p in pd.read_sql(all_sql, conn).iterrows()]
+    all_proposals = [str(p["ProposalCode_Id"]) for i, p in pd.read_sql(sql, conn).iterrows()]
 
-
-    partners = [partner for partner in g.ALL_PARTNERS if g.user.may_perform(Action.VIEW_PARTNER_PROPOSALS, partner=partner)]
-
-    sql += """ AND (
-                    pa.Partner_Code in ("{partner_codes}")
-                    OR
-                    i.Email = \"{email}\"
-                    ) 
-            """.format(partner_codes='", "'.join(partners),
-                       email=g.user.email)
-
+    user_partners = [partner for partner in all_partners if g.user.may_perform(Action.VIEW_PARTNER_PROPOSALS,
+                                                                               partner=partner)]
     if partner_code is not None:
-        sql += " AND pa.Partner_Code = '{partner_code}' ".format(partner_code=partner_code)
+        sql += """  and PartnerCode in ("{partner_codes}")
+                """.format(partner_codes='", "'.join([partner_code]))
+    else:
+        sql += """  and PartnerCode in ("{partner_codes}")
+        """.format(partner_codes='", "'.join(user_partners))
 
-    ids = []
-    pcode_ids = []
-    for index, r in pd.read_sql(sql + " GROUP BY pc.ProposalCode_Id ", conn).iterrows():
-        ids.append(str(r['Ids']))
-        pcode_ids.append(str(r['PCode_Ids']))
+    proposal_code_ids = []
+    for index, r in pd.read_sql(sql, conn).iterrows():
+        if g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code=str(r['Proposal_Code'])):
+            proposal_code_ids.append(str(r['ProposalCode_Id']))
     conn.close()
-    return {'ProposalIds': ids, 'ProposalCode_Ids': pcode_ids, "all_proposals": all_proposals}
+    return {
+        'ProposalCode_Ids': proposal_code_ids,
+        "all_proposals": all_proposals
+    }
 
 
 def sql_list_string(values):
