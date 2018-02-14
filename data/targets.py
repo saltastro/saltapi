@@ -53,7 +53,7 @@ def get_targets(ids=None, proposals=None, semester=None, partner_code=None):
                     JOIN TargetCoordinates using(TargetCoordinates_Id) 
            """
     sql += "  WHERE Proposal_Id in {id_list} order by Proposal_Id"\
-        .format(id_list=sql_list_string(ids['ProposalIds']))
+        .format(id_list=sql_list_string(ids['ProposalCode_Ids']))
 
     conn = sdb_connect()
     results = pd.read_sql(sql, conn)
