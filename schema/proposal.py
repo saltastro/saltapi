@@ -62,6 +62,7 @@ class TechReview(ObjectType):
 
 class Proposals(ObjectType):
     abstract = String()
+    act_on_alert = Boolean()
     allocated_time = List(ProposalAllocatedTime)
     code = String()
     id = ID()

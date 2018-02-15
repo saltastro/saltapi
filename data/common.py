@@ -20,9 +20,8 @@ def get_proposal_ids(semester, partner_code=None):
                 join Semester using (Semester_Id)
                 join Partner on (MultiPartner.Partner_Id = Partner.Partner_Id)
             Group by ProposalCode_Id, Semester_Id having Semester = "{semester}"
-                and sum(ReqTimeAmount) > 0
                 and ProposalStatus_Id NOT IN (9, 3)
-                """.format(semester=semester)
+                """.format(semester=semester)  # status 9 => Deleted, 3 => Rejected
 
     conn = sdb_connect()
     all_proposals = [str(p["ProposalCode_Id"]) for i, p in pd.read_sql(sql, conn).iterrows()]

@@ -78,6 +78,7 @@ def make_proposal(row, ids, text, tech_report_entries, time_Requests):
             code=row["Proposal_Code"],
             is_p4=row["P4"] == 1,
             status=row["Status"],
+            act_on_alert=row["ActOnAlert"] == 1,
             transparency=row["Transparency"],
             max_seeing=row["MaxSeeing"],
             time_requests=[],
@@ -107,6 +108,7 @@ def make_proposal(row, ids, text, tech_report_entries, time_Requests):
             is_p4=row["P4"] == 1,
             status=row["Status"],
             transparency=row["Transparency"],
+            act_on_alert=row["ActOnAlert"] == 1,
             max_seeing=row["MaxSeeing"],
             time_requests=time_Requests[row["Proposal_Code"]],
             allocated_time=[],
@@ -213,8 +215,6 @@ where mp.ProposalCode_Id in {id_list}
             requested_times[proposal_code] = []
         requested_times[proposal_code] = add_time_request(row, requested_times[proposal_code])
     conn.close()
-    for tt in requested_times:
-        print(tt, requested_times[tt])
 
     conn = sdb_connect()
     results = pd.read_sql(proposal_sql, conn)
