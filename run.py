@@ -185,6 +185,7 @@ def handle_exception(error):
         sentry.captureException()
     else:
         traceback.print_exc()
+        print('Set the SENTRY_DSN environment variable to log to Sentry instead of the command line.')
     return make_response(jsonify(dict(error='Sorry, there has been an internal server error. :-(')), 500)
 
 
