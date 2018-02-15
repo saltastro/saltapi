@@ -45,7 +45,7 @@ which are the connection to the sdb, for development I am using sdb sandbox
     SENTRY_DSN = URI for logging with Sentry
 ```
 
-The URL stored in `SENTRY_DSN` must be obtained from [Sentry](https://docs.sentry.io).
+The URL stored in `SENTRY_DSN` must be obtained from [Sentry](https://docs.sentry.io). `SENTRY_DSN` is optional; if it isn't set, exceptions will be logged to the command line.
 
 Now ready to start the graphql
 

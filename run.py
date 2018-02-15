@@ -1,5 +1,6 @@
 import os
 import tempfile
+import traceback
 from functools import wraps
 
 from flask import Flask, jsonify, request, g, make_response, Response, render_template, send_file
@@ -19,7 +20,9 @@ from util.user import basic_login, get_user_token, is_valid_token, create_token
 app = Flask(__name__)
 app.debug = True
 CORS(app)
-sentry = Sentry(app, dsn=os.environ['SENTRY_DSN'])
+sentry = None
+if os.environ.get('SENTRY_DSN'):
+    sentry = Sentry(app, dsn=os.environ.get('SENTRY_DSN'))
 
 token_auth = HTTPTokenAuth(scheme='Token')
 basic_auth = HTTPBasicAuth()
@@ -178,7 +181,11 @@ def handle_invalid_usage(error):
 
 @app.errorhandler(Exception)
 def handle_exception(error):
-    sentry.captureException()
+    if sentry:
+        sentry.captureException()
+    else:
+        traceback.print_exc()
+        print('Set the SENTRY_DSN environment variable to log to Sentry instead of the command line.')
     return make_response(jsonify(dict(error='Sorry, there has been an internal server error. :-(')), 500)
 
 
