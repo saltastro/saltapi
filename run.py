@@ -109,7 +109,6 @@ def about():
 
 @app.route("/")
 def home():
-    raise ValueError('Ah! Yet another fake value exception!')
     return render_template('home.html')
 
 
