@@ -4,7 +4,7 @@ from data import sdb_connect
 from data.common import sql_list_string
 
 
-def get_instruments(ids, proposals):
+def get_instruments(id_list, proposals):
     from schema.instruments import RSS, HRS, BVIT, SCAM, Spectroscopy, Polarimetry, FabryPerot, Mask
 
     instruments_sql = ' select *, sc.DetectorMode as SCDetectorMode, sc.XmlDetectorMode as SCXmlDetectorMode, ' \
@@ -30,11 +30,9 @@ def get_instruments(ids, proposals):
                       '   left join P1Bvit using(P1Bvit_Id) ' \
                       '   left join BvitFilter using(BvitFilter_Id) ' \
                       '   left join P1Hrs using(P1Hrs_Id) ' \
-                      '   left join HrsMode using(HrsMode_Id) '
-    if len(ids['ProposalCode_Ids']) == 1:
-        instruments_sql += "  where ProposalCode_Id = {id}".format(id=ids['ProposalCode_Ids'][0])
-    else:
-        instruments_sql += "  where ProposalCode_Id in {id_list}".format(id_list=sql_list_string(ids['ProposalCode_Ids']))
+                      '   left join HrsMode using(HrsMode_Id) ' \
+                      '  where ProposalCode_Id in {id_list}'.format(id_list=id_list)
+
     conn = sdb_connect()
 
     i_results = pd.read_sql(instruments_sql, conn)

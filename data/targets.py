@@ -43,17 +43,17 @@ def get_targets(ids=None, proposals=None, semester=None, partner_code=None):
         if semester is None:
             raise ValueError("semester must be provided when query for Targets")
         ids = get_proposal_ids(semester=semester, partner_code=partner_code)
-
+    id_list = sql_list_string(ids['all_proposals']) if partner_code is None else sql_list_string(ids['ProposalCode_Ids'])
     sql = """
             SELECT * 
                 FROM Proposal
                     JOIN ProposalCode using (ProposalCode_Id) 
                     JOIN P1ProposalTarget using (ProposalCode_Id) 
-                    JOIN Target as tp on (P1ProposalTarget.Target_Id = tp.Target_Id) 
+                    JOIN Target using (Target_Id)
                     JOIN TargetCoordinates using(TargetCoordinates_Id) 
            """
     sql += "  WHERE Proposal_Id in {id_list} order by Proposal_Id"\
-        .format(id_list=sql_list_string(ids['ProposalCode_Ids']))
+        .format(id_list=id_list)
 
     conn = sdb_connect()
     results = pd.read_sql(sql, conn)
@@ -66,5 +66,4 @@ def get_targets(ids=None, proposals=None, semester=None, partner_code=None):
                 proposals[row["Proposal_Code"]].targets.append(target(row))
         except KeyError:
             pass
-
     return targets

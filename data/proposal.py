@@ -49,8 +49,12 @@ def make_proposal(row, ids, text, tech_report_entries, time_Requests):
     from schema.proposal import Proposals, PI, SALTAstronomer, TechReview
     from schema.instruments import Instruments
 
-    title = text[row["Proposal_Code"]]["title"]
-    abstract = text[row["Proposal_Code"]]["abstract"]
+    if row["Proposal_Code"] in text:
+        title = text[row["Proposal_Code"]]["title"]
+        abstract = text[row["Proposal_Code"]]["abstract"]
+    else:
+        title = None
+        abstract = None
     sa = SALTAstronomer(
         name=row["SAFname"],
         surname=row["SASname"],
@@ -133,9 +137,12 @@ def make_proposal(row, ids, text, tech_report_entries, time_Requests):
 
 
 def query_proposal_data(semester, partner_code=None, all_proposals=False):
+    print(all_proposals)
     from schema.proposal import Distribution, ProposalAllocatedTime, TacComment
 
     ids = get_proposal_ids(semester, partner_code)
+    id_list = sql_list_string(ids['all_proposals']) if all_proposals else sql_list_string(ids['ProposalCode_Ids'])
+    print(id_list)
 
     proposals = {}
     proposals_text = {}
@@ -154,8 +161,7 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
         join Transparency using (Transparency_Id)
         join Semester using (Semester_Id)
     where CONCAT(Year, '-', Semester) = '{semester}' and ProposalCode_Id IN {id_list} order by ProposalCode_Id
-    """.format(semester=semester, id_list=sql_list_string(ids['all_proposals']) if all_proposals else \
-        sql_list_string(ids['ProposalCode_Ids']))
+    """.format(semester=semester, id_list=id_list)
 
     proposals_text_sql = """
     SELECT * FROM ProposalText
@@ -172,10 +178,10 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
 
     tech_reports = {}
     tech_report_sql = """
-    SELECT Proposal_Code,
+    SELECT  ProposalCode.Proposal_Code as Proposal_Code,
            CONCAT(Semester.Year, '-', Semester.Semester) AS Semester,
            FirstName, Surname, Email, Username,
-           TechReport
+           TechReport, ProposalCode.ProposalCode_Id as ProposalCode_Id
     FROM ProposalTechReport
          JOIN ProposalCode ON ProposalTechReport.ProposalCode_Id = ProposalCode.ProposalCode_Id
          JOIN Semester ON ProposalTechReport.Semester_Id = Semester.Semester_Id
@@ -183,7 +189,7 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
          LEFT JOIN PiptUser ON Investigator.PiptUser_Id=PiptUser.PiptUser_Id
     WHERE ProposalCode.ProposalCode_Id IN {id_list}
     ORDER BY Semester.Year ASC, Semester.Semester ASC
-    """.format(id_list=sql_list_string(ids['ProposalCode_Ids']))
+    """.format(id_list=id_list)
     conn = sdb_connect()
     for index, row in pd.read_sql(tech_report_sql, conn).iterrows():
         proposal_code = row['Proposal_Code']
@@ -206,7 +212,7 @@ SELECT * FROM MultiPartner as mp
     join Partner using (Partner_Id)
     left join P1MinTime as mt on (mt.Semester_Id=sm.Semester_Id and mp.ProposalCode_Id=mt.ProposalCode_Id)
 where mp.ProposalCode_Id in {id_list}
-    """.format(id_list=sql_list_string(ids['ProposalCode_Ids']))
+    """.format(id_list=id_list)
     conn = sdb_connect()
     for index, row in pd.read_sql(requested_time_sql, conn).iterrows():
         proposal_code = row['Proposal_Code']
@@ -230,7 +236,7 @@ where mp.ProposalCode_Id in {id_list}
                                   join Semester as s using (Semester_Id) 
                                   join Partner using(Partner_Id) 
                          WHERE ProposalCode_Id in {id_list}
-                       """.format(id_list=sql_list_string(ids['ProposalCode_Ids']))
+                       """.format(id_list=id_list)
 
     conn = sdb_connect()
     for index, row in pd.read_sql(partner_time_sql, conn).iterrows():
@@ -251,7 +257,7 @@ where mp.ProposalCode_Id in {id_list}
             pass
     conn.close()
 
-    get_instruments(ids, proposals)
+    get_instruments(id_list, proposals)
     get_targets(ids=ids, proposals=proposals)
 
     all_time_sql = """
