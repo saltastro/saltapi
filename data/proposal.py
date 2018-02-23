@@ -214,6 +214,7 @@ SELECT * FROM MultiPartner as mp
 where mp.ProposalCode_Id in {id_list}
     """.format(id_list=id_list)
     conn = sdb_connect()
+    print(proposal_sql)
     for index, row in pd.read_sql(requested_time_sql, conn).iterrows():
         proposal_code = row['Proposal_Code']
         semester = str(row['Year']) + "-" + str(row['Semester'])
@@ -239,6 +240,7 @@ where mp.ProposalCode_Id in {id_list}
                        """.format(id_list=id_list)
 
     conn = sdb_connect()
+    print(partner_time_sql)
     for index, row in pd.read_sql(partner_time_sql, conn).iterrows():
         try:
             proposal = proposals[row["Proposal_Code"]]
