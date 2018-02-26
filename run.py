@@ -18,8 +18,9 @@ from util.proposal_summaries import zip_proposal_summaries
 from util.user import basic_login, get_user_token, is_valid_token, create_token
 
 app = Flask(__name__)
-CORS(app, resources={r"/graphql*": {"origins": "*"}})
-app.config['CORS_ALLOW_HEADERS'] = 'Content-Type'
+# Set CORS options on app configuration
+app.config['CORS_HEADERS'] = "Content-Type"
+app.config['CORS_RESOURCES'] = {r"/*": {"origins": "*"}}
 sentry = None
 if os.environ.get('SENTRY_DSN'):
     sentry = Sentry(app, dsn=os.environ.get('SENTRY_DSN'))
@@ -193,10 +194,11 @@ def handle_exception(error):
 
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
+    response.headers.add('Access-Control-Allow-Origin', 'http://tac.salt.ac.za')
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
+    print(">>>>", response.headers)
     return response
 
 
