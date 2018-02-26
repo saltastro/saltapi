@@ -18,7 +18,8 @@ from util.proposal_summaries import zip_proposal_summaries
 from util.user import basic_login, get_user_token, is_valid_token, create_token
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/graphql*": {"origins": "*"}})
+app.config['CORS_ALLOW_HEADERS'] = 'Content-Type'
 sentry = None
 if os.environ.get('SENTRY_DSN'):
     sentry = Sentry(app, dsn=os.environ.get('SENTRY_DSN'))
@@ -99,7 +100,8 @@ def f():
 
 
 app.add_url_rule('/graphiql', view_func=requires_auth(GraphQLView.as_view('graphiql', schema=schema, graphiql=True)))
-app.add_url_rule('/graphql', view_func=token_auth.login_required(GraphQLView.as_view('graphql', schema=schema, graphiql=False)))
+app.add_url_rule('/graphql',
+                 view_func=token_auth.login_required(GraphQLView.as_view('graphql', schema=schema, graphiql=False)))
 
 
 @app.route("/about")
@@ -140,7 +142,7 @@ def proposal_summary():
     # check permission
     if not g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code='2018-1-SCI-005'):
         raise InvalidUsage(message='You are not allowed to view the pdf summary of proposal {proposal_code}'
-                        .format(proposal_code=proposal_code),
+                           .format(proposal_code=proposal_code),
                            status_code=403)
 
     return send_file(summary_file(proposal_code))
@@ -156,7 +158,7 @@ def proposal_summaries():
     for proposal_code in proposal_codes:
         if not g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code='2018-1-SCI-005'):
             raise InvalidUsage(message='You are not allowed to view the pdf summary of proposal {proposal_code}'
-                            .format(proposal_code=proposal_code),
+                               .format(proposal_code=proposal_code),
                                status_code=403)
 
     with tempfile.NamedTemporaryFile('wb') as f:
@@ -189,6 +191,14 @@ def handle_exception(error):
     return make_response(jsonify(dict(error='Sorry, there has been an internal server error. :-(')), 500)
 
 
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
+
+
 if __name__ == '__main__':
     app.run(port=5001)
-
