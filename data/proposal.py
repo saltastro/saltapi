@@ -137,12 +137,10 @@ def make_proposal(row, ids, text, tech_report_entries, time_Requests):
 
 
 def query_proposal_data(semester, partner_code=None, all_proposals=False):
-    print(all_proposals)
     from schema.proposal import Distribution, ProposalAllocatedTime, TacComment
 
     ids = get_proposal_ids(semester, partner_code)
     id_list = sql_list_string(ids['all_proposals']) if all_proposals else sql_list_string(ids['ProposalCode_Ids'])
-    print(id_list)
 
     proposals = {}
     proposals_text = {}
@@ -214,7 +212,6 @@ SELECT * FROM MultiPartner as mp
 where mp.ProposalCode_Id in {id_list}
     """.format(id_list=id_list)
     conn = sdb_connect()
-    print(proposal_sql)
     for index, row in pd.read_sql(requested_time_sql, conn).iterrows():
         proposal_code = row['Proposal_Code']
         semester = str(row['Year']) + "-" + str(row['Semester'])
@@ -240,7 +237,6 @@ where mp.ProposalCode_Id in {id_list}
                        """.format(id_list=id_list)
 
     conn = sdb_connect()
-    print(partner_time_sql)
     for index, row in pd.read_sql(partner_time_sql, conn).iterrows():
         try:
             proposal = proposals[row["Proposal_Code"]]
