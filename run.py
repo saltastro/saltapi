@@ -18,12 +18,12 @@ from util.proposal_summaries import zip_proposal_summaries
 from util.user import basic_login, get_user_token, is_valid_token, create_token
 
 app = Flask(__name__)
-app.debug = True
 CORS(app)
 sentry = None
 if os.environ.get('SENTRY_DSN'):
     sentry = Sentry(app, dsn=os.environ.get('SENTRY_DSN'))
-
+else:
+    app.debug = True
 token_auth = HTTPTokenAuth(scheme='Token')
 basic_auth = HTTPBasicAuth()
 multi_auth = MultiAuth(HTTPBasicAuth, HTTPTokenAuth)

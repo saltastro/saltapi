@@ -26,7 +26,7 @@ Create virtual Environments and activate it, assumes that you have python3 virtu
    source venv/bin/activate
 ```
 
-and install reqirements.txt 
+and install requirements.txt 
 
 ```bazaar
 pip install -r reqirements.txt
