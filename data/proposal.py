@@ -1,9 +1,11 @@
 import os
+import tempfile
 import pandas as pd
 from data import sdb_connect
 from data.targets import get_targets
 from data.instruments import get_instruments
 from data.common import get_proposal_ids, sql_list_string
+from util.semester import previous_semester
 
 proposal_data = {}
 
@@ -442,14 +444,24 @@ LIMIT 1
     return df['Submission'][0]
 
 
-def summary_file(proposal_code):
+def summary_file(proposal_code, semester):
     """
-    The file path of a proposal's summary file.
+    The file path of a proposal's summary file. The summary file is the progress report (if there is
+    one) or the phase 1 summary. If there exists a supplementary file for the progress report, a
+    temporary file containing both the progress report and the supplementary file is created, and
+    the path to that temporary file is returned.
+
+    The semester is the one for whose time allocation the summary should be used. This is relevant
+    only for progress reports. Note that the progress report is returned for the semester previous to
+    the given one. So, for example, if '2018-1' is passed as semester, the progress report for 2017-2
+    is returned.
 
     Parameters
     ----------
     proposal_code : str
         The proposal code, such as "2018-1-SCI-005".
+    semester : str
+        The semester, such as '2018-1'.
 
     Returns
     -------
@@ -457,7 +469,29 @@ def summary_file(proposal_code):
         The file path of the summary.
     """
 
-    return os.path.join(os.environ['PROPOSALS_DIR'],
-                        proposal_code,
-                        str(latest_version(proposal_code, 1)),
-                        'Summary.pdf')
+    # look for a progress report and a supplementary file
+    prev_sem = previous_semester(semester)
+    sql = '''
+SELECT ProposalProgress.ReportPath AS ReportPath
+       FROM ProposalProgress
+       JOIN ProposalCode USING (ProposalCode_Id)
+       JOIN Semester USING (Semester_Id)
+WHERE ProposalCode.Proposal_Code = %s AND CONCAT(Semester.Year, '-', Semester.Semester) = %s
+'''
+
+    conn = sdb_connect()
+    df = pd.read_sql(sql, conn, params=(proposal_code, prev_sem))
+    conn.close()
+
+    if len(df['ReportPath']) > 0:
+        report = os.path.join(os.environ['PROPOSALS_DIR'],
+                              proposal_code,
+                              'Included',
+                              df['ReportPath'][0])
+        return report
+    else:
+        summary = os.path.join(os.environ['PROPOSALS_DIR'],
+                               proposal_code,
+                               str(latest_version(proposal_code, 1)),
+                               'Summary.pdf')
+        return summary
