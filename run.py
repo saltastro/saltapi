@@ -139,6 +139,7 @@ def technical_reviews():
 def proposal_summary():
     data = request.json
     proposal_code = data['proposalCode']
+    semester = data['semester']
 
     # check permission
     if not g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code='2018-1-SCI-005'):
@@ -146,7 +147,7 @@ def proposal_summary():
                            .format(proposal_code=proposal_code),
                            status_code=403)
 
-    return send_file(summary_file(proposal_code))
+    return send_file(summary_file(proposal_code, semester))
 
 
 @app.route("/proposal-summaries", methods=['POST'])
@@ -154,6 +155,7 @@ def proposal_summary():
 def proposal_summaries():
     data = request.json
     proposal_codes = data['proposalCodes']
+    semester = data['semester']
 
     # check permission
     for proposal_code in proposal_codes:
@@ -163,7 +165,7 @@ def proposal_summaries():
                                status_code=403)
 
     with tempfile.NamedTemporaryFile('wb') as f:
-        zip_proposal_summaries(proposal_codes, f)
+        zip_proposal_summaries(proposal_codes, semester, f)
         return send_file(f.name, mimetype='application/zip', attachment_filename='proposal_summaries.zip')
 
 
