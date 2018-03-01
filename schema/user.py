@@ -134,6 +134,15 @@ class UserModel(ObjectType):
         if action == Action.SWITCH_USER:
             return self.has_role(RoleType.ADMINISTRATOR)
 
+        if action == Action.DOWNLOAD_SUMMARY:
+            print()
+            if self.has_role(RoleType.ADMINISTRATOR) or self.has_role(RoleType.SALT_ASTRONOMER) or \
+                    self.has_role(RoleType.TAC_CHAIR, partner) or self.has_role(RoleType.TAC_MEMBER, partner):
+                return True
+
+            if is_investigator(g.user.username, proposal_code):
+                return True
+
         return False
 
     def __str__(self):
