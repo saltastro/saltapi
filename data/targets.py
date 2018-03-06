@@ -52,7 +52,7 @@ def get_targets(ids=None, proposals=None, semester=None, partner_code=None):
                     JOIN Target using (Target_Id)
                     JOIN TargetCoordinates using(TargetCoordinates_Id) 
            """
-    sql += "  WHERE Proposal_Id in {id_list} order by Proposal_Id"\
+    sql += "  WHERE ProposalCode_Id in {id_list} order by ProposalCode_Id"\
         .format(id_list=id_list)
 
     conn = sdb_connect()
