@@ -1,6 +1,7 @@
 from graphene import Boolean, InputObjectType, Int, List, Mutation, String
 from util.time_allocations import update_time_allocations
 
+
 class TimeAllocationInput(InputObjectType):
     """
     A time allocation for a proposal and priority.
@@ -54,5 +55,5 @@ class UpdateTimeAllocations(Mutation):
             semester=time_allocations['semester'],
             time_allocations=time_allocations['time_allocations'],
             tac_comments=time_allocations['tac_comments']
-                                             )
+        )
         return UpdateTimeAllocations(is_updated)
