@@ -156,10 +156,11 @@ def proposal_summaries():
     data = request.json
     proposal_codes = data['proposalCodes']
     semester = data['semester']
+    partner = data['partner']
 
     # check permission
     for proposal_code in proposal_codes:
-        if not g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code=proposal_code):
+        if not g.user.may_perform(Action.DOWNLOAD_SUMMARY, proposal_code=proposal_code, partner=partner):
             raise InvalidUsage(message='You are not allowed to view the pdf summary of proposal {proposal_code}'
                                .format(proposal_code=proposal_code),
                                status_code=403)

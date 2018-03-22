@@ -1,7 +1,7 @@
 from flask import g
 import pandas as pd
 from data.common import sdb_connect
-from schema.user import UserModel, Role, RoleType
+from schema.user import UserModel, Role, RoleType, TacMember
 from data.partner import get_partners_for_role
 
 
@@ -79,3 +79,48 @@ def get_user(user_id):
             )
         user[username].role += get_role(row, user_id)
     return user[username]
+
+
+def get_salt_users():
+    sql = 'select * from PiptUser JOIN Investigator using (Investigator_Id)'
+    conn = sdb_connect()
+    results = pd.read_sql(sql, conn)
+    conn.close()
+    users = []
+    for index, row in results.iterrows():
+        if row["Username"] is not None:
+            users.append(UserModel(
+                username=row["Username"],
+                first_name=row["FirstName"],
+                last_name=row["Surname"],
+                email=row["Email"],
+                role=[]
+            ))
+
+    return users
+
+def get_tac_members(partner):
+    sql = '''select * from PiptUser
+join PiptUserTAC using(PiptUser_Id)
+join Investigator using(Investigator_Id)
+join Partner using(Partner_Id)
+        '''
+    if partner is not None:
+        sql += " where Partner_Code = '{partner}'".format(partner=partner)
+    conn = sdb_connect()
+    results = pd.read_sql(sql, conn)
+    conn.close()
+    tacs = []
+    for index, row in results.iterrows():
+        if row["Username"] is not None:
+            tacs.append(TacMember(
+                username=row["Username"],
+                first_name=row["FirstName"],
+                last_name=row["Surname"],
+                email=row["Email"],
+                partner_code=row["Partner_Code"],
+                partner_name=row["Partner_Name"],
+                is_chair=row["Chair"] == 1
+            ))
+
+    return tacs
