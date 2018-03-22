@@ -140,6 +140,7 @@ def proposal_summary():
     data = request.json
     proposal_code = data['proposalCode']
     semester = data['semester']
+    partner = data['partner']
 
     # check permission
     if not g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code=proposal_code):
@@ -156,6 +157,7 @@ def proposal_summaries():
     data = request.json
     proposal_codes = data['proposalCodes']
     semester = data['semester']
+    partner = data['partner']
 
     # check permission
     for proposal_code in proposal_codes:

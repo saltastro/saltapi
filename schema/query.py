@@ -1,15 +1,14 @@
 import graphene
 from flask import g
 from schema.partner import *
-from schema.selectors import Selectors
 from schema.proposal import *
+from data.user import get_salt_users, get_tac_members
 from data.proposal import get_proposals
 from data.partner import get_partners
 from data.targets import get_targets
 from data.salt_astronomer import get_salt_astronomer
-from data.selectors import get_selectors_data
 from schema.instruments import *
-from schema.user import UserModel
+from schema.user import UserModel, TacMember
 from schema.mutations import Mutations
 
 
@@ -26,6 +25,8 @@ class Query(graphene.ObjectType):
                                 description="List of all allocations of SALT Partners")
     user = Field(UserModel)
     S_a_l_t_astronomers = Field(List(SALTAstronomer))
+    tac_members = Field(List(TacMember), partner_code=String())
+    salt_users = Field(List(UserModel), partner_code=String())
 
     def resolve_proposals(self, info, semester=None, partner_code=None, all_proposals=False):
         if semester is None:
@@ -47,6 +48,12 @@ class Query(graphene.ObjectType):
 
     def resolve_S_a_l_t_astronomers(self, info):
         return get_salt_astronomer()
+
+    def resolve_tac_members(self, info, partner_code=None):
+        return get_tac_members(partner_code)
+
+    def resolve_salt_users(self, info):
+        return get_salt_users()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutations, types=[HRS, RSS, BVIT, SCAM])
