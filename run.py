@@ -143,7 +143,7 @@ def proposal_summary():
     partner = data['partner']
 
     # check permission
-    if not g.user.may_perform(Action.DOWNLOAD_SUMMARY, proposal_code='2018-1-SCI-005', partner=partner):
+    if not g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code=proposal_code):
         raise InvalidUsage(message='You are not allowed to view the pdf summary of proposal {proposal_code}'
                            .format(proposal_code=proposal_code),
                            status_code=403)
@@ -161,7 +161,7 @@ def proposal_summaries():
 
     # check permission
     for proposal_code in proposal_codes:
-        if not g.user.may_perform(Action.DOWNLOAD_SUMMARY, proposal_code='2018-1-SCI-005', partner=partner):
+        if not g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code=proposal_code):
             raise InvalidUsage(message='You are not allowed to view the pdf summary of proposal {proposal_code}'
                                .format(proposal_code=proposal_code),
                                status_code=403)
