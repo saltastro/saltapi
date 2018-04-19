@@ -3,6 +3,8 @@ import pandas as pd
 from data.common import sdb_connect
 from schema.user import UserModel, Role, RoleType, TacMember
 from data.partner import get_partners_for_role
+from util.action import Action
+from util.error import InvalidUsage
 
 
 def get_role(row, user_id):
@@ -124,3 +126,68 @@ join Partner using(Partner_Id)
             ))
 
     return tacs
+
+
+def update_tac_member(partner, member, cursor):
+    """
+    Update a proposal's reviewer.
+
+    Parameters
+    ----------
+    partner : str
+        partner updating member.
+    member : str
+        username of a member.
+    cursor : database cursor
+        Cursor on which the database command is executed.
+
+    Returns
+    -------
+    void
+    """
+
+    if not g.user.may_perform(Action.UPDATE_TAC_COMMENTS,
+                              partner=partner):
+        raise InvalidUsage(message='You are not allowed to update members of {partner}'
+                           .format(partner=partner),
+                           status_code=403)
+
+
+    sql = '''
+    INSERT INTO PiptUserTAC (PiptUser_Id, Partner_Id, Chair)
+SELECT PiptUser_Id, Partner_Id, 0
+FROM PiptUser join Partner on (Partner_Code = %s)
+WHERE  Username = %s
+ON DUPLICATE KEY UPDATE
+    PiptUser_Id=
+        (SELECT PiptUser_Id FROM PiptUser WHERE  Username = %s),
+    Partner_Id=
+        (SELECT  Partner_Id FROM  Partner WHERE Partner_Code = %s),
+    Chair=0'''
+    params = (partner, member, member, partner)
+    cursor.execute(sql, params)
+
+
+def update_tac_members(partner, members):
+    """
+    Update the database with a list of members.
+
+    Parameters
+    ----------
+    partner : str
+       Partner code like "RSA".
+    members : iterable
+        The list of user names of members..
+    """
+
+    connection = sdb_connect()
+    try:
+        with connection.cursor() as cursor:
+            for member in members:
+                update_tac_member(
+                    partner=partner,
+                    member=member['member'],
+                    cursor=cursor)
+            connection.commit()
+    finally:
+        connection.close()

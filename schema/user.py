@@ -95,9 +95,6 @@ class UserModel(ObjectType):
                    self.has_role(RoleType.TAC_MEMBER, partner) or \
                    self.has_role(RoleType.SALT_ASTRONOMER, partner)
 
-        if action == Action.UPDATE_TAC_COMMENTS:
-            return self.has_role(RoleType.ADMINISTRATOR, partner)
-
         if action == Action.UPDATE_LIAISON_ASTRONOMER:
             assigned_liaison = kwargs['liaison_astronomer']
             current_liaison = liaison_astronomer(proposal_code)
