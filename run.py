@@ -9,7 +9,7 @@ from flask_httpauth import HTTPTokenAuth, HTTPBasicAuth, MultiAuth
 from raven.contrib.flask import Sentry
 
 from data.proposal import summary_file
-from data.user import update_tac_members
+from data.user import update_tac_members, remove_tac_members
 from data.technical_review import update_liaison_astronomers, update_reviews
 from schema.query import schema
 from util.action import Action
@@ -134,13 +134,25 @@ def technical_reviews():
     return jsonify(dict(success=True))
 
 
-@app.route("/tac_members_update", methods=['POST'])
+@app.route("/update_tac_members", methods=['POST'])
 @token_auth.login_required
 def tac_members_update():
     data = request.json
-    partner = data['partner_code']
+    partner = data['partner']
     members = data['members']
+    print("add: ", partner, members)
     update_tac_members(partner=partner, members=members)
+    return jsonify(dict(success=True))
+
+
+@app.route("/remove_tac_members", methods=['POST'])
+@token_auth.login_required
+def tac_members_delete():
+    data = request.json
+    partner = data['partner']
+    members = data['members']
+    print("dell: ", partner, members)
+    remove_tac_members(partner=partner, members=members)
     return jsonify(dict(success=True))
 
 
