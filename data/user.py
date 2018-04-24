@@ -45,7 +45,6 @@ def get_role(row, user_id):
         )
 
     if len(results) > 0 and int(results.iloc[0]["Value"]) > 1:
-
         role.append(
             Role(
                 type=RoleType.ADMINISTRATOR,
@@ -101,6 +100,7 @@ def get_salt_users():
 
     return users
 
+
 def get_tac_members(partner):
     sql = '''select * from PiptUser
 join PiptUserTAC using(PiptUser_Id)
@@ -128,7 +128,52 @@ join Partner using(Partner_Id)
     return tacs
 
 
-def update_tac_member(partner, member, cursor):
+def update_tac_member(partner, member, is_chair, cursor):
+    """
+    Update a proposal's reviewer.
+
+    Parameters
+    ----------
+    partner : str
+        partner updating member.
+    member : str
+        Pipt username of a member
+    is_chair: Int
+        a small Int either 0 or 1
+    cursor : database cursor
+        Cursor on which the database command is executed.
+
+    Returns
+    -------
+    void
+    """
+
+    if not g.user.may_perform(Action.UPDATE_TAC_COMMENTS,
+                              partner=partner):
+        raise InvalidUsage(message='You are not allowed to update members of {partner}'
+                           .format(partner=partner),
+                           status_code=403)
+
+    if is_chair not in [0, 1]:
+        raise InvalidUsage(message='is_chair is a small Int either 0 or 1'
+                           .format(partner=partner),
+                           status_code=403)
+    sql = '''
+INSERT INTO PiptUserTAC (PiptUser_Id, Partner_Id, Chair)
+    SELECT PiptUser_Id, Partner_Id, 0
+    FROM PiptUser join Partner on (Partner_Code = %s)
+    WHERE  Username = %s
+    ON DUPLICATE KEY UPDATE
+        PiptUser_Id=
+            (SELECT PiptUser_Id FROM PiptUser WHERE  Username = %s),
+        Partner_Id=
+            (SELECT  Partner_Id FROM  Partner WHERE Partner_Code = %s),
+        Chair=%s'''
+    params = (partner, member, member, partner, is_chair)
+    cursor.execute(sql, params)
+
+
+def remove_tac_member(partner, member, cursor):
     """
     Update a proposal's reviewer.
 
@@ -152,19 +197,14 @@ def update_tac_member(partner, member, cursor):
                            .format(partner=partner),
                            status_code=403)
 
-
     sql = '''
-    INSERT INTO PiptUserTAC (PiptUser_Id, Partner_Id, Chair)
-SELECT PiptUser_Id, Partner_Id, 0
-FROM PiptUser join Partner on (Partner_Code = %s)
-WHERE  Username = %s
-ON DUPLICATE KEY UPDATE
-    PiptUser_Id=
-        (SELECT PiptUser_Id FROM PiptUser WHERE  Username = %s),
-    Partner_Id=
-        (SELECT  Partner_Id FROM  Partner WHERE Partner_Code = %s),
-    Chair=0'''
-    params = (partner, member, member, partner)
+DELETE FROM PiptUserTAC
+WHERE
+    PiptUser_Id = (SELECT PiptUser_Id FROM PiptUser WHERE  Username = %s)
+    AND
+    Partner_Id = (SELECT  Partner_Id FROM  Partner WHERE Partner_Code = %s)
+'''
+    params = (member, partner)
     cursor.execute(sql, params)
 
 
@@ -178,6 +218,10 @@ def update_tac_members(partner, members):
        Partner code like "RSA".
     members : iterable
         The list of user names of members..
+        like [
+            {member: 'user-1', is_chair: 0},
+            {member: 'user-4', is_chair: 1}
+        ]
     """
 
     connection = sdb_connect()
@@ -185,6 +229,33 @@ def update_tac_members(partner, members):
         with connection.cursor() as cursor:
             for member in members:
                 update_tac_member(
+                    partner=partner,
+                    member=member['member'],
+                    is_chair=member['is_chair'],
+                    cursor=cursor)
+                connection.commit()
+
+    finally:
+        connection.close()
+
+
+def remove_tac_members(partner, members):
+    """
+    remove the list of given members from the database for the give partner
+
+    Parameters
+    ----------
+    partner : str
+       Partner code like "RSA".
+    members : iterable
+        The list of user names of members.. like [{member: 'user-1'}, {member: 'user-4'}]
+    """
+
+    connection = sdb_connect()
+    try:
+        with connection.cursor() as cursor:
+            for member in members:
+                remove_tac_member(
                     partner=partner,
                     member=member['member'],
                     cursor=cursor)
