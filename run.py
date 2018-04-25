@@ -134,24 +134,51 @@ def technical_reviews():
     return jsonify(dict(success=True))
 
 
-@app.route("/update_tac_members", methods=['POST'])
+@app.route("/update-tac-members", methods=['POST'])
 @token_auth.login_required
 def tac_members_update():
+    """
+    it update the tac members or add new tac members of a given partner.
+    if member exist it will update else add
+    Request
+    ----------
+        partner: str
+            partner code like "RSA"
+        members: iterable
+            an array of object of shape {member: 'user-1', is_chair: 0}
+
+    Returns
+    -------
+        success: bool
+            Bool indicating whether the users had been updated/added or not.
+    """
     data = request.json
     partner = data['partner']
     members = data['members']
-    print("add: ", partner, members)
     update_tac_members(partner=partner, members=members)
     return jsonify(dict(success=True))
 
 
-@app.route("/remove_tac_members", methods=['POST'])
+@app.route("/remove-tac-members", methods=['POST'])
 @token_auth.login_required
 def tac_members_delete():
+    """
+    it remove the tac members which are given of a given partner.
+    Request
+    ----------
+        partner: str
+            partner code like "RSA"
+        members: iterable
+            an array of object of shape {member: 'user-1', is_chair: 0}
+
+    Returns
+    -------
+        success: bool
+            Bool indicating whether the users had been removed or not.
+    """
     data = request.json
     partner = data['partner']
     members = data['members']
-    print("dell: ", partner, members)
     remove_tac_members(partner=partner, members=members)
     return jsonify(dict(success=True))
 
