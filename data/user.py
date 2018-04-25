@@ -130,16 +130,16 @@ join Partner using(Partner_Id)
 
 def update_tac_member(partner, member, is_chair, cursor):
     """
-    Update a proposal's reviewer.
+    Update or add a tac member to be TAC on given partner.
 
     Parameters
     ----------
     partner : str
-        partner updating member.
+        The partner code (such as "RSA") of the partner whose TAC is updated
     member : str
-        Pipt username of a member
-    is_chair: Int
-        a small Int either 0 or 1
+        The username of the added/updated TAC member.
+    is_chair: boolean
+        true if user is a chair
     cursor : database cursor
         Cursor on which the database command is executed.
 
@@ -153,11 +153,7 @@ def update_tac_member(partner, member, is_chair, cursor):
         raise InvalidUsage(message='You are not allowed to update members of {partner}'
                            .format(partner=partner),
                            status_code=403)
-
-    if is_chair not in [0, 1]:
-        raise InvalidUsage(message='is_chair is a small Int either 0 or 1'
-                           .format(partner=partner),
-                           status_code=403)
+    chair = 1 if is_chair else 0
     sql = '''
 INSERT INTO PiptUserTAC (PiptUser_Id, Partner_Id, Chair)
     SELECT PiptUser_Id, Partner_Id, 0
@@ -169,20 +165,20 @@ INSERT INTO PiptUserTAC (PiptUser_Id, Partner_Id, Chair)
         Partner_Id=
             (SELECT  Partner_Id FROM  Partner WHERE Partner_Code = %s),
         Chair=%s'''
-    params = (partner, member, member, partner, is_chair)
+    params = (partner, member, member, partner, chair)
     cursor.execute(sql, params)
 
 
 def remove_tac_member(partner, member, cursor):
     """
-    Update a proposal's reviewer.
+    remove a given member as a tac ot the given partner.
 
     Parameters
     ----------
     partner : str
-        partner updating member.
+       The partner code (such as "RSA") of the partner whose TAC is updated.
     member : str
-        username of a member.
+        The username of the TAC member to be removed.
     cursor : database cursor
         Cursor on which the database command is executed.
 
@@ -210,7 +206,7 @@ WHERE
 
 def update_tac_members(partner, members):
     """
-    Update the database with a list of members.
+    Update members which are already on the database or add new once form the given list for the given partner.
 
     Parameters
     ----------
@@ -219,8 +215,8 @@ def update_tac_members(partner, members):
     members : iterable
         The list of user names of members..
         like [
-            {member: 'user-1', is_chair: 0},
-            {member: 'user-4', is_chair: 1}
+            {member: 'user-1', is_chair: False},
+            {member: 'user-4', is_chair: True}
         ]
     """
 
@@ -241,12 +237,12 @@ def update_tac_members(partner, members):
 
 def remove_tac_members(partner, members):
     """
-    remove the list of given members from the database for the give partner
+    Remove all members from the given list of members from being the tac members of given partner
 
     Parameters
     ----------
     partner : str
-       Partner code like "RSA".
+        Partner code like "RSA".
     members : iterable
         The list of user names of members.. like [{member: 'user-1'}, {member: 'user-4'}]
     """
