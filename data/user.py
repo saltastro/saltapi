@@ -171,7 +171,7 @@ INSERT INTO PiptUserTAC (PiptUser_Id, Partner_Id, Chair)
 
 def remove_tac_member(partner, member, cursor):
     """
-    remove a given member as a tac ot the given partner.
+    Remove a list of members from a partner's TAC.
 
     Parameters
     ----------
@@ -206,14 +206,15 @@ WHERE
 
 def update_tac_members(partner, members):
     """
-    Update members which are already on the database or add new once form the given list for the given partner.
+    dd or update a list of members for a partner's TAC.
+    If a member is not in the database, they are added. Otherwise their details are updated in the database.
 
     Parameters
     ----------
     partner : str
        Partner code like "RSA".
     members : iterable
-        The list of user names of members..
+        The list of usernames of members, like
         like [
             {member: 'user-1', is_chair: False},
             {member: 'user-4', is_chair: True}
@@ -237,14 +238,14 @@ def update_tac_members(partner, members):
 
 def remove_tac_members(partner, members):
     """
-    Remove all members from the given list of members from being the tac members of given partner
+    Remove a list of members from a partner's TAC.
 
     Parameters
     ----------
     partner : str
         Partner code like "RSA".
     members : iterable
-        The list of user names of members.. like [{member: 'user-1'}, {member: 'user-4'}]
+        The list of usernames of members, like [{member: 'user-1'}, {member: 'user-4'}]
     """
 
     connection = sdb_connect()
