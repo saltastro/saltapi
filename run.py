@@ -4,12 +4,12 @@ import traceback
 from functools import wraps
 
 from flask import Flask, jsonify, request, g, make_response, Response, render_template, send_file
-from flask_cors import CORS
 from flask_graphql import GraphQLView
 from flask_httpauth import HTTPTokenAuth, HTTPBasicAuth, MultiAuth
 from raven.contrib.flask import Sentry
 
 from data.proposal import summary_file
+from data.user import update_tac_members, remove_tac_members
 from data.technical_review import update_liaison_astronomers, update_reviews
 from schema.query import schema
 from util.action import Action
@@ -131,6 +131,55 @@ def technical_reviews():
     semester = data['semester']
     reviews = data['reviews']
     update_reviews(semester=semester, reviews=reviews)
+    return jsonify(dict(success=True))
+
+
+@app.route("/update-tac-members", methods=['POST'])
+@token_auth.login_required
+def tac_members_update():
+    """
+    it update the tac members or add new tac members of a given partner.
+    if member exist it will update else add
+    Request
+    ----------
+        partner: str
+            partner code like "RSA"
+        members: iterable
+            an array of object of shape {member: 'user-1', is_chair: 0}
+
+    Returns
+    -------
+        success: bool
+            Bool indicating whether the users had been updated/added or not.
+    """
+    data = request.json
+    partner = data['partner']
+    members = data['members']
+    update_tac_members(partner=partner, members=members)
+    return jsonify(dict(success=True))
+
+
+@app.route("/remove-tac-members", methods=['POST'])
+@token_auth.login_required
+def tac_members_delete():
+    """
+    it remove the tac members which are given of a given partner.
+    Request
+    ----------
+        partner: str
+            partner code like "RSA"
+        members: iterable
+            an array of object of shape {member: 'user-1', is_chair: 0}
+
+    Returns
+    -------
+        success: bool
+            Bool indicating whether the users had been removed or not.
+    """
+    data = request.json
+    partner = data['partner']
+    members = data['members']
+    remove_tac_members(partner=partner, members=members)
     return jsonify(dict(success=True))
 
 
