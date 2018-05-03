@@ -171,7 +171,7 @@ INSERT INTO PiptUserTAC (PiptUser_Id, Partner_Id, Chair)
 
 def remove_tac_member(partner, member, cursor):
     """
-    Remove a list of members from a partner's TAC.
+    Remove a member from a partner's TAC.
 
     Parameters
     ----------
@@ -206,7 +206,7 @@ WHERE
 
 def update_tac_members(partner, members):
     """
-    dd or update a list of members for a partner's TAC.
+    Add or update a list of members for a partner's TAC.
     If a member is not in the database, they are added. Otherwise their details are updated in the database.
 
     Parameters
