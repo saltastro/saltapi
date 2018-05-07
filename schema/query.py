@@ -8,7 +8,7 @@ from data.partner import get_partners
 from data.targets import get_targets
 from data.salt_astronomer import get_salt_astronomer
 from schema.instruments import *
-from schema.user import UserModel, TacMember
+from schema.user import User, TacMember
 from schema.mutations import Mutations
 
 
@@ -23,10 +23,10 @@ class Query(graphene.ObjectType):
                                 " Semester must be provided in all cases")
     partner_allocations = Field(List(PartnerAllocations), semester=String(), partner_code=String(),
                                 description="List of all allocations of SALT Partners")
-    user = Field(UserModel)
+    user = Field(User)
     S_a_l_t_astronomers = Field(List(SALTAstronomer))
     tac_members = Field(List(TacMember), partner_code=String())
-    salt_users = Field(List(UserModel), partner_code=String())
+    salt_users = Field(List(User), partner_code=String())
 
     def resolve_proposals(self, info, semester=None, partner_code=None, all_proposals=False):
         if semester is None:
