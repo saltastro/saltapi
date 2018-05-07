@@ -65,7 +65,6 @@ class Proposals(ObjectType):
     act_on_alert = Boolean()
     allocated_time = List(ProposalAllocatedTime)
     code = String()
-    id = ID()
     instruments = Field(Instruments)
     is_p4 = Boolean()
     is_thesis = Boolean()

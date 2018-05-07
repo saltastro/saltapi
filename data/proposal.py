@@ -80,7 +80,6 @@ def make_proposal(row, ids, text, tech_report_entries, time_Requests):
             tech_reports = None
     if row["ProposalCode_Id"] in ids["ProposalCode_Ids"]:
         proposal = Proposals(
-            id="Proposal: " + str(row["ProposalCode_Id"]),
             code=row["Proposal_Code"],
             is_p4=row["P4"] == 1,
             status=row["Status"],
@@ -107,7 +106,6 @@ def make_proposal(row, ids, text, tech_report_entries, time_Requests):
         )
     else:
         proposal = Proposals(
-            id="Proposal: " + str(row["ProposalCode_Id"]),
             code=row["Proposal_Code"],
             title=title,
             abstract=abstract,
