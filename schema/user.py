@@ -37,7 +37,7 @@ class Role(ObjectType):
         return self.type.value
 
 
-class UserModel(ObjectType):
+class User(ObjectType):
     first_name = String()
     last_name = String()
     email = String()
