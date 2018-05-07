@@ -1,7 +1,7 @@
 from flask import g
 import pandas as pd
 from data.common import sdb_connect
-from schema.user import UserModel, Role, RoleType, TacMember
+from schema.user import User, Role, RoleType, TacMember
 from data.partner import get_partners_for_role
 from util.action import Action
 from util.error import InvalidUsage
@@ -71,7 +71,7 @@ def get_user(user_id):
     for index, row in results.iterrows():
         username = row["Username"]
         if username not in user:
-            user[username] = UserModel(
+            user[username] = User(
                 username=row["Username"],
                 first_name=row["FirstName"],
                 last_name=row["Surname"],
@@ -90,7 +90,7 @@ def get_salt_users():
     users = []
     for index, row in results.iterrows():
         if row["Username"] is not None:
-            users.append(UserModel(
+            users.append(User(
                 username=row["Username"],
                 first_name=row["FirstName"],
                 last_name=row["Surname"],
