@@ -24,7 +24,7 @@ class PI(ObjectType):
     email = String()
 
 
-class Distribution(ObjectType):
+class PartnerTimeRequest(ObjectType):
     partner_name = String()
     partner_code = String()
     time = Int()
@@ -32,7 +32,7 @@ class Distribution(ObjectType):
 
 class RequestedTimeM(ObjectType):
     semester = String()
-    distribution = Field(List(Distribution))
+    partnerTimeRequest = Field(List(PartnerTimeRequest))
     minimum_useful_time = Int()
 
 

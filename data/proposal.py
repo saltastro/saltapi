@@ -26,7 +26,7 @@ def priority(p, time, pat):
 
 
 def add_time_request(data, time_requests):
-    from schema.proposal import RequestedTimeM, Distribution
+    from schema.proposal import RequestedTimeM
     semester = str(data['Year']) + "-" + str(data['Semester'])
 
     def is_sem_in_time():
@@ -41,7 +41,7 @@ def add_time_request(data, time_requests):
             RequestedTimeM(
                 semester=semester,
                 minimum_useful_time=None if pd.isnull(data["P1MinimumUsefulTime"]) else data["P1MinimumUsefulTime"],
-                distribution=[]
+                partnerTimeRequest=[]
             )
         )
     return time_requests
@@ -137,7 +137,7 @@ def make_proposal(row, ids, text, tech_report_entries, time_Requests):
 
 
 def query_proposal_data(semester, partner_code=None, all_proposals=False):
-    from schema.proposal import Distribution, ProposalAllocatedTime, TacComment
+    from schema.proposal import PartnerTimeRequest, ProposalAllocatedTime, TacComment
 
     ids = get_proposal_ids(semester, partner_code)
     id_list = sql_list_string(ids['all_proposals']) if all_proposals else sql_list_string(ids['ProposalCode_Ids'])
@@ -244,8 +244,8 @@ where mp.ProposalCode_Id in {id_list}
             for p in proposal.time_requests:
 
                 if p.semester == row['CurSemester']:
-                    p.distribution.append(
-                        Distribution(
+                    p.partnerTimeRequest.append(
+                        PartnerTimeRequest(
                             partner_name=row['Partner_Name'],
                             partner_code=row['Partner_Code'],
                             time=int(row['TimePerPartner'])
