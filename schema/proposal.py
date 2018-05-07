@@ -30,7 +30,7 @@ class PartnerTimeRequest(ObjectType):
     time = Int()
 
 
-class RequestedTimeM(ObjectType):
+class TimeRequest(ObjectType):
     semester = String()
     partnerTimeRequest = Field(List(PartnerTimeRequest))
     minimum_useful_time = Int()
@@ -74,7 +74,7 @@ class Proposals(ObjectType):
     tac_comment = List(TacComment)
     targets = Field(List(Target))
     tech_reviews = Field(List(TechReview))
-    time_requests = List(RequestedTimeM)
+    time_requests = List(TimeRequest)
     title = String()
     transparency = String()
     S_a_l_t_astronomer = Field(SALTAstronomer)
