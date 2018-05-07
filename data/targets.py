@@ -14,7 +14,6 @@ def target(row):
             id="Target: " + str(row['Target_Id']),
             name=row['Target_Name'],
             optional=row['Optional'] == 1,
-            proposal_code=row['Proposal_Code'],
             coordinates=Coordinates(
                 ra=(row['RaH'] + row['RaM'] / 60 + row['RaS'] / 3600) / (24 / 360),
                 dec=(sign * (row['DecD'] + row['DecM'] / 60 + row['DecS'] / 3600)))
@@ -47,7 +46,6 @@ def get_targets(ids=None, proposals=None, semester=None, partner_code=None):
     sql = """
             SELECT * 
                 FROM Proposal
-                    JOIN ProposalCode using (ProposalCode_Id) 
                     JOIN P1ProposalTarget using (ProposalCode_Id) 
                     JOIN Target using (Target_Id)
                     JOIN TargetCoordinates using(TargetCoordinates_Id) 
