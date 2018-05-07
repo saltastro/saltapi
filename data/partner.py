@@ -5,7 +5,7 @@ from schema.user import RoleType
 
 
 def get_partners(semester, partner):
-    from schema.partner import PartnerAllocations, AllocatedTime
+    from schema.partner import Partner, AllocatedTime
 
     sql = ''' 
             select * from  PeriodTimeDist 
@@ -20,7 +20,7 @@ def get_partners(semester, partner):
     results = pd.read_sql(sql, conn)
     conn.close()
 
-    partners = [PartnerAllocations(
+    partners = [Partner(
         id="Partner: " + str(row["Partner_Id"]),
         name=row["Partner_Name"],
         code=row["Partner_Code"],
@@ -35,7 +35,7 @@ def get_partners(semester, partner):
             used_p2=row['Used2'],
             used_p3=row['Used3']
         )) for index, row in results.iterrows()] if partner is not None else \
-        [PartnerAllocations(
+        [Partner(
             id="Partner: " + str(row["Partner_Id"]),
             name=row["Partner_Name"] if g.user.has_role(RoleType.ADMINISTRATOR, row["Partner_Code"]) else None,
             code=row["Partner_Code"] if g.user.has_role(RoleType.ADMINISTRATOR, row["Partner_Code"]) else None,

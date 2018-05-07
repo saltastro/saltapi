@@ -21,7 +21,7 @@ class ScienceTime(ObjectType):
     p4 = Int()
 
 
-class PartnerAllocations(ObjectType):
+class Partner(ObjectType):
     id = ID()
     name = String()
     code = String()
