@@ -1,5 +1,4 @@
 import os
-import tempfile
 import pandas as pd
 from data import sdb_connect
 from data.targets import get_targets
@@ -26,7 +25,7 @@ def priority(p, time, pat):
 
 
 def add_time_request(data, time_requests):
-    from schema.proposal import RequestedTimeM
+    from schema.proposal import TimeRequest
     semester = str(data['Year']) + "-" + str(data['Semester'])
 
     def is_sem_in_time():
@@ -38,7 +37,7 @@ def add_time_request(data, time_requests):
 
     if not is_sem_in_time():
         time_requests.append(
-            RequestedTimeM(
+            TimeRequest(
                 semester=semester,
                 minimum_useful_time=None if pd.isnull(data["P1MinimumUsefulTime"]) else data["P1MinimumUsefulTime"],
                 partnerTimeRequest=[]
