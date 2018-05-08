@@ -65,4 +65,4 @@ class Proposals(ObjectType):
     time_requests = List(TimeRequest)
     title = String()
     transparency = String()
-    S_a_l_t_astronomer = Field(User)
+    liaison_s_a_l_t_astronomer = Field(User)
