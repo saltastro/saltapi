@@ -21,7 +21,7 @@ class Magnitudes(ObjectType):
 class Target(ObjectType):
     id = ID()
     name = String()
-    optional = Boolean()
+    is_optional = Boolean()
     coordinates = Field(Coordinates)
     magnitudes = Field(Magnitudes)
     moving = Field(Moving)

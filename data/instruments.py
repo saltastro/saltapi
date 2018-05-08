@@ -56,7 +56,7 @@ def get_instruments(id_list, proposals):
                             etalon_config=row['EtalonConfig'],
                         ),
                         polarimetry=Polarimetry(
-                            pattern_name=row['PatternName']
+                            waveplate_pattern=row['PatternName']
                         ),
                         mask=Mask(
                             type=row['RssMaskType'],
@@ -68,14 +68,14 @@ def get_instruments(id_list, proposals):
                 proposals[row["Proposal_Code"]].instruments.hrs.append(
                     HRS(
                         type="HRS",
-                        exposure_mode=row["ExposureMode"]
+                        detector_mode=row["ExposureMode"]
                     )
                 )
             if not pd.isnull(row["P1Bvit_Id"]):
                 proposals[row["Proposal_Code"]].instruments.bvit.append(
                     BVIT(
                         type="BVIT",
-                        filter_name=row['BvitFilter_Name']
+                        filter=row['BvitFilter_Name']
                     )
                 )
             if not pd.isnull(row["P1Salticam_Id"]):

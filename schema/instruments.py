@@ -6,7 +6,7 @@ class Spectroscopy(ObjectType):
 
 
 class Polarimetry(ObjectType):
-    pattern_name = String()
+    waveplate_pattern = String()
 
 
 class FabryPerot(ObjectType):
@@ -22,7 +22,7 @@ class Mask(ObjectType):
 
 class BVIT(ObjectType):
     type = String()
-    filter_name = String()
+    filter = String()
 
 
 class SCAM(ObjectType):
@@ -32,7 +32,7 @@ class SCAM(ObjectType):
 
 
 class HRS(ObjectType):
-    exposure_mode = String()
+    detector_mode = String()
     type = String()
 
 

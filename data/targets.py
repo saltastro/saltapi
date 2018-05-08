@@ -13,7 +13,7 @@ def target(row):
     return Target(
             id="Target: " + str(row['Target_Id']),
             name=row['Target_Name'],
-            optional=row['Optional'] == 1,
+            is_optional=row['Optional'] == 1,
             coordinates=Coordinates(
                 ra=(row['RaH'] + row['RaM'] / 60 + row['RaS'] / 3600) / (24 / 360),
                 dec=(sign * (row['DecD'] + row['DecM'] / 60 + row['DecS'] / 3600)))
