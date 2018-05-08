@@ -45,7 +45,6 @@ def get_instruments(id_list, proposals):
                     RSS(
                         type="RSS",
                         detector_mode=row['RSDetectorMode'],
-                        xml_detector_mode=row['RSXmlDetectorMode'],
                         mode=row['Mode'],
                         spectroscopy=Spectroscopy(
                             grating=row["Grating"]
@@ -82,8 +81,7 @@ def get_instruments(id_list, proposals):
                 proposals[row["Proposal_Code"]].instruments.scam.append(
                     SCAM(
                         type="SCAM",
-                        detector_mode=row['SCDetectorMode'],
-                        xml_detector_mode=row['SCXmlDetectorMode']
+                        detector_mode=row['SCDetectorMode']
                     )
                 )
         except KeyError:

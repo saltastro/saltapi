@@ -148,7 +148,7 @@ def make_proposal(row, ids, text, tech_report_entries, time_Requests):
 
 
 def query_proposal_data(semester, partner_code=None, all_proposals=False):
-    from schema.proposal import PartnerTimeRequest, ProposalAllocatedTime, TacComment
+    from schema.proposal import PartnerTimeRequest, ProposalAllocatedTime, TacComment, Partner
 
     ids = get_proposal_ids(semester, partner_code)
     id_list = sql_list_string(ids['all_proposals']) if all_proposals else sql_list_string(ids['ProposalCode_Ids'])
@@ -265,8 +265,10 @@ where mp.ProposalCode_Id in {id_list}
                 if p.semester == row['CurSemester']:
                     p.partnerTimeRequest.append(
                         PartnerTimeRequest(
-                            partner_name=row['Partner_Name'],
-                            partner_code=row['Partner_Code'],
+                            partner=Partner(
+                                code=row['Partner_Code'],
+                                name=row['Partner_Name']
+                            ),
                             time=int(row['TimePerPartner'])
                         )
                     )
@@ -292,11 +294,16 @@ where mp.ProposalCode_Id in {id_list}
     for index, row in pd.read_sql(all_time_sql, conn).iterrows():
         partner, proposal = row['Partner_Code'], row["Proposal_Code"]
         pat = ProposalAllocatedTime(
-            partner_code=row['Partner_Code'],
-            partner_name=row['Partner_Name']
+            partner=Partner(
+                code=row['Partner_Code'],
+                name=row['Partner_Name']
+            )
         )
         tac_comment = TacComment(
-            partner_code=row['Partner_Code'],
+            partner=Partner(
+                code=row['Partner_Code'],
+                name=row['Partner_Name']
+            ),
             comment=row['TacComment']
         )
         if proposal in proposals:

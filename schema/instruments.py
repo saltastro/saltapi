@@ -28,7 +28,6 @@ class BVIT(ObjectType):
 class SCAM(ObjectType):
     type = String()
     detector_mode = String()
-    xml_detector_mode = String()
 
 
 class HRS(ObjectType):
@@ -40,7 +39,6 @@ class RSS(ObjectType):
     type = String()
     mode = String()
     detector_mode = String()
-    xml_detector_mode = String()
     spectroscopy = Field(Spectroscopy)
     fabry_perot = Field(FabryPerot)
     polarimetry = Field(Polarimetry)

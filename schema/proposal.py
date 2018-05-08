@@ -1,5 +1,6 @@
 from graphene import ObjectType, String, Boolean, Field, Int, List, Float
 from schema.instruments import Instruments
+from schema.partner import Partner
 from schema.target import Target
 from schema.user import User
 
@@ -12,8 +13,7 @@ class ProposalInfoM(ObjectType):
 
 
 class PartnerTimeRequest(ObjectType):
-    partner_name = String()
-    partner_code = String()
+    partner = Field(Partner)
     time = Int()
 
 
@@ -24,8 +24,7 @@ class TimeRequest(ObjectType):
 
 
 class ProposalAllocatedTime(ObjectType):
-    partner_code = String()
-    partner_name = String()
+    partner = Field(Partner)
     p0 = Float()
     p1 = Float()
     p2 = Float()
@@ -34,7 +33,7 @@ class ProposalAllocatedTime(ObjectType):
 
 
 class TacComment(ObjectType):
-    partner_code = String()
+    partner = Field(Partner)
     comment = String()
 
     def __eq__(self, other):
