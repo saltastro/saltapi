@@ -18,7 +18,8 @@ Conceptual Solution & Logical Solution
 **************************************
 This follows a use case approach to explain the endpoints used by the salt-api.
 
-* **Get proposals (get_proposals)**
+Get proposals (get_proposals)
+#############################
 
   Returns the list of proposals containing json data about a single proposal.
 
