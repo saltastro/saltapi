@@ -1,4 +1,5 @@
-from schema.target import Target, Coordinates
+from pandas._libs.tslib import NaTType
+from schema.target import Target, Position, Magnitude
 from data.common import get_proposal_ids, sql_list_string
 import pandas as pd
 from data import sdb_connect
@@ -11,13 +12,22 @@ def target(row):
     """
     sign = -1 if row['DecSign'] == '-' else 1
     return Target(
-            id="Target: " + str(row['Target_Id']),
-            name=row['Target_Name'],
-            is_optional=row['Optional'] == 1,
-            coordinates=Coordinates(
-                ra=(row['RaH'] + row['RaM'] / 60 + row['RaS'] / 3600) / (24 / 360),
-                dec=(sign * (row['DecD'] + row['DecM'] / 60 + row['DecS'] / 3600)))
+        id="Target: " + str(row['Target_Id']),
+        name=row['Target_Name'],
+        is_optional=row['Optional'] == 1,
+        position=Position(
+            ra=(row['RaH'] + row['RaM'] / 60 + row['RaS'] / 3600) / (24 / 360),
+            dec=(sign * (row['DecD'] + row['DecM'] / 60 + row['DecS'] / 3600)),
+            ra_dot=None if isinstance(row['Epoch'], NaTType) else row['RaDot'],
+            dec_dot=None if isinstance(row['Epoch'], NaTType) else row['DecDot'],
+            epoch=None if isinstance(row['Epoch'], NaTType) else row['Epoch']
+        ),
+        magnitude=Magnitude(
+            filter=row['FilterName'],
+            min_magnitude=row['MinMag'],
+            max_magnitude=row['MaxMag']
         )
+    )
 
 
 def get_targets(ids=None, proposals=None, semester=None, partner_code=None):
@@ -44,14 +54,16 @@ def get_targets(ids=None, proposals=None, semester=None, partner_code=None):
         ids = get_proposal_ids(semester=semester, partner_code=partner_code)
     id_list = sql_list_string(ids['all_proposals']) if partner_code is None else sql_list_string(ids['ProposalCode_Ids'])
     sql = """
-            SELECT * 
-                FROM Proposal
-                    JOIN P1ProposalTarget using (ProposalCode_Id) 
-                    JOIN Target using (Target_Id)
-                    JOIN TargetCoordinates using(TargetCoordinates_Id) 
-           """
-    sql += "  WHERE ProposalCode_Id in {id_list} order by ProposalCode_Id"\
-        .format(id_list=id_list)
+     SELECT *
+        FROM Proposal
+            JOIN P1ProposalTarget using (ProposalCode_Id)
+            JOIN Target using (Target_Id)
+            JOIN TargetCoordinates using(TargetCoordinates_Id)
+            JOIN TargetMagnitudes using(TargetMagnitudes_Id)
+            JOIN Bandpass using(Bandpass_Id)
+            LEFT JOIN MovingTarget using(MovingTarget_Id)
+        WHERE ProposalCode_Id in {id_list} order by ProposalCode_Id
+     """.format(id_list=id_list)
 
     conn = sdb_connect()
     results = pd.read_sql(sql, conn)
