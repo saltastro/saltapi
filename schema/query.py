@@ -24,7 +24,7 @@ class Query(graphene.ObjectType):
     partner_allocations = Field(List(Partner), semester=String(), partner_code=String(),
                                 description="List of all allocations of SALT Partners")
     user = Field(User)
-    S_a_l_t_astronomers = Field(List(SALTAstronomer))
+    S_a_l_t_astronomers = Field(List(User))
     tac_members = Field(List(TacMember), partner_code=String())
     salt_users = Field(List(User), partner_code=String())
 

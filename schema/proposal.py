@@ -1,14 +1,7 @@
-from graphene import ObjectType, String, ID, Boolean, Field, Int, List, Float
+from graphene import ObjectType, String, Boolean, Field, Int, List, Float
 from schema.instruments import Instruments
-from schema.salt_astronomer import SALTAstronomer
 from schema.target import Target
-
-
-class Investigator(ObjectType):
-    id = ID()
-    first_name = String()
-    surname = String()
-    email = String()
+from schema.user import User
 
 
 class ProposalInfoM(ObjectType):
@@ -16,12 +9,6 @@ class ProposalInfoM(ObjectType):
     status = String()
     transparency = String()
     max_seeing = Float()
-
-
-class PI(ObjectType):
-    surname = String()
-    name = String()
-    email = String()
 
 
 class PartnerTimeRequest(ObjectType):
@@ -56,7 +43,7 @@ class TacComment(ObjectType):
 
 class TechReview(ObjectType):
     semester = String()
-    reviewer = Field(SALTAstronomer)
+    reviewer = Field(User)
     report = String()
 
 
@@ -69,7 +56,8 @@ class Proposals(ObjectType):
     is_p4 = Boolean()
     is_thesis = Boolean()
     max_seeing = Float()
-    pi = Field(PI)
+    principal_investigator = Field(User)
+    principal_contact = Field(User)
     status = String()
     tac_comment = List(TacComment)
     targets = Field(List(Target))
@@ -77,4 +65,4 @@ class Proposals(ObjectType):
     time_requests = List(TimeRequest)
     title = String()
     transparency = String()
-    S_a_l_t_astronomer = Field(SALTAstronomer)
+    S_a_l_t_astronomer = Field(User)

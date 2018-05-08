@@ -47,7 +47,7 @@ def add_time_request(data, time_requests):
 
 
 def make_proposal(row, ids, text, tech_report_entries, time_Requests):
-    from schema.proposal import Proposals, PI, SALTAstronomer, TechReview
+    from schema.proposal import Proposals, User, TechReview
     from schema.instruments import Instruments
 
     if row["Proposal_Code"] in text:
@@ -56,9 +56,9 @@ def make_proposal(row, ids, text, tech_report_entries, time_Requests):
     else:
         title = None
         abstract = None
-    sa = SALTAstronomer(
-        name=row["SAFname"],
-        surname=row["SASname"],
+    sa = User(
+        first_name=row["SAFname"],
+        last_name=row["SASname"],
         email=row["SAEmail"],
         username=row["SAUsername"]
     ) if row["SAFname"] is not None else None
@@ -66,9 +66,9 @@ def make_proposal(row, ids, text, tech_report_entries, time_Requests):
     if row["ProposalCode_Id"] not in ids["ProposalCode_Ids"]:
         try:
             for tre in tech_report_entries[row["Proposal_Code"]]:
-                reviewer = SALTAstronomer(
-                    name=tre["ReviewerFName"],
-                    surname=tre["ReviewerSName"],
+                reviewer = User(
+                    first_name=tre["ReviewerFName"],
+                    last_name=tre["ReviewerSName"],
                     email=tre["ReviewerEmail"],
                     username=tre["ReviewerUsername"]
                 ) if tre['ReviewerFName'] is not None else None
@@ -89,9 +89,14 @@ def make_proposal(row, ids, text, tech_report_entries, time_Requests):
             targets=[],
             allocated_time=[],
             tac_comment=[],
-            pi=PI(
-                name=None,
-                surname=None,
+            principal_investigator=User(
+                first_name=None,
+                last_name=None,
+                email=None
+            ),
+            principal_contact=User(
+                first_name=None,
+                last_name=None,
                 email=None
             ),
             S_a_l_t_astronomer=sa,
@@ -117,10 +122,17 @@ def make_proposal(row, ids, text, tech_report_entries, time_Requests):
             allocated_time=[],
             targets=[],
             tac_comment=[],
-            pi=PI(
-                name=row["PIFname"],
-                surname=row["PISname"],
+            principal_investigator=User(
+                first_name=row["PIFname"],
+                username=row["PIUsername"],
+                last_name=row["PISname"],
                 email=row["PIEmail"]
+            ),
+            principal_contact=User(
+                first_name=row["PCFname"],
+                username=row["PCUsername"],
+                last_name=row["PCSname"],
+                email=row["PCEmail"]
             ),
             instruments=Instruments(
                 rss=[],
@@ -144,16 +156,24 @@ def query_proposal_data(semester, partner_code=None, all_proposals=False):
     proposals = {}
     proposals_text = {}
     proposal_sql = """
-    select *, i.FirstName as PIFname, i.Surname as PISname, i.Email as PIEmail, tsa.FirstName as SAFname,
-        tsa.Surname as SASname, tsa.Email as SAEmail, sau.Username as SAUsername
+    select *,
+    i.FirstName as PIFname, i.Surname as PISname, i.Email as PIEmail,
+    c.FirstName as PCFname, c.Surname as PCSname, c.Email as PCEmail,
+    tsa.FirstName as SAFname, tsa.Surname as SASname, tsa.Email as SAEmail,
+    sau.Username as SAUsername,
+    piu.Username as PIUsername,
+    pcu.Username as PCUsername
     from ProposalGeneralInfo
         join ProposalStatus using(ProposalStatus_Id)
         join ProposalCode using (ProposalCode_Id)
         left join P1Thesis using (ProposalCode_Id)
         join ProposalContact as pc using (ProposalCode_Id)
         join Investigator as i on (i.Investigator_Id = pc.Leader_Id)
+        join Investigator as c on (c.Investigator_Id = pc.Contact_Id)
         left join Investigator as tsa on (tsa.Investigator_Id = pc.Astronomer_Id)
         left join PiptUser as sau on (sau.Investigator_Id = pc.Astronomer_Id)
+        left join PiptUser as piu on (piu.Investigator_Id = pc.Leader_Id)
+        left join PiptUser as pcu on (pcu.Investigator_Id = pc.Contact_Id)
         join P1ObservingConditions  using (ProposalCode_Id)
         join Transparency using (Transparency_Id)
         join Semester using (Semester_Id)
