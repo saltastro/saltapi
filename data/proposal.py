@@ -99,7 +99,7 @@ def make_proposal(row, ids, text, tech_report_entries, time_Requests):
                 last_name=None,
                 email=None
             ),
-            liaison_s_a_l_t_astronomer=sa,
+            liaison_salt_astronomer=sa,
             instruments=Instruments(
                 rss=[],
                 hrs=[],
@@ -142,7 +142,7 @@ def make_proposal(row, ids, text, tech_report_entries, time_Requests):
             ),
             is_thesis=not pd.isnull(row["ThesisType_Id"]),
             tech_reviews=tech_reports,
-            liaison_s_a_l_t_astronomer=sa,
+            liaison_salt_astronomer=sa,
         )
     return proposal
 
