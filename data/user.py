@@ -1,6 +1,7 @@
 from flask import g
 import pandas as pd
 from data.common import sdb_connect
+from schema.partner import Partner
 from schema.user import User, Role, RoleType, TacMember
 from data.partner import get_partners_for_role
 from util.action import Action
@@ -120,8 +121,10 @@ join Partner using(Partner_Id)
                 first_name=row["FirstName"],
                 last_name=row["Surname"],
                 email=row["Email"],
-                partner_code=row["Partner_Code"],
-                partner_name=row["Partner_Name"],
+                partner=Partner(
+                    code=row["Partner_Code"],
+                    name=row["Partner_Name"]
+                ),
                 is_chair=row["Chair"] == 1
             ))
 
