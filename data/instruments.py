@@ -1,10 +1,8 @@
-from pymysql.connections import Connection
 import pandas as pd
 from data import sdb_connect
-from data.common import sql_list_string
 
 
-def get_instruments(id_list, proposals):
+def get_instruments(proposal_ids, proposals):
     from schema.instruments import RSS, HRS, BVIT, SCAM, Spectroscopy, Polarimetry, FabryPerot, Mask
 
     instruments_sql = ' select *, sc.DetectorMode as SCDetectorMode, sc.XmlDetectorMode as SCXmlDetectorMode, ' \
@@ -31,7 +29,7 @@ def get_instruments(id_list, proposals):
                       '   left join BvitFilter using(BvitFilter_Id) ' \
                       '   left join P1Hrs using(P1Hrs_Id) ' \
                       '   left join HrsMode using(HrsMode_Id) ' \
-                      '  where ProposalCode_Id in {id_list}'.format(id_list=id_list)
+                      '  where ProposalCode_Id in {proposal_ids}'.format(proposal_ids=proposal_ids)
 
     conn = sdb_connect()
 
@@ -41,7 +39,7 @@ def get_instruments(id_list, proposals):
     for index, row in i_results.iterrows():
         try:
             if not pd.isnull(row["P1Rss_Id"]):
-                proposals[row["Proposal_Code"]].instruments.rss.append(
+                proposals[row["Proposal_Code"]].instruments.append(
                     RSS(
                         type="RSS",
                         detector_mode=row['RSDetectorMode'],
@@ -64,21 +62,21 @@ def get_instruments(id_list, proposals):
                     )
                 )
             if not pd.isnull(row["P1Hrs_Id"]):
-                proposals[row["Proposal_Code"]].instruments.hrs.append(
+                proposals[row["Proposal_Code"]].instruments.append(
                     HRS(
                         type="HRS",
                         detector_mode=row["ExposureMode"]
                     )
                 )
             if not pd.isnull(row["P1Bvit_Id"]):
-                proposals[row["Proposal_Code"]].instruments.bvit.append(
+                proposals[row["Proposal_Code"]].instruments.append(
                     BVIT(
                         type="BVIT",
                         filter=row['BvitFilter_Name']
                     )
                 )
             if not pd.isnull(row["P1Salticam_Id"]):
-                proposals[row["Proposal_Code"]].instruments.scam.append(
+                proposals[row["Proposal_Code"]].instruments.append(
                     SCAM(
                         type="SCAM",
                         detector_mode=row['SCDetectorMode']
