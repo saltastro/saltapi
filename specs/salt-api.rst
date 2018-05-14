@@ -155,6 +155,7 @@ Returns a proposal as a zip file containing the proposal's details.
   Accept-Encoding: gzip
 
   Connection: Keep-Alive
+
   _ _ _ _ _ _ _ _ _ _ _ _
 
   HTTP/1.x 200 OK
@@ -237,6 +238,7 @@ Modifies the content of the existing proposal.
   Accept-Encoding: gzip
 
   Connection: Keep-Alive
+
   _ _ _ _ _ _ _ _ _ _ _ _ _
 
   HTTP/1.1 200 OK
@@ -308,6 +310,7 @@ Inserts the new proposal.
   Accept-Encoding: gzip
 
   Connection: Keep-Alive
+
   _ _ _ _ _ _ _ _ _ _ _ _ _
 
   HTTP/1.1 200 OK
