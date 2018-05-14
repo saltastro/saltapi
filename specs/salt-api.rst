@@ -129,11 +129,15 @@ Returns a proposal as a zip file containing the proposal's details.
   1. **Code**: 404 NOT FOUND
 
   2. **Content**: {error: 'proposal_code requested doesn't exist'}
+
   OR
+
   1. **Code**: 403 UNAUTHORIZED
 
   2. **Content**: {error: 'You do not have permission to make this request'}
+
   OR
+
   1. **Code**: 401 UNAUTHENTICATED
 
   2. **Content**: {error: 'Incorrect credentials, please try again'}
@@ -170,6 +174,7 @@ Returns a proposal as a zip file containing the proposal's details.
   Content-Encoding: gzip
 
 * **Note**
+
   Currently only support the zip file
 
 Update proposal
@@ -202,11 +207,15 @@ Modifies the content of the existing proposal.
   1. **Code**: 404 NOT FOUND
 
   2. **Content**: {error: 'proposal_code requested doesn't exist'}
+
   OR
+
   1. **Code**: 403 UNAUTHORIZED
 
   2. **Content**: {error: 'You do not have permission to make this request'}
+
   OR
+
   1. **Code**: 401 UNAUTHENTICATED
 
   2. **Content**: {error: 'Incorrect credentials, please try again'}
@@ -235,6 +244,7 @@ Modifies the content of the existing proposal.
   Content-Location: /proposal/proposal_code
 
 * **Note**
+
   Currently only support the zip file
 
 Add proposal
@@ -305,6 +315,7 @@ Inserts the new proposal.
   Content-Location: /proposal/proposal_code
 
 * **Note**
+
   Currently, only support the zip file
 
 Download Proposal Summaries
@@ -339,10 +350,13 @@ Downloads the summaries of the proposal
   2. **Content**: {error: 'proposal_code requested doesn't exist'}
 
   OR
+
   1. **Code**: 403 UNAUTHORIZED
 
   2. **Content**: {error: 'You do not have permission to make this request'}
+
   OR
+
   1. **Code**: 401 UNAUTHENTICATED
 
   2. **Content**: {error: 'Incorrect credentials, please try again'}
@@ -360,6 +374,7 @@ Downloads the summaries of the proposal
   Accept-Encoding: gzip
 
   Connection: Keep-Alive
+
   _ _ _ _ _ _ _ _ _ _ _ _
 
   HTTP/1.x 200 OK
@@ -379,6 +394,7 @@ Downloads the summaries of the proposal
   Content-Encoding: gzip
 
 * **Note**
+
   Currently only support the zip file
 
 Download Proposal Summary
@@ -409,11 +425,15 @@ Downloads the summary of the proposal
   1. **Code**: 404 NOT FOUND
 
   2. **Content**: {error: 'proposal_code requested doesn't exist'}
+
   OR
+
   1. **Code**: 403 UNAUTHORIZED
 
   2. **Content**: {error: 'You do not have permission to make this request'}
+
   OR
+
   1. **Code**: 401 UNAUTHENTICATED
 
   2. **Content**: {error: 'Incorrect credentials, please try again'}
@@ -431,6 +451,7 @@ Downloads the summary of the proposal
   Accept-Encoding: gzip
 
   Connection: Keep-Alive
+
   _ _ _ _ _ _ _ _ _ _ _ _
 
   HTTP/1.x 200 OK
