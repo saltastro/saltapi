@@ -405,9 +405,11 @@ Download Proposal Summary
 Downloads the summary of the proposal
 
 * **URL**
+
   /proposal-summaries/[RSA]/[2018-1]/[2018-1-SCI-009]
 
 * **Method**
+
   GET
 
 * **URL Params**
@@ -415,6 +417,7 @@ Downloads the summary of the proposal
   1. **Required**: partner=[String], semester=[String], proposal_code=[String]
 
 * **Data Params**
+
   None
 
 * **Success Response**
