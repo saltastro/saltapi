@@ -18,8 +18,9 @@ Conceptual Solution & Logical Solution
 **************************************
 This follows a use case approach to explain the endpoints used by the salt-api.
 
+*************
 Get proposals
-#############
+*************
 Returns the list of the links of proposals.
 
 * **URL**
@@ -98,8 +99,9 @@ Returns the list of the links of proposals.
 
   To view the proposal, must click on the proposal's link.
 
+************
 Get proposal
-############
+************
 Returns a proposal as a zip file containing the proposal's details.
 
 * **URL**
@@ -178,8 +180,9 @@ Returns a proposal as a zip file containing the proposal's details.
 
   Currently only support the zip file
 
+***************
 Update proposal
-###############
+***************
 Modifies the content of the existing proposal.
 
 * **URL**
@@ -249,8 +252,9 @@ Modifies the content of the existing proposal.
 
   Currently only support the zip file
 
+************
 Add proposal
-############
+************
 Inserts the new proposal.
 
 * **URL**
@@ -321,8 +325,9 @@ Inserts the new proposal.
 
   Currently, only support the zip file
 
+***************************
 Download Proposal Summaries
-###########################
+***************************
 Downloads the summaries of the proposal
 
 * **URL**
@@ -400,8 +405,9 @@ Downloads the summaries of the proposal
 
   Currently only support the zip file
 
+*************************
 Download Proposal Summary
-#########################
+*************************
 Downloads the summary of the proposal
 
 * **URL**
