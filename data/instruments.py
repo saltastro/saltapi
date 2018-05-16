@@ -5,31 +5,35 @@ from data import sdb_connect
 def get_instruments(proposal_ids, proposals):
     from schema.instruments import RSS, HRS, BVIT, SCAM, Spectroscopy, Polarimetry, FabryPerot, Mask
 
-    instruments_sql = ' select *, sc.DetectorMode as SCDetectorMode, sc.XmlDetectorMode as SCXmlDetectorMode, ' \
-                      '         rs.DetectorMode as RSDetectorMode, rs.XmlDetectorMode as RSXmlDetectorMode  ' \
-                      '         from P1Config ' \
-                      '   join ProposalCode using (ProposalCode_Id) ' \
-                      '   left Join P1Rss using(P1Rss_Id) ' \
-                      '   left join RssDetectorMode as rs using(RssDetectorMode_Id) ' \
-                      '   left join RssMode using (RssMode_Id) ' \
-                      '   left join P1RssSpectroscopy using (P1RssSpectroscopy_Id) ' \
-                      '   left join RssGrating using (RssGrating_Id) ' \
-                      '   left join P1RssFabryPerot using (P1RssFabryPerot_Id) ' \
-                      '   left join RssFabryPerotMode using (RssFabryPerotMode_Id) ' \
-                      '   left join RssEtalonConfig using (RssEtalonConfig_Id) ' \
-                      '   left join P1RssPolarimetry using (P1RssPolarimetry_Id) ' \
-                      '   left join RssPolarimetryPattern using (RssPolarimetryPattern_Id) ' \
-                      '   left join P1RssMask using (P1RssMask_Id) ' \
-                      '   left join RssMaskType using (RssMaskType_Id) ' \
-                      '   ' \
-                      '   left join P1Salticam using(P1Salticam_Id) ' \
-                      '   left join SalticamDetectorMode as sc using(SalticamDetectorMode_Id) ' \
-                      '    ' \
-                      '   left join P1Bvit using(P1Bvit_Id) ' \
-                      '   left join BvitFilter using(BvitFilter_Id) ' \
-                      '   left join P1Hrs using(P1Hrs_Id) ' \
-                      '   left join HrsMode using(HrsMode_Id) ' \
-                      '  where ProposalCode_Id in {proposal_ids}'.format(proposal_ids=proposal_ids)
+    instruments_sql = '''
+SELECT
+    *,
+    sc.DetectorMode AS SCDetectorMode,
+    sc.XmlDetectorMode AS SCXmlDetectorMode,
+    rs.DetectorMode AS RSDetectorMode,
+    rs.XmlDetectorMode AS RSXmlDetectorMode
+FROM P1Config
+    JOIN ProposalCode USING(ProposalCode_Id)
+        LEFT JOIN P1Rss using(P1Rss_Id)
+        LEFT JOIN RssDetectorMode AS rs USING(RssDetectorMode_Id)
+        LEFT JOIN RssMode USING(RssMode_Id)
+        LEFT JOIN P1RssSpectroscopy USING(P1RssSpectroscopy_Id)
+        LEFT JOIN RssGrating USING(RssGrating_Id)
+        LEFT JOIN P1RssFabryPerot USING(P1RssFabryPerot_Id)
+        LEFT JOIN RssFabryPerotMode USING(RssFabryPerotMode_Id)
+        LEFT JOIN RssEtalonConfig USING(RssEtalonConfig_Id)
+        LEFT JOIN P1RssPolarimetry USING(P1RssPolarimetry_Id)
+        LEFT JOIN RssPolarimetryPattern USING(RssPolarimetryPattern_Id)
+        LEFT JOIN P1RssMask USING(P1RssMask_Id)
+        LEFT JOIN RssMaskType USING(RssMaskType_Id)
+        LEFT JOIN P1Salticam USING(P1Salticam_Id)
+        LEFT JOIN SalticamDetectorMode AS sc USING(SalticamDetectorMode_Id)
+        LEFT JOIN P1Bvit USING(P1Bvit_Id)
+        LEFT JOIN BvitFilter USING(BvitFilter_Id)
+        LEFT JOIN P1Hrs USING(P1Hrs_Id)
+        LEFT JOIN HrsMode USING(HrsMode_Id)
+WHERE ProposalCode_Id IN {proposal_ids}
+'''.format(proposal_ids=proposal_ids)
 
     conn = sdb_connect()
 

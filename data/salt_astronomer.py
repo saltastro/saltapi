@@ -2,7 +2,7 @@ import pandas as pd
 from data import sdb_connect
 
 
-def get_salt_astronomer():
+def get_salt_astronomers():
     from schema.user import User
     conn = sdb_connect()
     sql = """
@@ -11,7 +11,7 @@ def get_salt_astronomer():
                 join PiptUser using (Investigator_Id)
             where FirstName != "Techops"
         """
-    astros = [User(
+    astronomers = [User(
         first_name=row["FirstName"],
         last_name=row["Surname"],
         email=row["Email"],
@@ -20,4 +20,4 @@ def get_salt_astronomer():
 
     conn.close()
 
-    return astros
+    return astronomers

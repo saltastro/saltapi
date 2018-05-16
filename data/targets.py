@@ -57,14 +57,14 @@ def get_targets(proposal_code_ids=None, proposals=None, semester=None, partner_c
     sql = """
      SELECT *
         FROM Proposal
-            JOIN P1ProposalTarget using (ProposalCode_Id)
-            JOIN ProposalCode using (ProposalCode_Id)
-            JOIN Target using (Target_Id)
-            JOIN TargetCoordinates using(TargetCoordinates_Id)
-            JOIN TargetMagnitudes using(TargetMagnitudes_Id)
-            JOIN Bandpass using(Bandpass_Id)
-            LEFT JOIN MovingTarget using(MovingTarget_Id)
-        WHERE ProposalCode_Id in {proposal_code_ids} order by ProposalCode_Id
+            JOIN P1ProposalTarget USING (ProposalCode_Id)
+            JOIN ProposalCode USING (ProposalCode_Id)
+            JOIN Target USING (Target_Id)
+            JOIN TargetCoordinates USING(TargetCoordinates_Id)
+            JOIN TargetMagnitudes USING(TargetMagnitudes_Id)
+            JOIN Bandpass USING(Bandpass_Id)
+            LEFT JOIN MovingTarget USING(MovingTarget_Id)
+        WHERE ProposalCode_Id IN {proposal_code_ids} ORDER BY ProposalCode_Id
      """.format(proposal_code_ids=proposal_code_ids)
 
     conn = sdb_connect()

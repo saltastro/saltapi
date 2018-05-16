@@ -10,11 +10,12 @@ from util.error import InvalidUsage
 
 def get_role(row, user_id):
     all_partner = get_partners_for_role()
-    sql = "SELECT * " \
-          "     FROM PiptUserSetting  " \
-          "         LEFT JOIN PiptUserTAC using (PiptUser_Id) " \
-          "     WHERE PiptSetting_Id = 22 " \
-          "         AND PiptUser_Id = {user_id}".format(user_id=user_id)
+    sql = '''
+SELECT *  FROM PiptUserSetting
+    LEFT JOIN PiptUserTAC using (PiptUser_Id)
+WHERE PiptSetting_Id = 22
+    AND PiptUser_Id = {user_id}
+'''.format(user_id=user_id)
     conn = sdb_connect()
     results = pd.read_sql(sql, conn)
     conn.close()
@@ -59,12 +60,18 @@ def get_role(row, user_id):
 def get_user(user_id):
     user = {}
 
-    sql = " select *, t.PiptUser_Id as Tac, t.Partner_Id as TacPartner, a.Investigator_Id as Astro " \
-          " from PiptUser as u " \
-          " JOIN Investigator as i using (Investigator_Id) " \
-          " left join SaltAstronomers as a using( Investigator_Id ) " \
-          " left join PiptUserTAC as t on (u.PiptUser_Id = t.PiptUser_Id) " \
-          " where u.PiptUser_Id = {user_id}".format(user_id=user_id)
+    sql = '''
+SELECT
+    *,
+    t.PiptUser_Id AS Tac,
+    t.Partner_Id AS TacPartner,
+    a.Investigator_Id AS Astro
+FROM PiptUser AS u
+    JOIN Investigator AS i using (Investigator_Id)
+    LEFT JOIN SaltAstronomers AS a using( Investigator_Id )
+    LEFT JOIN PiptUserTAC AS t ON (u.PiptUser_Id = t.PiptUser_Id)
+WHERE u.PiptUser_Id = {user_id}
+'''.format(user_id=user_id)
     conn = sdb_connect()
     results = pd.read_sql(sql, conn)
     conn.close()
@@ -84,7 +91,7 @@ def get_user(user_id):
 
 
 def get_salt_users():
-    sql = 'select * from PiptUser JOIN Investigator using (Investigator_Id)'
+    sql = 'SELECT * FROM PiptUser JOIN Investigator USING (Investigator_Id)'
     conn = sdb_connect()
     results = pd.read_sql(sql, conn)
     conn.close()
@@ -103,13 +110,15 @@ def get_salt_users():
 
 
 def get_tac_members(partner):
-    sql = '''select * from PiptUser
-join PiptUserTAC using(PiptUser_Id)
-join Investigator using(Investigator_Id)
-join Partner using(Partner_Id)
-        '''
+    sql = '''
+SELECT *
+FROM PiptUser
+    JOIN PiptUserTAC USING(PiptUser_Id)
+    JOIN Investigator USING(Investigator_Id)
+    JOIN Partner USING(Partner_Id)
+'''
     if partner is not None:
-        sql += " where Partner_Code = '{partner}'".format(partner=partner)
+        sql += " WHERE Partner_Code = '{partner}'".format(partner=partner)
     conn = sdb_connect()
     results = pd.read_sql(sql, conn)
     conn.close()

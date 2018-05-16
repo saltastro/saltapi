@@ -1,5 +1,7 @@
 from graphene import ObjectType, String, Boolean, Field, Int, List, Float
-from schema.instruments import Instruments
+from graphene import resolve_only_args
+
+from schema.instruments import Instrument, HRS, RSS
 from schema.partner import Partner
 from schema.target import Target
 from schema.user import User
@@ -12,14 +14,14 @@ class ProposalInfoM(ObjectType):
     max_seeing = Float()
 
 
-class PartnerTimeRequest(ObjectType):
+class PartnerTimeRequests(ObjectType):
     partner = Field(Partner)
     time = Int()
 
 
 class TimeRequest(ObjectType):
     semester = String()
-    partnerTimeRequest = Field(List(PartnerTimeRequest))
+    partner_time_request = List(PartnerTimeRequests)
     minimum_useful_time = Int()
 
 
@@ -37,7 +39,7 @@ class TacComment(ObjectType):
     comment = String()
 
     def __eq__(self, other):
-        return self.partner_code == other.partner_code and self.comment == other.comment
+        return self.partner.code == other.partner.code and self.comment == other.comment
 
 
 class TechReview(ObjectType):
@@ -46,12 +48,12 @@ class TechReview(ObjectType):
     report = String()
 
 
-class Proposals(ObjectType):
+class Proposal(ObjectType):
     abstract = String()
     is_target_of_opportunity = Boolean()
     allocated_time = List(ProposalAllocatedTime)
     code = String()
-    instruments = Field(Instruments)
+    # instruments = Field(Instruments)
     is_p4 = Boolean()
     is_thesis = Boolean()
     max_seeing = Float()
@@ -65,3 +67,4 @@ class Proposals(ObjectType):
     title = String()
     transparency = String()
     liaison_salt_astronomer = Field(User)
+    instruments = List(Instrument)
