@@ -24,7 +24,7 @@ FROM ProposalCode
     JOIN ProposalContact USING(ProposalCode_Id)
     JOIN Investigator ON (Leader_Id=Investigator_Id)
     JOIN Semester USING(Semester_Id)
-    OIN Partner ON (MultiPartner.Partner_Id = Partner.Partner_Id)
+    JOIN Partner ON (MultiPartner.Partner_Id = Partner.Partner_Id)
 GROUP BY ProposalCode_Id, Semester_Id HAVING Semester = "{semester}"
     AND ProposalStatus_Id NOT IN (9, 3)
 """.format(semester=semester)  # status 9 => Deleted, 3 => Rejected
