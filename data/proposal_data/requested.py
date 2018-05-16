@@ -61,18 +61,20 @@ def get_requested_per_partner(proposal_code_ids, proposals):
     conn = sdb_connect()
     rq_times = pd.read_sql(partner_time_sql, conn)
     for index, row in rq_times.iterrows():
-        print(row["Proposal_Code"])
-        proposal = proposals[row["Proposal_Code"]]
-        for p in proposal.time_requests:
-            if p.semester == row['CurSemester']:
-                p.partner_time_request.append(
-                    PartnerTimeRequests(
-                        partner=Partner(
-                            code=row['Partner_Code'],
-                            name=row['Partner_Name']
-                        ),
-                        time=int(row['TimePerPartner'])
+        try:
+            proposal = proposals[row["Proposal_Code"]]
+            for p in proposal.time_requests:
+                if p.semester == row['CurSemester']:
+                    p.partner_time_request.append(
+                        PartnerTimeRequests(
+                            partner=Partner(
+                                code=row['Partner_Code'],
+                                name=row['Partner_Name']
+                            ),
+                            time=int(row['TimePerPartner'])
+                        )
                     )
-                )
+        except:
+            pass
 
     conn.close()
