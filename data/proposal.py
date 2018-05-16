@@ -54,13 +54,15 @@ def proposal_query(semester, proposal_code_ids, public):
 
 def make_proposal(row, public):
     from schema.proposal import Proposal, User
-
-    sa = User(
-        first_name=row["SAFirstName"],
-        last_name=row["SALastName"],
-        email=row["SAEmail"],
-        username=row["SAUsername"]
-    ) if row["SAFirstName"] is not None else User()
+    if not public:
+        sa = User(
+            first_name=row["SAFirstName"],
+            last_name=row["SALastName"],
+            email=row["SAEmail"],
+            username=row["SAUsername"]
+        ) if row["SAFirstName"] is not None else User()
+    else:
+        sa = User()
     return Proposal(
         allocated_time=[],
         code=row["Proposal_Code"],
@@ -68,7 +70,7 @@ def make_proposal(row, public):
         is_target_of_opportunity=row["ActOnAlert"] == 1,
         is_thesis=not pd.isnull(row["ThesisType_Id"]),
         is_p4=row["P4"] == 1,
-        liaison_salt_astronomer=User() if public else sa,
+        liaison_salt_astronomer=sa,
         max_seeing=row["MaxSeeing"],
         principal_contact=User() if public else User(
             first_name=row["PCFirstName"],
@@ -94,10 +96,11 @@ def make_proposal(row, public):
 def fill_proposal_private_data(proposals, text, reviews, requests):
     from schema.proposal import User, TechReview
     for code in list(proposals.keys()):
-        proposals[code].title = text[code]['title']
-        proposals[code].abstract = text[code]['abstract']
+
         proposals[code].time_requests = requests[code]
         try:
+            proposals[code].title = text[code]['title']
+            proposals[code].abstract = text[code]['abstract']
             for tre in reviews[code]:
 
                 reviewer = User(
@@ -116,8 +119,11 @@ def fill_proposal_private_data(proposals, text, reviews, requests):
 def query_proposal_data(proposal_code_ids, semester, public=False):
 
     proposals = {}
-    proposals_text = get_proposals_text(proposal_code_ids)
-    tech_reports = get_technical_reports(proposal_code_ids)
+    proposals_text = {}
+    tech_reports = {}
+    if not public:
+        proposals_text = get_proposals_text(proposal_code_ids)
+        tech_reports = get_technical_reports(proposal_code_ids)
     requested_times = get_proposals_requested_time(proposal_code_ids)
 
     proposal_sql = proposal_query(semester, proposal_code_ids, public=public)
