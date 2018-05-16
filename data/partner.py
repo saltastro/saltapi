@@ -27,31 +27,31 @@ WHERE concat(Year,"-", Semester) = "{semester}"
         allocated_time=TimeAllocation(
             semester=str(row['Year']) + "-" + str(row['Semester']),
             used_time=Priority(
-                p0_p1=row['Used0and1'],
+                p0_andp1=row['Used0and1'],
                 p2=row['Used2'],
                 p3=row['Used3']
             ),
             allocated_time=Priority(
-                Allocated_p0_p1=row['Alloc0and1'],
-                Allocated_p2=row['Alloc2'],
-                Allocated_p3=row['Alloc3']
+                p0_andp1=row['Alloc0and1'],
+                p2=row['Alloc2'],
+                p3=row['Alloc3']
             )
         )) for index, row in results.iterrows()] if partner is not None else \
         [Partner(
             id="Partner: " + str(row["Partner_Id"]),
             name=row["Partner_Name"] if g.user.has_role(RoleType.ADMINISTRATOR, row["Partner_Code"]) else None,
             code=row["Partner_Code"] if g.user.has_role(RoleType.ADMINISTRATOR, row["Partner_Code"]) else None,
-            allocated_time=TimeAllocation(
+            time_allocation=TimeAllocation(
                 semester=str(row['Year']) + "-" + str(row['Semester']),
                 used_time=Priority(
-                    p0_p1=row['Used0and1'],
+                    p0_andp1=row['Used0and1'],
                     p2=row['Used2'],
                     p3=row['Used3']
                 ),
                 allocated_time=Priority(
-                    Allocated_p0_p1=row['Alloc0and1'],
-                    Allocated_p2=row['Alloc2'],
-                    Allocated_p3=row['Alloc3']
+                    p0_andp1=row['Alloc0and1'],
+                    p2=row['Alloc2'],
+                    p3=row['Alloc3']
                 )
             )) for index, row in results.iterrows()]
 

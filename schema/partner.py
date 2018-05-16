@@ -2,7 +2,7 @@ from graphene import ObjectType, ID, String, Float,  Field
 
 
 class Priority(ObjectType):
-    p0_and_p1 = Float()
+    p0_andp1 = Float()
     p2 = Float()
     p3 = Float()
     p4 = Float()
