@@ -5,7 +5,7 @@ Introduction
 The communication from the client-side to the server-side and vice versa is a common ground in establishing the interaction with the data stored in the database.
 This common ground may become complex as the data stored increases. The database is loaded with multiple tables that contain information used from one table to another.
 The forever growing complexity needed to be overcame, hence, the rise of the REST API. REST API are the middle man between the client and the server.
-They bring the flexibility and the ease the communication between the client and server.
+They bring the flexibility and ease the communication between the client and server.
 REST API use the notion of endpoint to perform tasks such as (insert, retrieve, edit, and delete) data in the database accordingly.
 
 This document, serves the purpose of explaining the endpoints used to accomplish the tasks of inserting, retrieving, editing and deleting data in an efficient manner.
@@ -91,7 +91,7 @@ Get proposal
 +---------------------------+----------------------------------------------------------------------------+
 | **Success Response**      | 1. **Code**: 200 OK                                                        |
 |                           |                                                                            |
-|                           | 2. **Content**: ?                                                          |
+|                           | 2. **Content**: Zip file                                                   |
 +---------------------------+----------------------------------------------------------------------------+
 | **Error Response**        | 1. **Code**: 404 NOT FOUND                                                 |
 |                           |                                                                            |
@@ -209,7 +209,7 @@ Add proposal
 |                           |                                                                            |
 |                           | 2. **Content**: {error: 'Incorrect credentials, please try again'}         |
 +---------------------------+----------------------------------------------------------------------------+
-| **HTTP Request/Response** | POST /proposals/[proposal_code] HTTP/1.1                                   |
+| **HTTP Request/Response** | POST /proposals/ HTTP/1.1                                                  |
 |                           |                                                                            |
 |                           | Content-type: application/zip                                              |
 |                           |                                                                            |
