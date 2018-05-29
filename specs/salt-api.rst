@@ -184,7 +184,25 @@ Add proposal
 |                           |                                                                            |
 |                           | 2. **Optional**: None                                                      |
 +---------------------------+----------------------------------------------------------------------------+
-| **Data Params**           | Zip file                                                                   |
+| **Data Params**           | 1. username                                                                |
+|                           |                                                                            |
+|                           | 2. password                                                                |
+|                           |                                                                            |
+|                           | 3. asyncCode                                                               |
+|                           |                                                                            |
+|                           | 4. proposalCode                                                            |
+|                           |                                                                            |
+|                           | 5. emails                                                                  |
+|                           |                                                                            |
+|                           | 6. retainProposalStatus                                                    |
+|                           |                                                                            |
+|                           | 7. noValidation                                                            |
+|                           |                                                                            |
+|                           | 8. blocksOnly                                                              |
+|                           |                                                                            |
+|                           | 9. anySemester                                                             |
+|                           |                                                                            |
+|                           | 10. zip_file                                                               |
 +---------------------------+----------------------------------------------------------------------------+
 | **Success Response**      | 1. **Code**: 201 CREATED                                                   |
 |                           |                                                                            |
@@ -710,59 +728,42 @@ Add Block
 Tests
 *****
 
-Code testing is very important, such that, if the code is not tested it is considered **BROKEN**.
-This also applies to API since they are coded. They need to be tested. Following a Test Driven Development **(TDD)**,
-a unit testing is practiced to test the saltapi. The saltapi is basically a python library that talks to the server
-to retrieve or perform modifications to the data stored in the database. Hence, testing the API will require the
-connections to the server and that may be time consuming. Also tests expand to many case scenarios which may increase
-the testing time massively and can lead to code crashing.
-
-Therefore, in the case of testing API, a technique of mocking is used. When you are mocking something e.g. Function,
-you actually tricking the system to think it uses the original function while in fact it uses the fake created function
-to avoid e.g. database connectivity, server calls and so on.
-
-Thanks to the Python libraries, the hustle of mocking it made easier. In the case of testing the saltapi, the following
-libraries are used
-
-* **pytest**
-
-  Pytest makes testing Python code a breeze. It easy to read and easy to understand. In this case, it useful because
-  it provides us with a fixture enabling mocking of the necessary functions. The fixture that is used is called the
-  **monkeypatch**. Monkeypatch basically swaps the original function with the substituting function to enable the mocking.
-  Then when testing the original function, a mock function will be used instead. Mock function doesn't really care about
-  the details of how the original function handles the database connectivity,
-  the server calling and so on, but really focuses on the parameters it called with and the expected output.
-
-* **unittest**
-  unittest is also a testing framework or library for Python code. In testing saltapi, the pytest monkeypatch fixture
-  won't be sufficient on it own in completing the testing. Hence the unittest is bringing the MagicMock class. The
-  MagicMock class gives flexibility to test objects of classes. Hence in this way, we can test all kinds of objects.
-
 ***************************
 Submitting Proposal Testing
 ***************************
 
-The submit proposal has a function signature:
+Submitting proposal requires data params that includes:
 
-submitProposal(username, password, asyncCode, proposalCode, emails, retainProposalStatus, noValidation, blocksOnly, anySemester)
+* (username, password, asyncCode, proposalCode, emails, retainProposalStatus, noValidation, blocksOnly, anySemester, zip_file)
 
-The data types of these parameters
+These data params are used in a post request as the payload for the proposal submission.
 
-[username, password, proposalCode] ------> String
-[asyncCode, emails, retainProposalStatus, noValidation, blocksOnly, anySemester] -------> Boolean
+When submitting a proposal, first and foremost, a user must be authenticated and authorized.
+Also, submitting a proposal requires that the proposal must be a zip file.
+Furthermore, only one proposal can be submitted at a time.
 
-When submitting a proposal, there are conditions that must be met.
+Assuming that the authentication and authorization tests are performed separately.
 
-* A user who's submitting a proposal must be authenticated
-* And must be checked if he/she have the permissions to submit the proposal
-* There can be only one proposal submitted a time
-* A proposal must be a zip file
-* An appropriate error message must be displayed if occurred
+The following tests, focusing on submitting proposal only,
+must be performed to ensure that the proposal submission functions as intended
 
-The above mentioned conditions for the submitProposal function must be tested to confirm that the function
-operates as it intended.
+* There is only one selected file for submission.
+* The file selected is a zip file.
+* There is no error in the selected file.
+* If the post request do not succeed:
 
-The Pytest library fixture, monkeypatch, is used to fake the original function by mocking it.
+  1. A response error message is returned.
+
+* If the post request succeed:
+
+  1. The response headers location showing the newly proposal's url or endpoint.
+
+  2. The response data contains a proposal code of the newly created proposal.
 
 
+****************************
+Downloading Proposal Testing
+****************************
+
+To Do...
 
