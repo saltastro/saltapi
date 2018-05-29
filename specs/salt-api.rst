@@ -716,7 +716,7 @@ Submitting Proposal Testing
 
 Submitting proposal requires data params that includes:
 
-* (username, password, asyncCode, proposalCode, emails, retainProposalStatus, noValidation, blocksOnly, anySemester, zip_file)
+* zip_file
 
 These data params are used in a post request as the payload for the proposal submission.
 
