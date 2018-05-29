@@ -184,7 +184,11 @@ Add proposal
 |                           |                                                                            |
 |                           | 2. **Optional**: None                                                      |
 +---------------------------+----------------------------------------------------------------------------+
-| **Data Params**           | 1. zip_file                                                                |
+| **Data Params**           | 1. username                                                                |
+|                           |                                                                            |
+|                           | 2. password                                                                |
+|                           |                                                                            |
+|                           | 3. zip_file                                                                |
 +---------------------------+----------------------------------------------------------------------------+
 | **Success Response**      | 1. **Code**: 201 CREATED                                                   |
 |                           |                                                                            |
@@ -716,7 +720,7 @@ Submitting Proposal Testing
 
 Submitting proposal requires data params that includes:
 
-* zip_file
+* (username, password, zip_file)
 
 These data params are used in a post request as the payload for the proposal submission.
 
