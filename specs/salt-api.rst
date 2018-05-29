@@ -184,25 +184,7 @@ Add proposal
 |                           |                                                                            |
 |                           | 2. **Optional**: None                                                      |
 +---------------------------+----------------------------------------------------------------------------+
-| **Data Params**           | 1. username                                                                |
-|                           |                                                                            |
-|                           | 2. password                                                                |
-|                           |                                                                            |
-|                           | 3. asyncCode                                                               |
-|                           |                                                                            |
-|                           | 4. proposalCode                                                            |
-|                           |                                                                            |
-|                           | 5. emails                                                                  |
-|                           |                                                                            |
-|                           | 6. retainProposalStatus                                                    |
-|                           |                                                                            |
-|                           | 7. noValidation                                                            |
-|                           |                                                                            |
-|                           | 8. blocksOnly                                                              |
-|                           |                                                                            |
-|                           | 9. anySemester                                                             |
-|                           |                                                                            |
-|                           | 10. zip_file                                                               |
+| **Data Params**           | 1. zip_file                                                                |
 +---------------------------+----------------------------------------------------------------------------+
 | **Success Response**      | 1. **Code**: 201 CREATED                                                   |
 |                           |                                                                            |
