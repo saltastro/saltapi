@@ -24,11 +24,12 @@ def get_technical_reports(proposal_code_ids):
             technical_reports[proposal_code] = []
         technical_reports[proposal_code].append(
             dict(Semester=row['Semester'],
-                 ReviewerFName=row['FirstName'],
-                 ReviewerSName=row['Surname'],
+                 ReviewerFirstName=row['FirstName'],
+                 ReviewerLastName=row['Surname'],
                  ReviewerEmail=row['Email'],
                  ReviewerUsername=row['Username'],
                  Report=row['TechReport'])
         )
     conn.close()
+    print(technical_reports)
     return technical_reports

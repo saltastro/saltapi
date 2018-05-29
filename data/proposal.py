@@ -88,7 +88,7 @@ def make_proposal(row, public):
         tac_comment=[],
         targets=[],
         tech_reviews=[],
-        time_requests=[],
+        time_requirements=[],
         transparency=row["Transparency"]
     )
 
@@ -97,7 +97,7 @@ def fill_proposal_private_data(proposals, text, reviews, requests):
     from schema.proposal import User, TechReview
     for code in list(proposals.keys()):
 
-        proposals[code].time_requests = requests[code]
+        proposals[code].time_requirements = requests[code]
         try:
             proposals[code].title = text[code]['title']
             proposals[code].abstract = text[code]['abstract']

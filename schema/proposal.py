@@ -7,21 +7,21 @@ from schema.target import Target
 from schema.user import User
 
 
-class ProposalInfoM(ObjectType):
+class ProposalInfo(ObjectType):
     is_p4 = Boolean()
     status = String()
     transparency = String()
     max_seeing = Float()
 
 
-class PartnerTimeRequests(ObjectType):
+class TimeRequest(ObjectType):
     partner = Field(Partner)
     time = Int()
 
 
-class TimeRequest(ObjectType):
+class TimeRequirements(ObjectType):
     semester = String()
-    partner_time_request = List(PartnerTimeRequests)
+    time_requests = List(TimeRequest)
     minimum_useful_time = Int()
 
 
@@ -53,7 +53,6 @@ class Proposal(ObjectType):
     is_target_of_opportunity = Boolean()
     allocated_time = List(ProposalAllocatedTime)
     code = String()
-    # instruments = Field(Instruments)
     is_p4 = Boolean()
     is_thesis = Boolean()
     max_seeing = Float()
@@ -63,7 +62,7 @@ class Proposal(ObjectType):
     tac_comment = List(TacComment)
     targets = Field(List(Target))
     tech_reviews = Field(List(TechReview))
-    time_requests = List(TimeRequest)
+    time_requirements = List(TimeRequirements)
     title = String()
     transparency = String()
     liaison_salt_astronomer = Field(User)

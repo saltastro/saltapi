@@ -2,26 +2,26 @@ import pandas as pd
 from data import sdb_connect
 
 
-def add_time_request(data, time_requests):
-    from schema.proposal import TimeRequest
+def add_time_request(data, time_requirements):
+    from schema.proposal import TimeRequirements
     semester = str(data['Year']) + "-" + str(data['Semester'])
 
     def is_sem_in_time():
         is_in = False
-        for t in time_requests:
+        for t in time_requirements:
             if t.semester == semester:
                 is_in = True
         return is_in
 
     if not is_sem_in_time():
-        time_requests.append(
-            TimeRequest(
+        time_requirements.append(
+            TimeRequirements(
                 semester=semester,
                 minimum_useful_time=None if pd.isnull(data["P1MinimumUsefulTime"]) else data["P1MinimumUsefulTime"],
-                partner_time_request=[]
+                time_requests=[]
             )
         )
-    return time_requests
+    return time_requirements
 
 
 def get_proposals_requested_time(proposal_code_ids):
@@ -46,7 +46,7 @@ def get_proposals_requested_time(proposal_code_ids):
 
 def get_requested_per_partner(proposal_code_ids, proposals):
     from schema.partner import Partner
-    from schema.proposal import PartnerTimeRequests
+    from schema.proposal import TimeRequest
 
     partner_time_sql = """
     SELECT Proposal_Code, ReqTimeAmount*ReqTimePercent/100.0 as TimePerPartner,
@@ -63,10 +63,10 @@ def get_requested_per_partner(proposal_code_ids, proposals):
     for index, row in rq_times.iterrows():
         try:
             proposal = proposals[row["Proposal_Code"]]
-            for p in proposal.time_requests:
+            for p in proposal.time_requirements:
                 if p.semester == row['CurSemester']:
-                    p.partner_time_request.append(
-                        PartnerTimeRequests(
+                    p.time_requests.append(
+                        TimeRequest(
                             partner=Partner(
                                 code=row['Partner_Code'],
                                 name=row['Partner_Name']
