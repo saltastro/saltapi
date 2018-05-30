@@ -6,11 +6,12 @@ from functools import wraps
 from flask import Flask, jsonify, request, g, make_response, Response, render_template, send_file
 from flask_graphql import GraphQLView
 from flask_httpauth import HTTPTokenAuth, HTTPBasicAuth, MultiAuth
+from flask_socketio import SocketIO, send
 from raven.contrib.flask import Sentry
 
 from data.proposal import summary_file
-from data.user import update_tac_members, remove_tac_members
 from data.technical_review import update_liaison_astronomers, update_reviews
+from data.user import update_tac_members, remove_tac_members
 from schema.query import schema
 from util.action import Action
 from util.error import InvalidUsage
@@ -18,6 +19,8 @@ from util.proposal_summaries import zip_proposal_summaries
 from util.user import basic_login, get_user_token, is_valid_token, create_token
 
 app = Flask(__name__)
+# configure socket to the application
+socketio = SocketIO(app)
 # Set CORS options on app configuration
 app.config['CORS_HEADERS'] = "Content-Type"
 app.config['CORS_RESOURCES'] = {r"/*": {"origins": "*"}}
@@ -191,8 +194,8 @@ def proposal_summary():
     semester = data['semester']
     partner = data['partner']
 
-    # check permission
-    if not g.user.may_perform(Action.DOWNLOAD_SUMMARY, proposal_code='2018-1-SCI-005', partner=partner):
+    # TODO: check permission
+    if not g.user.may_perform(Action.DOWNLOAD_SUMMARY, proposal_code=proposal_code, partner=partner):
         raise InvalidUsage(message='You are not allowed to view the pdf summary of proposal {proposal_code}'
                            .format(proposal_code=proposal_code),
                            status_code=403)
@@ -254,5 +257,13 @@ def after_request(response):
     return response
 
 
+@socketio.on('e')
+def technical_review_socket(editing):
+    send(editing, broadcast=True)
+
+@socketio.on('xxxx')
+def technical_review_socket(editing):
+        send(editing, broadcast=True)
+
 if __name__ == '__main__':
-    app.run(port=5001)
+    socketio.run(app, port=5001)

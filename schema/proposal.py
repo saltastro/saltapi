@@ -59,7 +59,7 @@ class Proposal(ObjectType):
     principal_investigator = Field(User)
     principal_contact = Field(User)
     status = String()
-    tac_comment = List(TacComment)
+    tac_comments = List(TacComment)
     targets = Field(List(Target))
     tech_reviews = Field(List(TechReview))
     time_requirements = List(TimeRequirements)

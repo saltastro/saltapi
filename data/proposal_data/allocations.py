@@ -18,7 +18,7 @@ def priority(p, time, pat):
     return pat
 
 
-def proposals_allocated_time(semester, proposals):
+def update_time_allocations(semester, proposals):
     from schema.partner import Partner
     from schema.proposal import ProposalAllocatedTime, TacComment
     all_time_sql = """
@@ -42,7 +42,7 @@ def proposals_allocated_time(semester, proposals):
                 name=row['Partner_Name']
             )
         )
-        tac_comment = TacComment(
+        tac_comments = TacComment(
             partner=Partner(
                 code=row['Partner_Code'],
                 name=row['Partner_Name']
@@ -50,9 +50,9 @@ def proposals_allocated_time(semester, proposals):
             comment=row['TacComment']
         )
         if proposal in proposals:
-            if tac_comment not in proposals[proposal].tac_comment:
-                proposals[proposal].tac_comment.append(
-                    tac_comment
+            if tac_comments not in proposals[proposal].tac_comments:
+                proposals[proposal].tac_comments.append(
+                    tac_comments
                 )
 
             if len(proposals[proposal].allocated_time) == 0:

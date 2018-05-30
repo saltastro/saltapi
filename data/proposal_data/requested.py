@@ -2,7 +2,22 @@ import pandas as pd
 from data import sdb_connect
 
 
-def add_time_request(data, time_requirements):
+def update_time_requirements(data, time_requirements):
+    """
+    This method add minimum useful time for all semesters it requested times from if any
+    it also create an empty array for adding each requested time from a partner
+
+    Parameters
+    ----------
+    data : pandas data frame
+        a query row from proposals query
+    time_requirements: array
+        time requirements created thus far
+    Returns
+    -------
+    time_requirements : iterable
+        updated time requirements
+    """
     from schema.proposal import TimeRequirements
     semester = str(data['Year']) + "-" + str(data['Semester'])
 
@@ -24,8 +39,20 @@ def add_time_request(data, time_requirements):
     return time_requirements
 
 
-def get_proposals_requested_time(proposal_code_ids):
-    requested_times = {}
+def update_proposals_requested_time(proposal_code_ids):
+    """
+    Query database for requested times of given proposals ids
+
+    Parameters
+    ----------
+    proposal_code_ids : string
+        proposal code id of interest like '(23, 45, 51, 89, 94)'
+    Returns
+    -------
+    time_requirements : array
+        updated time requirements
+    """
+    time_requirements = {}
     requested_time_sql = """
     SELECT * FROM MultiPartner as mp
         join Semester as sm using (Semester_Id)
@@ -37,14 +64,29 @@ def get_proposals_requested_time(proposal_code_ids):
     conn = sdb_connect()
     for index, row in pd.read_sql(requested_time_sql, conn).iterrows():
         proposal_code = row['Proposal_Code']
-        if proposal_code not in requested_times:
-            requested_times[proposal_code] = []
-        requested_times[proposal_code] = add_time_request(row, requested_times[proposal_code])
+        if proposal_code not in time_requirements:
+            time_requirements[proposal_code] = []
+        time_requirements[proposal_code] = update_time_requirements(row, time_requirements[proposal_code])
     conn.close()
-    return requested_times
+    return time_requirements
 
 
-def get_requested_per_partner(proposal_code_ids, proposals):
+def update_requested_per_partner(proposal_code_ids, proposals):
+
+    """
+    Query database for requested times of all partners on the given proposals ids
+    and update proposals with query results
+
+    Parameters
+    ----------
+    proposal_code_ids : string
+        proposal code id of interest like '(23, 45, 51, 89, 94)'
+    proposals: object
+        time requirements created thus far
+    Returns
+    -------
+    None
+    """
     from schema.partner import Partner
     from schema.proposal import TimeRequest
 

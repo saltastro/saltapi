@@ -2,7 +2,20 @@ import pandas as pd
 from data import sdb_connect
 
 
-def get_technical_reports(proposal_code_ids):
+def update_technical_reports(proposal_code_ids):
+    """
+    Query database for technical reports of given proposals ids
+
+    Parameters
+    ----------
+    proposal_code_ids : string
+        proposal code id of interest like '(23, 45, 51, 89, 94)'
+    Returns
+    -------
+    time_requirements : object
+        key: proposal code
+        values: semester, reviewer info(first name, last name, username and email), and report
+    """
     technical_reports = {}
     tech_report_sql = """
         SELECT  ProposalCode.Proposal_Code as Proposal_Code,
@@ -31,5 +44,4 @@ def get_technical_reports(proposal_code_ids):
                  Report=row['TechReport'])
         )
     conn.close()
-    print(technical_reports)
     return technical_reports
