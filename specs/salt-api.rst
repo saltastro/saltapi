@@ -184,11 +184,7 @@ Add proposal
 |                           |                                                                            |
 |                           | 2. **Optional**: None                                                      |
 +---------------------------+----------------------------------------------------------------------------+
-| **Data Params**           | 1. username                                                                |
-|                           |                                                                            |
-|                           | 2. password                                                                |
-|                           |                                                                            |
-|                           | 3. zip_file                                                                |
+| **Data Params**           | 1. zip_file                                                                |
 +---------------------------+----------------------------------------------------------------------------+
 | **Success Response**      | 1. **Code**: 201 CREATED                                                   |
 |                           |                                                                            |
@@ -208,13 +204,14 @@ Add proposal
 |                           |                                                                            |
 |                           | Content-type: application/zip                                              |
 |                           |                                                                            |
+|                           | Authorization: Token                                                       |
 |                           | _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _                |
 |                           |                                                                            |
 |                           | HTTP/1.x 200 OK                                                            |
 |                           |                                                                            |
 |                           | Location: /proposal/[proposal_code]                                        |
 +---------------------------+----------------------------------------------------------------------------+
-| **Notes**                 | Currently only support the zip file                                        |
+| **Notes**                 | Currently only supports the zip file                                       |
 +---------------------------+----------------------------------------------------------------------------+
 
 ***************************
@@ -718,33 +715,36 @@ Tests
 Submitting Proposal Testing
 ***************************
 
-Submitting proposal requires data params that includes:
+Submitting proposal requires data param of a zip_file
 
-* (username, password, zip_file)
-
-These data params are used in a post request as the payload for the proposal submission.
-
-When submitting a proposal, first and foremost, a user must be authenticated and authorized.
-Also, submitting a proposal requires that the proposal must be a zip file.
-Furthermore, only one proposal can be submitted at a time.
-
-Assuming that the authentication and authorization tests are performed separately.
+This data param is used in a post request as the payload for the proposal submission.
 
 The following tests, focusing on submitting proposal only,
 must be performed to ensure that the proposal submission functions as intended
 
-* There is only one selected file for submission.
-* The file selected is a zip file.
-* There is no error in the selected file.
-* If the post request do not succeed:
+* **If the post request succeed:**
 
-  1. A response error message is returned.
+  1. The success response message is returned: "200 OK"
 
-* If the post request succeed:
+  2. The response headers location contains the newly created proposal's url or endpoint.
 
-  1. The response headers location showing the newly proposal's url or endpoint.
+  3. The response data contains a proposal code of the newly created proposal.
 
-  2. The response data contains a proposal code of the newly created proposal.
+* **If the post request do not succeed:**
+
+  1. If multiple proposal files submitted, an error message is returned: "400 BAD REQUEST"
+
+  2. If the proposal file is not a zip file, an error message is returned: "415 UNSUPPORTED MEDIA TYPE"
+
+  3. If the user is not authenticated, an error message is returned: "401 UNAUTHORIZED"
+
+  4. If the user is not authorized, an error message is returned: "403 FORBIDDEN"
+
+* **Functionality Tests:**
+
+  1. The request method is a POST method
+
+  2. The request method is requested with the correct data
 
 
 ****************************
