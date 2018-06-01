@@ -742,9 +742,9 @@ must be performed to ensure that the proposal submission functions as intended
 
 * **Functionality Tests:**
 
-  1. The request method is a POST method
+  1. If the request method is not a POST method, an error message is returned: "405 METHOD NOT ALLOWED"
 
-  2. The request method is requested with the correct data
+  2. The request method is requested with the correct data, else, an error message is returned: "Please provide valid data."
 
 
 ****************************

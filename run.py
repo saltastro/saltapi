@@ -74,7 +74,6 @@ def requires_auth(f):
 
 @app.route('/proposals', methods=['POST'])
 def proposals():
-
     return ''
 
 
