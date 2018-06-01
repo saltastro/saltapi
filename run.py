@@ -31,6 +31,10 @@ basic_auth = HTTPBasicAuth()
 multi_auth = MultiAuth(HTTPBasicAuth, HTTPTokenAuth)
 
 
+def get_app():
+    return app
+
+
 @token_auth.verify_token
 def verify_token(token):
     g.user_id = None
@@ -66,6 +70,12 @@ def requires_auth(f):
         return f(*args, **kwargs)
 
     return decorated
+
+
+@app.route('/proposals', methods=['POST'])
+def proposals():
+
+    return ''
 
 
 @app.route("/token", methods=['POST'])
