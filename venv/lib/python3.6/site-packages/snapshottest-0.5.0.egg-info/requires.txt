@@ -1,0 +1,15 @@
+six>=1.10.0
+termcolor
+
+[nose]
+nose
+
+[pytest]
+pytest
+
+[test]
+six
+pytest>=3.0
+pytest-cov
+nose
+django>=1.10.6

@@ -1,0 +1,6 @@
+[nose.plugins.0.10]
+snapshottest = snapshottest.nose:SnapshotTestPlugin
+
+[pytest11]
+snapshottest = snapshottest.pytest
+

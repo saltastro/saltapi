@@ -1,0 +1,7 @@
+[console_scripts]
+fabulous-demo = fabulous.demo:main
+fabulous-gotham = fabulous.gotham:main
+fabulous-image = fabulous.image:main
+fabulous-rotatingcube = fabulous.rotating_cube:main
+fabulous-text = fabulous.text:main
+
