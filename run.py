@@ -3,6 +3,7 @@ import tempfile
 import traceback
 from functools import wraps
 
+import requests
 from flask import Flask, jsonify, request, g, make_response, Response, render_template, send_file
 from flask_graphql import GraphQLView
 from flask_httpauth import HTTPTokenAuth, HTTPBasicAuth, MultiAuth
@@ -74,7 +75,11 @@ def requires_auth(f):
 
 @app.route('/proposals', methods=['POST'])
 def proposals():
-    return ''
+    t = requests.post('https://google.com/')
+
+    import json
+    r = make_response(json.dumps({'code': 99}))
+    return jsonify(t)
 
 
 @app.route("/token", methods=['POST'])
