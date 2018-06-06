@@ -75,10 +75,9 @@ def requires_auth(f):
 
 @app.route('/proposals', methods=['POST'])
 def proposals():
-    t = requests.post('https://google.com/')
+    payload = request.files['file']
+    t = requests.post('https://google.com/', data=payload)
 
-    import json
-    r = make_response(json.dumps({'code': 99}))
     return jsonify(t)
 
 

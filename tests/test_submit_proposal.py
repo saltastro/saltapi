@@ -1,5 +1,6 @@
 from io import BytesIO
 import json
+from unittest.mock import MagicMock
 
 
 def test_successful_submit_proposal(monkeypatch, client):
@@ -69,6 +70,38 @@ def test_submit_proposal_disallowed_request_method(client):
     assert response.status == '405 METHOD NOT ALLOWED'
 
 
-def test_submit_proposal_functionality():
-    # Todo
-    pass
+def test_submit_proposal_functionality(self, client):
+    import run
+
+    self.file_content = None
+
+    # Creating the mocking substitute function for the post request/response to submitting proposal to get file content
+    def get_file_content(*args, **kwargs):
+        self.file_content = kwargs['data'].read()
+        return self.file_content
+
+    run.requests.post = get_file_content
+
+    file = (BytesIO(b'Proposal Content'), 'proposal.zip')
+    client.post('/proposals', data={'file': file})
+
+    # Assert the proposal file content to be b'Proposal Content'
+    assert self.file_content == b'Proposal Content'
+
+    # Mocking the post request method using the MagicMock class for the post request/response to submitting proposal
+    run.requests.post = MagicMock()
+
+    file = (BytesIO(b'Proposal Content'), 'proposal.zip')
+    client.post('/proposals', data={'file': file})
+
+    # Assert a post request method is called once
+    run.requests.post.assert_called_once()
+
+    # Assert a post request is called with a url http://google.com/
+    assert run.requests.post.call_args[0][0] == 'https://google.com/'
+
+    # Assert a post request is called with the filename proposal.zip
+    assert run.requests.post.call_args[1]['data'].filename == 'proposal.zip'
+
+    # Assert a post request is called with the file type zip
+    assert run.requests.post.call_args[1]['data'].content_type == 'application/zip'
