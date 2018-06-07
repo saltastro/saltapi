@@ -2,7 +2,7 @@ import pandas as pd
 from data import sdb_connect
 
 
-def update_technical_reports(proposal_code_ids):
+def fill_technical_reports(proposal_code_ids):
     """
     Query database for technical reports of given proposals ids
 

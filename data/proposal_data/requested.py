@@ -2,7 +2,7 @@ import pandas as pd
 from data import sdb_connect
 
 
-def update_time_requirements(data, time_requirements):
+def fill_time_requirements(data, time_requirements):
     """
     This method add minimum useful time for all semesters it requested times from if any
     it also create an empty array for adding each requested time from a partner
@@ -18,7 +18,7 @@ def update_time_requirements(data, time_requirements):
     time_requirements : iterable
         updated time requirements
     """
-    from schema.proposal import TimeRequirements
+    from schema.proposal import TimeRequirement
     semester = str(data['Year']) + "-" + str(data['Semester'])
 
     def is_sem_in_time():
@@ -30,7 +30,7 @@ def update_time_requirements(data, time_requirements):
 
     if not is_sem_in_time():
         time_requirements.append(
-            TimeRequirements(
+            TimeRequirement(
                 semester=semester,
                 minimum_useful_time=None if pd.isnull(data["P1MinimumUsefulTime"]) else data["P1MinimumUsefulTime"],
                 time_requests=[]
@@ -39,7 +39,7 @@ def update_time_requirements(data, time_requirements):
     return time_requirements
 
 
-def update_proposals_requested_time(proposal_code_ids):
+def fill_proposals_requested_time(proposal_code_ids):
     """
     Query database for requested times of given proposals ids
 
@@ -66,12 +66,12 @@ def update_proposals_requested_time(proposal_code_ids):
         proposal_code = row['Proposal_Code']
         if proposal_code not in time_requirements:
             time_requirements[proposal_code] = []
-        time_requirements[proposal_code] = update_time_requirements(row, time_requirements[proposal_code])
+        time_requirements[proposal_code] = fill_time_requirements(row, time_requirements[proposal_code])
     conn.close()
     return time_requirements
 
 
-def update_requested_per_partner(proposal_code_ids, proposals):
+def fill_requested_time_per_partner(proposal_code_ids, proposals):
 
     """
     Query database for requested times of all partners on the given proposals ids

@@ -19,7 +19,7 @@ class TimeRequest(ObjectType):
     time = Int()
 
 
-class TimeRequirements(ObjectType):
+class TimeRequirement(ObjectType):
     semester = String()
     time_requests = List(TimeRequest)
     minimum_useful_time = Int()
@@ -62,7 +62,7 @@ class Proposal(ObjectType):
     tac_comments = List(TacComment)
     targets = Field(List(Target))
     tech_reviews = Field(List(TechReview))
-    time_requirements = List(TimeRequirements)
+    time_requirements = List(TimeRequirement)
     title = String()
     transparency = String()
     liaison_salt_astronomer = Field(User)
