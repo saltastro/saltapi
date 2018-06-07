@@ -6,7 +6,7 @@ from functools import wraps
 from flask import Flask, jsonify, request, g, make_response, Response, render_template, send_file
 from flask_graphql import GraphQLView
 from flask_httpauth import HTTPTokenAuth, HTTPBasicAuth, MultiAuth
-from flask_socketio import SocketIO, send
+from flask_socketio import SocketIO
 from raven.contrib.flask import Sentry
 
 from data.proposal import summary_file
@@ -255,15 +255,6 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
-
-
-@socketio.on('e')
-def technical_review_socket(editing):
-    send(editing, broadcast=True)
-
-@socketio.on('xxxx')
-def technical_review_socket(editing):
-        send(editing, broadcast=True)
 
 if __name__ == '__main__':
     socketio.run(app, port=5001)
