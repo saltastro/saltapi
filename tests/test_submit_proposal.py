@@ -22,14 +22,14 @@ def test_successful_submit_proposal(monkeypatch, client):
     # Mocking the post request/response to submitting proposal
     monkeypatch.setattr('run.requests.post', mock_submit_proposal_post_request_response)
 
-    url = '/proposals'
+    endpoint = '/proposals'
     file = (BytesIO(b'Proposal Content'), 'proposal.zip')
 
     payload = {
         'file': file
     }
 
-    response = client.post(url, data=payload)
+    response = client.post(endpoint, data=payload)
 
     resp = json.loads(response.data)
 
@@ -47,24 +47,24 @@ def test_successful_submit_proposal(monkeypatch, client):
 
 
 def test_submit_proposal_disallowed_request_method(client):
-    url = '/proposals'
+    endpoint = '/proposals'
 
-    response = client.get(url)
+    response = client.get(endpoint)
 
     # Assert that the get request method is not allowed
     assert response.status == '405 METHOD NOT ALLOWED'
 
-    response = client.put(url)
+    response = client.put(endpoint)
 
     # Assert that the put request method is not allowed
     assert response.status == '405 METHOD NOT ALLOWED'
 
-    response = client.delete(url)
+    response = client.delete(endpoint)
 
     # Assert that the delete request method is not allowed
     assert response.status == '405 METHOD NOT ALLOWED'
 
-    response = client.patch(url)
+    response = client.patch(endpoint)
 
     # Assert that the patch request method is not allowed
     assert response.status == '405 METHOD NOT ALLOWED'
@@ -82,8 +82,9 @@ def test_submit_proposal_functionality(self, client):
 
     run.requests.post = get_file_content
 
+    endpoint = '/proposals'
     file = (BytesIO(b'Proposal Content'), 'proposal.zip')
-    client.post('/proposals', data={'file': file})
+    client.post(endpoint, data={'file': file})
 
     # Assert the proposal file content to be b'Proposal Content'
     assert self.file_content == b'Proposal Content'
@@ -92,7 +93,7 @@ def test_submit_proposal_functionality(self, client):
     run.requests.post = MagicMock()
 
     file = (BytesIO(b'Proposal Content'), 'proposal.zip')
-    client.post('/proposals', data={'file': file})
+    client.post(endpoint, data={'file': file})
 
     # Assert a post request method is called once
     run.requests.post.assert_called_once()

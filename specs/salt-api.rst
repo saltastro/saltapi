@@ -726,25 +726,35 @@ must be performed to ensure that the proposal submission functions as intended
 
   1. The success response message is returned: "200 OK"
 
-  2. The response headers location contains the newly created proposal's url or endpoint.
+  2. The response content type returned is: application/json
+
+  2. The response headers location contains the newly created proposal's url.
 
   3. The response data contains a proposal code of the newly created proposal.
 
 * **If the post request do not succeed:**
 
-  1. If multiple proposal files submitted, an error message is returned: "400 BAD REQUEST"
+  1. If multiple proposal files submitted, an error message is returned: "400 BAD REQUEST" ?
 
-  2. If the proposal file is not a zip file, an error message is returned: "415 UNSUPPORTED MEDIA TYPE"
+  2. If the proposal file is not a zip file, an error message is returned: "415 UNSUPPORTED MEDIA TYPE" ?
 
-  3. If the user is not authenticated, an error message is returned: "401 UNAUTHORIZED"
+  3. If the user is not authenticated, an error message is returned: "401 UNAUTHORIZED" ?
 
-  4. If the user is not authorized, an error message is returned: "403 FORBIDDEN"
+  4. If the user is not authorized, an error message is returned: "403 FORBIDDEN" ?
+
+  5. If the request method is not a POST method, an error message is returned: "405 METHOD NOT ALLOWED"
 
 * **Functionality Tests:**
 
-  1. If the request method is not a POST method, an error message is returned: "405 METHOD NOT ALLOWED"
+  1. The content of the zip file matches the expected content, else, an error message is returned.
 
-  2. The request method is requested with the correct data, else, an error message is returned: "Please provide valid data."
+  2. The post request method is called once when the end point is triggered, else, an error message is returned.
+
+  3. The filename posted matches the filename of the attached/uploaded file, else, an error message is returned.
+
+  4. The url used by the post request method is correct, else, an error massage is returned.
+
+  2. The request method is requested with the correct data, else, an error message is returned.
 
 
 ****************************
