@@ -16,11 +16,11 @@ class Query(graphene.ObjectType):
     proposals = Field(List(Proposal), semester=String(), partner_code=String(),
                       description="List of proposals per semester. Can be filtered by partner "
                                   "The semester must be provided")
-    public_proposals_details = Field(List(Proposal), semester=String(), partner_code=String(),
-                                     description="List of non-confidential proposal details per semester. Can be "
-                                                 "filtered by partner the semester must be provided. These proposal "
-                                                 "only provide  information which is not critical to the proposal "
-                                                 "(best to use for SALT statistics)")
+    non_confidential_proposal_details = Field(List(Proposal), semester=String(), partner_code=String(),
+                                              description="List of non-confidential proposal details per semester. Can "
+                                                          "be filtered by partner the semester must be provided. These "
+                                                          "proposal only provide  information which is not critical to "
+                                                          "the proposal (best to use for SALT statistics)")
     targets = Field(List(Target), semester=String(), partner_code=String(), proposal_code=String(),
                     description="List of targets per semester can be reduced to per partner or per proposal. " 
                                 " The semester must be provided in all cases")
@@ -36,7 +36,7 @@ class Query(graphene.ObjectType):
             raise ValueError("please provide argument \"semester\"")
         return get_proposals(semester=semester, partner_code=partner_code, details=False)
 
-    def resolve_public_proposals_details(self, info, semester=None, partner_code=None):
+    def resolve_non_confidential_proposal_details(self, info, semester=None, partner_code=None):
         if semester is None:
             raise ValueError("please provide argument \"semester\"")
         return get_proposals(semester=semester, partner_code=partner_code, details=True)
