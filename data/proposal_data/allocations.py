@@ -2,7 +2,6 @@ import pandas as pd
 from data import sdb_connect
 
 
-
 def priority(p, time, pat):
     if p == 0:
         pat.p0 = time
@@ -55,8 +54,8 @@ def update_time_allocations(semester, proposals):
                     tac_comments
                 )
 
-            if len(proposals[proposal].allocated_time) == 0:
-                proposals[proposal].allocated_time.append(
+            if len(proposals[proposal].allocated_times) == 0:
+                proposals[proposal].allocated_times.append(
                     priority(row['Priority'],
                              row['TimeAlloc'],
                              pat
@@ -65,13 +64,13 @@ def update_time_allocations(semester, proposals):
                 prev_partner, prev_proposal = partner, proposal
             else:
                 if partner == prev_partner and proposal == prev_proposal:
-                    proposals[proposal].allocated_time[len(proposals[proposal].allocated_time) - 1] = \
+                    proposals[proposal].allocated_times[len(proposals[proposal].allocated_times) - 1] = \
                         priority(
                             row['Priority'],
                             row['TimeAlloc'],
-                            proposals[proposal].allocated_time[len(proposals[proposal].allocated_time) - 1])
+                            proposals[proposal].allocated_times[len(proposals[proposal].allocated_times) - 1])
                 else:
-                    proposals[proposal].allocated_time.append(
+                    proposals[proposal].allocated_times.append(
                         priority(row['Priority'],
                                  row['TimeAlloc'],
                                  pat

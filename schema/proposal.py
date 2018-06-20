@@ -51,7 +51,7 @@ class TechReview(ObjectType):
 class Proposal(ObjectType):
     abstract = String()
     is_target_of_opportunity = Boolean()
-    allocated_time = List(ProposalAllocatedTime)
+    allocated_times = List(ProposalAllocatedTime)
     code = String()
     is_p4 = Boolean()
     is_thesis = Boolean()

@@ -64,7 +64,7 @@ def make_proposal(row, public):
     else:
         sa = User()
     return Proposal(
-        allocated_time=[],
+        allocated_times=[],
         code=row["Proposal_Code"],
         instruments=[],
         is_target_of_opportunity=row["ActOnAlert"] == 1,
