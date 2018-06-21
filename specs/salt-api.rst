@@ -734,15 +734,19 @@ must be performed to ensure that the proposal submission functions as intended
 
 * **If the post request do not succeed:**
 
-  1. If multiple proposal files submitted, an error message is returned: "400 BAD REQUEST" ?
+  1. If multiple proposal files submitted, an error message is returned: "400 BAD REQUEST"
 
-  2. If the proposal file is not a zip file, an error message is returned: "415 UNSUPPORTED MEDIA TYPE" ?
+  2. If the proposal file is not a zip file, an error message is returned: "415 UNSUPPORTED MEDIA TYPE"
 
-  3. If the user is not authenticated, an error message is returned: "401 UNAUTHORIZED" ?
+  3. If the user is not authenticated, an error message is returned: "401 UNAUTHORIZED"
 
-  4. If the user is not authorized, an error message is returned: "403 FORBIDDEN" ?
+  4. If the user is not authorized, an error message is returned: "403 FORBIDDEN"
 
-  5. If the request method is not a POST method, an error message is returned: "405 METHOD NOT ALLOWED"
+
+* **If it is not a post request method:**
+
+  1. If the request method is not a POST method, an error message is returned: "405 METHOD NOT ALLOWED"
+
 
 * **Functionality Tests:**
 
@@ -750,11 +754,9 @@ must be performed to ensure that the proposal submission functions as intended
 
   2. The post request method is called once when the end point is triggered, else, an error message is returned.
 
-  3. The filename posted matches the filename of the attached/uploaded file, else, an error message is returned.
+  3. The url used by the post request method is correct, else, an error massage is returned.
 
-  4. The url used by the post request method is correct, else, an error massage is returned.
-
-  2. The request method is requested with the correct data, else, an error message is returned.
+  4. The request method is requested with the correct data type, else, an error message is returned.
 
 
 ****************************

@@ -76,7 +76,7 @@ def requires_auth(f):
 @app.route('/proposals', methods=['POST'])
 def proposals():
     payload = request.files['file']
-    t = requests.post('https://google.com/', data=payload)
+    t = requests.post('wmdev.saao.ac.za/wm/webservices/index.php', data=payload)
 
     return jsonify(t)
 
