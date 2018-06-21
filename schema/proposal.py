@@ -1,44 +1,32 @@
-from graphene import ObjectType, String, ID, Boolean, Field, Int, List, Float
-from schema.instruments import Instruments
-from schema.salt_astronomer import SALTAstronomer
+from graphene import ObjectType, String, Boolean, Field, Int, List, Float
+from graphene import resolve_only_args
+
+from schema.instruments import Instrument, HRS, RSS
+from schema.partner import Partner
 from schema.target import Target
+from schema.user import User
 
 
-class Investigator(ObjectType):
-    id = ID()
-    first_name = String()
-    surname = String()
-    email = String()
-
-
-class ProposalInfoM(ObjectType):
+class ProposalInfo(ObjectType):
     is_p4 = Boolean()
     status = String()
     transparency = String()
     max_seeing = Float()
 
 
-class PI(ObjectType):
-    surname = String()
-    name = String()
-    email = String()
-
-
-class Distribution(ObjectType):
-    partner_name = String()
-    partner_code = String()
+class TimeRequest(ObjectType):
+    partner = Field(Partner)
     time = Int()
 
 
-class RequestedTimeM(ObjectType):
+class TimeRequirement(ObjectType):
     semester = String()
-    distribution = Field(List(Distribution))
+    time_requests = List(TimeRequest)
     minimum_useful_time = Int()
 
 
 class ProposalAllocatedTime(ObjectType):
-    partner_code = String()
-    partner_name = String()
+    partner = Field(Partner)
     p0 = Float()
     p1 = Float()
     p2 = Float()
@@ -47,35 +35,35 @@ class ProposalAllocatedTime(ObjectType):
 
 
 class TacComment(ObjectType):
-    partner_code = String()
+    partner = Field(Partner)
     comment = String()
 
     def __eq__(self, other):
-        return self.partner_code == other.partner_code and self.comment == other.comment
+        return self.partner.code == other.partner.code and self.comment == other.comment
 
 
 class TechReview(ObjectType):
     semester = String()
-    reviewer = Field(SALTAstronomer)
+    reviewer = Field(User)
     report = String()
 
 
-class Proposals(ObjectType):
+class Proposal(ObjectType):
     abstract = String()
-    act_on_alert = Boolean()
-    allocated_time = List(ProposalAllocatedTime)
+    is_target_of_opportunity = Boolean()
+    allocated_times = List(ProposalAllocatedTime)
     code = String()
-    id = ID()
-    instruments = Field(Instruments)
     is_p4 = Boolean()
     is_thesis = Boolean()
     max_seeing = Float()
-    pi = Field(PI)
+    principal_investigator = Field(User)
+    principal_contact = Field(User)
     status = String()
-    tac_comment = List(TacComment)
+    tac_comments = List(TacComment)
     targets = Field(List(Target))
     tech_reviews = Field(List(TechReview))
-    time_requests = List(RequestedTimeM)
+    time_requirements = List(TimeRequirement)
     title = String()
     transparency = String()
-    S_a_l_t_astronomer = Field(SALTAstronomer)
+    liaison_salt_astronomer = Field(User)
+    instruments = List(Instrument)

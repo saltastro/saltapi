@@ -11,17 +11,23 @@ def get_proposal_ids(semester, partner_code=None):
     conn.close()
 
     sql = """
-        select distinct Partner.Partner_Code as PartnerCode, ProposalCode_Id, Proposal_Code, Surname, ProposalStatus_Id , CONCAT(Year, '-', Semester) as Semester
-            from ProposalCode
-                join ProposalGeneralInfo using (ProposalCode_Id)
-                join MultiPartner using (ProposalCode_Id)
-                join ProposalContact using (ProposalCode_Id)
-                join Investigator on (Leader_Id=Investigator_Id)
-                join Semester using (Semester_Id)
-                join Partner on (MultiPartner.Partner_Id = Partner.Partner_Id)
-            Group by ProposalCode_Id, Semester_Id having Semester = "{semester}"
-                and ProposalStatus_Id NOT IN (9, 3)
-                """.format(semester=semester)  # status 9 => Deleted, 3 => Rejected
+SELECT distinct
+    Partner.Partner_Code AS PartnerCode,
+    ProposalCode_Id,
+    Proposal_Code,
+    Surname,
+    ProposalStatus_Id ,
+    CONCAT(Year, '-', Semester) AS Semester
+FROM ProposalCode
+    JOIN ProposalGeneralInfo USING(ProposalCode_Id)
+    JOIN MultiPartner USING(ProposalCode_Id)
+    JOIN ProposalContact USING(ProposalCode_Id)
+    JOIN Investigator ON (Leader_Id=Investigator_Id)
+    JOIN Semester USING(Semester_Id)
+    JOIN Partner ON (MultiPartner.Partner_Id = Partner.Partner_Id)
+GROUP BY ProposalCode_Id, Semester_Id HAVING Semester = "{semester}"
+    AND ProposalStatus_Id NOT IN (9, 3)
+""".format(semester=semester)  # status 9 => Deleted, 3 => Rejected
 
     conn = sdb_connect()
     all_proposals = [str(p["ProposalCode_Id"]) for i, p in pd.read_sql(sql, conn).iterrows()]
@@ -29,10 +35,10 @@ def get_proposal_ids(semester, partner_code=None):
     user_partners = [partner for partner in all_partners if g.user.may_perform(Action.VIEW_PARTNER_PROPOSALS,
                                                                                partner=partner)]
     if partner_code is not None:
-        sql += """  and PartnerCode in ("{partner_codes}")
+        sql += """  AND PartnerCode IN ("{partner_codes}")
                 """.format(partner_codes='", "'.join([partner_code]))
     else:
-        sql += """  and PartnerCode in ("{partner_codes}")
+        sql += """  AND PartnerCode IN ("{partner_codes}")
         """.format(partner_codes='", "'.join(user_partners))
 
     proposal_code_ids = []
