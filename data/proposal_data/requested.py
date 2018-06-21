@@ -2,7 +2,7 @@ import pandas as pd
 from data import sdb_connect
 
 
-def fill_time_requirements(data, time_requirements):
+def update_time_requirements(data, time_requirements):
     """
     This method add minimum useful time for all semesters it requested times from if any
     it also create an empty array for adding each requested time from a partner
@@ -39,7 +39,7 @@ def fill_time_requirements(data, time_requirements):
     return time_requirements
 
 
-def fill_proposals_requested_time(proposal_code_ids):
+def update_proposals_requested_time(proposal_code_ids):
     """
     Query database for requested times of given proposals ids
 
@@ -66,12 +66,12 @@ def fill_proposals_requested_time(proposal_code_ids):
         proposal_code = row['Proposal_Code']
         if proposal_code not in time_requirements:
             time_requirements[proposal_code] = []
-        time_requirements[proposal_code] = fill_time_requirements(row, time_requirements[proposal_code])
+        time_requirements[proposal_code] = update_time_requirements(row, time_requirements[proposal_code])
     conn.close()
     return time_requirements
 
 
-def fill_requested_time_per_partner(proposal_code_ids, proposals):
+def update_requested_time_per_partner(proposal_code_ids, proposals):
 
     """
     Query database for requested times of all partners on the given proposals ids

@@ -6,8 +6,8 @@ from data import sdb_connect
 from data.common import get_proposal_ids, sql_list_string
 from data.instruments import get_instruments
 from data.proposal_data.allocations import update_time_allocations
-from data.proposal_data.requested import fill_proposals_requested_time, fill_requested_time_per_partner
-from data.proposal_data.technical_report import fill_technical_reports
+from data.proposal_data.requested import update_proposals_requested_time, update_requested_time_per_partner
+from data.proposal_data.technical_report import update_technical_reports
 from data.proposal_data.text import get_proposals_text
 from data.targets import get_targets
 from util.semester import previous_semester
@@ -123,8 +123,8 @@ def query_proposal_data(proposal_code_ids, semester, public=False):
     tech_reports = {}
     if not public:
         proposals_text = get_proposals_text(proposal_code_ids)
-        tech_reports = fill_technical_reports(proposal_code_ids)
-    requested_times = fill_proposals_requested_time(proposal_code_ids)
+        tech_reports = update_technical_reports(proposal_code_ids)
+    requested_times = update_proposals_requested_time(proposal_code_ids)
 
     proposal_sql = proposal_query(semester, proposal_code_ids, public=public)
 
@@ -138,7 +138,7 @@ def query_proposal_data(proposal_code_ids, semester, public=False):
     get_targets(proposal_code_ids=proposal_code_ids, proposals=proposals)
     fill_proposal_private_data(proposals, proposals_text, tech_reports, requested_times)
 
-    fill_requested_time_per_partner(proposal_code_ids, proposals)
+    update_requested_time_per_partner(proposal_code_ids, proposals)
 
     update_time_allocations(semester, proposals)
     return proposals.values()
