@@ -1,28 +1,23 @@
 from graphene import ObjectType, String, ID, Float, Field, Boolean
 
 
-class Coordinates(ObjectType):
+class Position(ObjectType):
     dec = Float()
     ra = Float()
-
-
-class Moving(ObjectType):
     dec_dot = Float()
     ra_dot = Float()
     epoch = String()
 
 
-class Magnitudes(ObjectType):
-    minimum = Float()
-    maximum = Float()
-    filter_name = String()  # from bandpass
+class Magnitude(ObjectType):
+    min_magnitude = Float()
+    max_magnitude = Float()
+    filter = String()  # from bandpass
 
 
 class Target(ObjectType):
     id = ID()
     name = String()
-    proposal_code = String()
-    optional = Boolean()
-    coordinates = Field(Coordinates)
-    magnitudes = Field(Magnitudes)
-    moving = Field(Moving)
+    is_optional = Boolean()
+    position = Field(Position)
+    magnitude = Field(Magnitude)

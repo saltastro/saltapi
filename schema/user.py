@@ -1,5 +1,7 @@
 from flask import g
 from graphene import Enum, ObjectType, String, List, Field, Boolean
+
+from schema.partner import Partner
 from util.action import Action
 from data.proposal import liaison_astronomer, technical_reviewer, is_investigator
 from util.time_requests import time_requests
@@ -37,7 +39,7 @@ class Role(ObjectType):
         return self.type.value
 
 
-class UserModel(ObjectType):
+class User(ObjectType):
     first_name = String()
     last_name = String()
     email = String()
@@ -140,8 +142,7 @@ class UserModel(ObjectType):
 class TacMember(ObjectType):
     last_name = String()
     first_name = String()
-    partner_code = String()
-    partner_name = String()
+    partner = Field(Partner)
     is_chair = Boolean()
     email = String()
     username = String()
