@@ -1,10 +1,13 @@
+import json
 import os
 import tempfile
 import traceback
 from functools import wraps
+import base64
+import magic
 
 import requests
-from flask import Flask, jsonify, request, g, make_response, Response, render_template, send_file
+from flask import Flask, jsonify, request, g, make_response, Response, render_template, send_file, abort
 from flask_graphql import GraphQLView
 from flask_httpauth import HTTPTokenAuth, HTTPBasicAuth, MultiAuth
 from flask_socketio import SocketIO
@@ -77,11 +80,64 @@ def requires_auth(f):
 
 
 @app.route('/proposals', methods=['POST'])
-def proposals():
-    payload = request.files['file']
-    t = requests.post('wmdev.saao.ac.za/wm/webservices/index.php', data=payload)
+def submit_proposals():
+    username = os.environ.get('USERNAME')
+    password = os.environ.get('SDB_ACCESS_KEY')
+    base_url = os.environ.get('WM_WEB_SERVICES')
 
-    return jsonify(t)
+    file = request.get_data()
+    # Checks if the file is attached for submission
+    # If it is not attached abort with the response status code 400
+    if file == b'':
+        abort(make_response(jsonify(error="No file is attached"), 400))
+
+    filename = 'proposal_content'
+    # Creating a temporary file with the content of the attached file
+    with open(os.path.join(tempfile.gettempdir(), filename), 'wb+') as output:
+        output.write(file)
+        output.close()
+    # Make the file to be readable
+    tmp_file = open(os.path.join(tempfile.gettempdir(), filename), 'rb+')
+    # Retrieving the file type of the temporary created file
+    file_type = magic.from_file(os.path.join(tempfile.gettempdir(), filename), mime=True)
+    # Checks if the attached file type is a zip
+    # If it is not a zip file abort with the response status code 415
+    if file_type not in ['application/octet-stream', 'application/zip']:
+        abort(make_response(jsonify(error="Only zip file is supported"), 415))
+    # Setting a post request parameters
+    files = {
+        'proposal_content': tmp_file
+    }
+
+    data = {
+        "method": 'SendProposal',
+        "username": base64.b64encode(username.encode('utf-8')),
+        "password": base64.b64encode(password.encode('utf-8')),
+        "asyncCode": '',
+        "proposalCode": 'Unsubmitted-001',
+        "emails": False,
+        "retainProposalStatus": False,
+        "noValidation": False,
+        "anySemester": False,
+        "isAPI": True
+    }
+    # Creating a post request
+    response = requests.post(base_url, files=files, data=data)
+    # Form a response to conform with the API specs
+    if response.status_code == 200:
+        make_rsp = make_response(
+            json.dumps({'proposal_code': response.json()['Proposal_Code']}),
+        )
+        make_rsp.headers['Location'] = 'http://localhost:5001/proposals/' + response.json()['Proposal_Code']
+        make_rsp.headers['Content-Type'] = 'application/json'
+    else:
+        make_rsp = make_response(
+            json.dumps({'error': response.json()['Error']}),
+            response.status_code
+        )
+        make_rsp.headers['Content-Type'] = 'application/json'
+    # Returning a response
+    return make_rsp
 
 
 @app.route("/token", methods=['POST'])
@@ -241,6 +297,14 @@ def not_found(error):
     return make_response(jsonify({'errors': 'Not found'}), 404)
 
 
+@app.errorhandler(405)
+def not_found(error):
+    make_resp = make_response()
+    make_resp.status_code = 405
+    make_resp.headers['Content-Type'] = 'application/json'
+    return make_resp
+
+
 @app.errorhandler(500)
 def not_found(error):
     return make_response(jsonify({'errors': 'Something is wrong'}), 500)
@@ -268,6 +332,7 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST')
     response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
+
 
 if __name__ == '__main__':
     socketio.run(app, port=5001)
