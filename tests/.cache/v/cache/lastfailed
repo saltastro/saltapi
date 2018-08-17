@@ -1,6 +1,0 @@
-{
-  "main_test.py": true,
-  "test_models.py": true,
-  "test_proposals.py": true,
-  "test_submit_proposal.py": true
-}

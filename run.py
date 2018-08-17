@@ -2,18 +2,22 @@ import json
 import os
 import tempfile
 import traceback
+import zipfile
 from functools import wraps
 import base64
+from io import StringIO, BytesIO
+
 import magic
 
 import requests
-from flask import Flask, jsonify, request, g, make_response, Response, render_template, send_file, abort
+from flask import Flask, jsonify, request, g, make_response, Response, render_template, send_file, abort, \
+    send_from_directory
 from flask_graphql import GraphQLView
 from flask_httpauth import HTTPTokenAuth, HTTPBasicAuth, MultiAuth
 from flask_socketio import SocketIO
 from raven.contrib.flask import Sentry
 
-from data.proposal import summary_file
+from data.proposal import summary_file, latest_version
 from data.technical_review import update_liaison_astronomers, update_reviews
 from data.user import update_tac_members, remove_tac_members
 from schema.query import schema
@@ -80,6 +84,7 @@ def requires_auth(f):
 
 
 @app.route('/proposals', methods=['POST'])
+@token_auth.login_required
 def submit_proposals():
     username = os.environ.get('USERNAME')
     password = os.environ.get('SDB_ACCESS_KEY')
@@ -137,6 +142,38 @@ def submit_proposals():
         )
         make_rsp.headers['Content-Type'] = 'application/json'
     # Returning a response
+    return make_rsp
+
+
+@app.route("/proposals/<string:proposal_code>", methods=['GET'])
+@token_auth.login_required
+def get_proposal(proposal_code):
+
+    proposal_phase = request.args['proposal_phase']
+    # Forming a url that points to the proposals directory
+    url = '{}/{}/{}/{}'.format(
+        os.environ.get('PROPOSALS_DIR'),
+        proposal_code,
+        str(latest_version(proposal_code, proposal_phase)),
+        proposal_code + ".zip"
+    )
+
+    # Creating a get request to retrieve a proposal
+    response = requests.get(url)
+
+    # Make a response to conform with the API specs
+    if response.status_code == 200:
+        make_rsp = make_response(response.content)
+        make_rsp.headers['Content-Type'] = 'application/zip'
+
+    else:
+        make_rsp = make_response(
+            json.dumps(response.json()),
+            response.status_code
+        )
+        make_rsp.headers['Content-Type'] = 'application/json'
+
+    # Returning the response
     return make_rsp
 
 
