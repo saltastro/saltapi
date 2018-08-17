@@ -1,6 +1,6 @@
-import tempfile
 import json
 import os
+from io import BytesIO
 from unittest.mock import patch, Mock
 import zipfile
 import pytest
@@ -9,26 +9,21 @@ ENDPOINT = '/proposals'
 
 
 # Creating a zip file
-def create_zipfile(zip_file_name, zip_content_file_name):
-    with open(os.path.join(tempfile.gettempdir(), zip_content_file_name), 'wb+') as output:
-        output.write(b'Proposal Content')
+def create_zipfile():
+    proposal_content = BytesIO()
+    with zipfile.ZipFile(proposal_content, 'w') as zip_file:
+        zip_file.writestr('content', b'proposal content')
 
-    with zipfile.ZipFile(os.path.join(tempfile.gettempdir(), zip_file_name), 'w') as zip_file:
-        zip_file.write(os.path.join(tempfile.gettempdir(), zip_content_file_name))
+    proposal_content.seek(0)
 
-    tmp_file = open(os.path.join(tempfile.gettempdir(), zip_file_name), 'rb+')
-
-    return tmp_file.read()
+    return proposal_content.read()
 
 
 # Creating a non zip file
-def create_non_zipfile(filename):
-    with open(os.path.join(tempfile.gettempdir(), filename), 'wb+') as output:
-        output.write(b'Proposal Content')
+def create_non_zipfile():
+    file_content = BytesIO(b'any file content')
 
-    tmp_file = open(os.path.join(tempfile.gettempdir(), filename), 'rb+')
-
-    return tmp_file.read()
+    return file_content.read()
 
 
 def test_submit_proposal_successful(client, uri):
@@ -41,7 +36,7 @@ def test_submit_proposal_successful(client, uri):
 
         mock_response.json.return_value = {"Proposal_Code": new_proposal_code}
 
-        response = client.post(ENDPOINT, data=create_zipfile('zip_file_name', 'zip_content_file_name'))
+        response = client.post(ENDPOINT, data=create_zipfile())
 
         # Assert the response status code to be 200 for successful post request
         assert response.status_code == 200
@@ -73,7 +68,7 @@ def test_submit_proposal_unsupported_media_type(client):
 
         mock_response.json.return_value = {'Error': 'Only zip file is supported'}
 
-        response = client.post(ENDPOINT, data=create_non_zipfile('non_zip_file'))
+        response = client.post(ENDPOINT, data=create_non_zipfile())
 
         # Assert the response status code to be 415 for unsupported media type
         assert response.status_code == 415
@@ -84,9 +79,9 @@ def test_submit_proposal_unsupported_media_type(client):
 
 
 @pytest.mark.parametrize(('status_code', 'error_message',), (
-    (403, {'Error': 'Have no permissions to make this request'},),
-    (401, {'Error': 'Invalid credentials'},),)
-)
+        (403, {'Error': 'Have no permissions to make this request'},),
+        (401, {'Error': 'Invalid credentials'},),)
+                         )
 def test_submit_proposal_forbidden_unauthorized(client, status_code, error_message):
     with patch('run.requests') as mock_requests:
         mock_requests.post.return_value = mock_response = Mock()
@@ -95,7 +90,7 @@ def test_submit_proposal_forbidden_unauthorized(client, status_code, error_messa
 
         mock_response.json.return_value = error_message
 
-        response = client.post(ENDPOINT, data=create_zipfile('zip_file_name', 'zip_content_file_name'))
+        response = client.post(ENDPOINT, data=create_zipfile())
 
         # Assert the response status code for a forbidden and unauthorized user trying to submit a proposal
         assert response.status_code == status_code
@@ -106,8 +101,8 @@ def test_submit_proposal_forbidden_unauthorized(client, status_code, error_messa
 
 
 @pytest.mark.parametrize(('status_code',), (
-    (405,),)
-)
+        (405,),)
+                         )
 def test_submit_proposal_disallowed_request_methods(client, status_code):
     # Assert the response status code to be 405 for not allowed request method when submitting a proposal
     assert client.get(ENDPOINT).status_code == status_code
@@ -124,11 +119,10 @@ def test_submit_proposal_disallowed_request_methods(client, status_code):
 
 def test_submit_proposal_functionality(client):
     with patch('run.requests.post') as mock_request:
-        client.post(ENDPOINT, data=create_zipfile('zip_file_name', 'zip_content_file_name'))
+        client.post(ENDPOINT, data=create_zipfile())
 
         # Assert a post request is called with a url http://localhost/webservices/index.php
         assert mock_request.call_args[0][0] == os.environ.get('WM_WEB_SERVICES')
 
         # Assert the proposal file content
-        assert mock_request.call_args[1]['files']['proposal_content'].read() == create_zipfile('zip_file_name',
-                                                                                               'zip_content_file_name')
+        assert mock_request.call_args[1]['files']['proposal_content'].read() == create_zipfile()
