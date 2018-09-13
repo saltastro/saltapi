@@ -40,9 +40,11 @@ WHERE concat(Year,"-", Semester) = "{semester}"
         [Partner(
             id="Partner: " + str(row["Partner_Id"]),
             name=row["Partner_Name"] if g.user.has_role(RoleType.ADMINISTRATOR, row["Partner_Code"]) else
-            row["Partner_Name"] if g.user.has_role(RoleType.TAC_CHAIR, row["Partner_Code"]) else None,
-            code=row["Partner_Code"] if g.user.has_role(RoleType.ADMINISTRATOR, row["Partner_Code"])
-            else row["Partner_Code"] if g.user.has_role(RoleType.TAC_CHAIR, row["Partner_Code"]) else None,
+            row["Partner_Name"] if g.user.has_role(RoleType.TAC_CHAIR, row["Partner_Code"]) else
+            row["Partner_Name"] if g.user.has_role(RoleType.TAC_MEMBER, row["Partner_Code"]) else None,
+            code=row["Partner_Code"] if g.user.has_role(RoleType.ADMINISTRATOR, row["Partner_Code"]) else
+            row["Partner_Code"] if g.user.has_role(RoleType.TAC_CHAIR, row["Partner_Code"]) else
+            row["Partner_Code"] if g.user.has_role(RoleType.TAC_MEMBER, row["Partner_Code"]) else None,
             time_allocation=TimeAllocation(
                 semester=str(row['Year']) + "-" + str(row['Semester']),
                 used_time=Priority(
