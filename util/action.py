@@ -14,3 +14,12 @@ class Action(Enum):
     VIEW_PROPOSAL = 6
     SWITCH_USER = 7
     DOWNLOAD_SUMMARY = 8
+
+
+class Data(Enum):
+    """
+    An enumeration of data a user may view with this API.
+    """
+
+    AVAILABLE_TIME = 1
+
