@@ -238,7 +238,7 @@ WHERE ProposalCode.Proposal_Code = %s AND PiptUser.Username = %s
     return df['Count'][0] > 0
 
 
-def latest_version(proposal_code, phase):
+def latest_version(proposal_code, phase=None):
     """
     The latest version number of a proposal, given a proposal phase.
 
@@ -257,17 +257,28 @@ def latest_version(proposal_code, phase):
     version : number
         The current version number.
     """
-
-    sql = '''
-SELECT Proposal.Submission AS Submission
-       FROM Proposal
-       JOIN ProposalCode ON Proposal.ProposalCode_Id = ProposalCode.ProposalCode_Id
-WHERE ProposalCode.Proposal_Code = %s AND Proposal.Phase = %s
-ORDER BY Proposal.Submission DESC
-LIMIT 1
-'''
-    conn = sdb_connect()
-    df = pd.read_sql(sql, conn, params=(proposal_code, phase))
+    if phase is None:
+        sql = '''
+    SELECT Proposal.Submission AS Submission
+           FROM Proposal
+           JOIN ProposalCode ON Proposal.ProposalCode_Id = ProposalCode.ProposalCode_Id
+    WHERE ProposalCode.Proposal_Code = %s
+    ORDER BY Proposal.Submission DESC
+    LIMIT 1
+    '''
+        conn = sdb_connect()
+        df = pd.read_sql(sql, conn, params=(proposal_code,))
+    else:
+        sql = '''
+    SELECT Proposal.Submission AS Submission
+           FROM Proposal
+           JOIN ProposalCode ON Proposal.ProposalCode_Id = ProposalCode.ProposalCode_Id
+    WHERE ProposalCode.Proposal_Code = %s AND Proposal.Phase = %s
+    ORDER BY Proposal.Submission DESC
+    LIMIT 1
+    '''
+        conn = sdb_connect()
+        df = pd.read_sql(sql, conn, params=(proposal_code, phase))
     conn.close()
 
     if not len(df['Submission']):
@@ -275,6 +286,40 @@ LIMIT 1
                         .format(proposal_code=proposal_code, phase=phase))
 
     return df['Submission'][0]
+
+
+def latest_semester(proposal_code):
+    """
+    The latest semester of a proposal, given a proposal code
+
+    Parameters
+    ----------
+    proposal_code : str
+        The proposal code, such as "2018-1-SCI-009".
+
+    Returns
+    -------
+    year-semester : string in the form of 'YEAR-SEMESTER' e.g. (2017-1)
+        The latest year-semester of the submitted proposal.
+    """
+    sql = '''
+    SELECT Semester.Semester AS semester, Semester.Year AS year
+           FROM Proposal
+           JOIN ProposalCode ON Proposal.ProposalCode_Id = ProposalCode.ProposalCode_Id
+           JOIN Semester ON Proposal.Semester_Id = Semester.Semester_Id
+    WHERE ProposalCode.Proposal_Code = %s
+    ORDER BY Proposal.Semester_Id DESC
+    LIMIT 1
+    '''
+    conn = sdb_connect()
+    df = pd.read_sql(sql, conn, params=(proposal_code,))
+
+    conn.close()
+
+    if not len(df['year']) or not len(df['semester']):
+        raise Exception
+
+    return '{}-{}'.format(df['year'][0], df['semester'][0])
 
 
 def summary_file(proposal_code, semester):
