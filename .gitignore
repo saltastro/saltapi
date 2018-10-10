@@ -7,4 +7,4 @@ venv/
 .cache/
 .pytest_cache/
 *.pyc
-test_proposal_dir/
+tests/test_proposal_dir/
