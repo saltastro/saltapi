@@ -1,0 +1,337 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Proposal xmlns="http://www.salt.ac.za/PIPT/Proposal/Phase2/4.6" xmlns:ns2="http://www.salt.ac.za/PIPT/Shared/1.4" xmlns:ns3="http://www.salt.ac.za/PIPT/Proposal/Shared/2.6" xmlns:ns4="http://www.salt.ac.za/DataTransfer" xmlns:ns5="http://www.salt.ac.za/PIPT/BVIT/Phase1/1.0" xmlns:ns6="http://www.salt.ac.za/PIPT/BVIT/Phase2/1.6" xmlns:ns7="http://www.salt.ac.za/PIPT/HRS/Phase1/1.1" xmlns:ns8="http://www.salt.ac.za/PIPT/HRS/Phase2/1.7" xmlns:ns9="http://www.salt.ac.za/PIPT/RSS/Phase1/1.12" xmlns:ns10="http://www.salt.ac.za/PIPT/RSS/Phase2/2.2" xmlns:ns11="http://www.salt.ac.za/PIPT/RSS/Shared/1.11" xmlns:ns12="http://www.salt.ac.za/PIPT/Salticam/Phase1/1.5" xmlns:ns13="http://www.salt.ac.za/PIPT/Salticam/Phase2/1.9" code="2017-1-SCI-030" final="true" PrincipalInvestigator="wkollat@astro.physik.uni-goettingen.de" PrincipalContact="wkollat@astro.physik.uni-goettingen.de">
+    <ProposalType>Science</ProposalType>
+    <Title>Target of opportunity for variable AGN</Title>
+    <Abstract>Based on optical broad band or X ray variations we intend to carry out 
+follow-up spectroscopic observations of dedicated AGN.</Abstract>
+    <ScientificJustification>
+        <ns3:Path>Included/8f8e36f4b09e17c006c20e40e3ec40db.pdf</ns3:Path>
+    </ScientificJustification>
+    <ReadMe>--------------------------------------------------------
+Short summary of program (from observers point of view):
+--------------------------------------------------------
+
+Based on optical broad band or X ray variations we intent to carry out 
+follow-up spectroscopic observations of dedicated AGN.
+
+--------------------------------------------
+Specific notes and instructions to observer:
+--------------------------------------------
+
+[Replace this with your notes and instructions.]
+
+------------------
+Critical aspects: 
+------------------
+
+[Replace this with a description of critical aspects.]</ReadMe>
+    <Year>2017</Year>
+    <Semester>1</Semester>
+    <Phase>2</Phase>
+    <TargetOfOpportunity>
+        <Reason>Brightness variations of specific objects.</Reason>
+    </TargetOfOpportunity>
+    <Partners>
+        <ns3:Partner id="Partner-1">
+            <ns3:Name>Georg-August-Universität Göttingen</ns3:Name>
+            <ns3:TimeDistribution>
+                <ns3:Year>2017</ns3:Year>
+                <ns3:Semester>1</ns3:Semester>
+                <ns3:Value>100</ns3:Value>
+                <ns3:Units>%</ns3:Units>
+            </ns3:TimeDistribution>
+        </ns3:Partner>
+    </Partners>
+    <Investigators>
+        <ns3:Investigator id="Investigator-1">
+            <ns3:Name>Wolfram</ns3:Name>
+            <ns3:Surname>Kollatschny</ns3:Surname>
+            <ns3:Partner ref="Partner-1"/>
+            <ns3:Institute>
+                <ns3:Name>Institute for Astrophysics</ns3:Name>
+                <ns3:Department></ns3:Department>
+            </ns3:Institute>
+            <ns3:Email>wkollat@astro.physik.uni-goettingen.de</ns3:Email>
+            <ns3:Phone>+49 0551 395065</ns3:Phone>
+        </ns3:Investigator>
+        <ns3:Investigator id="Investigator-3">
+            <ns3:Name>Matthias</ns3:Name>
+            <ns3:Surname>Zetzl</ns3:Surname>
+            <ns3:Partner ref="Partner-1"/>
+            <ns3:Institute>
+                <ns3:Name>Institute for Astrophysics</ns3:Name>
+                <ns3:Department></ns3:Department>
+            </ns3:Institute>
+            <ns3:Email>zetzl@astro.physik.uni-goettingen.de</ns3:Email>
+            <ns3:Phone>+49 0551 3912228</ns3:Phone>
+        </ns3:Investigator>
+    </Investigators>
+    <Targets>
+        <ns3:Target id="Target-4">
+            <ns3:Name>3C 120</ns3:Name>
+            <ns3:TargetType>Seyfert_1</ns3:TargetType>
+            <ns3:DummyTarget></ns3:DummyTarget>
+            <ns3:MagnitudeRange>
+                <ns3:Bandpass>V</ns3:Bandpass>
+                <ns3:Minimum>14.5</ns3:Minimum>
+                <ns3:Maximum>15.5</ns3:Maximum>
+            </ns3:MagnitudeRange>
+            <ns3:FindingChart>
+                <ns3:Path>Included/73faf0bcca18ffbd9599127f97a07070.jpg</ns3:Path>
+            </ns3:FindingChart>
+            <ns3:Mandatory>true</ns3:Mandatory>
+        </ns3:Target>
+        <ns3:NumberOfOptionalTargets>0</ns3:NumberOfOptionalTargets>
+    </Targets>
+    <InstrumentConfigurations/>
+    <Pools/>
+    <Blocks/>
+    <SubBlocks/>
+    <SubSubBlocks/>
+    <Pointings/>
+    <Observations/>
+    <Acquisitions/>
+    <TelescopeConfigurations/>
+    <PayloadConfigurations/>
+    <TimeAllocations>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>0</Priority>
+            <Moon>Dark</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>0</Priority>
+            <Moon>Gray</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>0</Priority>
+            <Moon>Bright</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>0</Priority>
+            <Moon>Any</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>1</Priority>
+            <Moon>Dark</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>1</Priority>
+            <Moon>Gray</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>1</Priority>
+            <Moon>Bright</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>1</Priority>
+            <Moon>Any</Moon>
+            <AllocatedTime>
+                <ns2:Value>4308.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>2</Priority>
+            <Moon>Dark</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>2</Priority>
+            <Moon>Gray</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>2</Priority>
+            <Moon>Bright</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>2</Priority>
+            <Moon>Any</Moon>
+            <AllocatedTime>
+                <ns2:Value>6462.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>3</Priority>
+            <Moon>Dark</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>3</Priority>
+            <Moon>Gray</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>3</Priority>
+            <Moon>Bright</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>3</Priority>
+            <Moon>Any</Moon>
+            <AllocatedTime>
+                <ns2:Value>17232.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>4</Priority>
+            <Moon>Dark</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>4</Priority>
+            <Moon>Gray</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>4</Priority>
+            <Moon>Bright</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>4</Priority>
+            <Moon>Any</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+    </TimeAllocations>
+    <BlockObservations/>
+    <Phase1Info>
+        <ObservingConditions>
+            <Transparency>Any</Transparency>
+            <MaximumSeeing>
+                <ns3:Value>3.0</ns3:Value>
+                <ns3:Units>arcseconds</ns3:Units>
+            </MaximumSeeing>
+        </ObservingConditions>
+        <Instruments>
+            <Instrument>
+                <InstrumentMode>RSS spectroscopy</InstrumentMode>
+                <DetectorMode>Normal</DetectorMode>
+            </Instrument>
+        </Instruments>
+        <TimeCritical>false</TimeCritical>
+        <TargetOfOpportunity>true</TargetOfOpportunity>
+        <Priority4Proposal>false</Priority4Proposal>
+    </Phase1Info>
+    <Detail>
+        <RequiredElements>
+            <ShowObservation>false</ShowObservation>
+            <ShowTelescopeConfig>false</ShowTelescopeConfig>
+            <ShowPayloadConfig>false</ShowPayloadConfig>
+            <ShowSubBlock>false</ShowSubBlock>
+            <ShowSubSubBlock>false</ShowSubSubBlock>
+        </RequiredElements>
+        <RequestedElements>
+            <ShowObservation>false</ShowObservation>
+            <ShowTelescopeConfig>false</ShowTelescopeConfig>
+            <ShowPayloadConfig>false</ShowPayloadConfig>
+            <ShowSubBlock>false</ShowSubBlock>
+            <ShowSubSubBlock>false</ShowSubSubBlock>
+        </RequestedElements>
+    </Detail>
+    <NightlogSummary>Target of opportunity for variable AGN</NightlogSummary>
+    <Outreach>
+        <ns3:AllowDisplaying>false</ns3:AllowDisplaying>
+    </Outreach>
+</Proposal>

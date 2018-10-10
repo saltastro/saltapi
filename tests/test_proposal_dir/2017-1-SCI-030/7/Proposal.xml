@@ -1,0 +1,760 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Proposal xmlns="http://www.salt.ac.za/PIPT/Proposal/Phase2/4.7" xmlns:ns2="http://www.salt.ac.za/PIPT/Shared/1.4" xmlns:ns3="http://www.salt.ac.za/PIPT/Proposal/Shared/2.6" xmlns:ns4="http://www.salt.ac.za/DataTransfer" xmlns:ns5="http://www.salt.ac.za/PIPT/BVIT/Phase1/1.0" xmlns:ns6="http://www.salt.ac.za/PIPT/BVIT/Phase2/1.6" xmlns:ns7="http://www.salt.ac.za/PIPT/HRS/Phase1/1.1" xmlns:ns8="http://www.salt.ac.za/PIPT/HRS/Phase2/1.7" xmlns:ns9="http://www.salt.ac.za/PIPT/RSS/Phase1/1.12" xmlns:ns10="http://www.salt.ac.za/PIPT/RSS/Phase2/2.3" xmlns:ns11="http://www.salt.ac.za/PIPT/RSS/Shared/1.11" xmlns:ns12="http://www.salt.ac.za/PIPT/Salticam/Phase1/1.5" xmlns:ns13="http://www.salt.ac.za/PIPT/Salticam/Phase2/1.9" code="2017-1-SCI-030" final="true" PrincipalInvestigator="wkollat@astro.physik.uni-goettingen.de" PrincipalContact="wkollat@astro.physik.uni-goettingen.de">
+    <ProposalType>Science</ProposalType>
+    <Title>Target of opportunity for variable AGN</Title>
+    <Abstract>Based on optical broad band or X ray variations we intend to carry out 
+follow-up spectroscopic observations of dedicated AGN.</Abstract>
+    <ScientificJustification>
+        <ns3:Path>Included/8f8e36f4b09e17c006c20e40e3ec40db.pdf</ns3:Path>
+    </ScientificJustification>
+    <ReadMe>--------------------------------------------------------
+Short summary of program (from observers point of view):
+--------------------------------------------------------
+
+Based on optical broad band or X ray variations we intent to carry out 
+follow-up spectroscopic observations of dedicated AGN.
+
+--------------------------------------------
+Specific notes and instructions to observer:
+--------------------------------------------
+
+[Replace this with your notes and instructions.]
+
+------------------
+Critical aspects: 
+------------------
+
+[Replace this with a description of critical aspects.]</ReadMe>
+    <Year>2017</Year>
+    <Semester>1</Semester>
+    <Phase>2</Phase>
+    <TargetOfOpportunity>
+        <Reason>Brightness variations of specific objects.</Reason>
+    </TargetOfOpportunity>
+    <Partners>
+        <ns3:Partner id="Partner-1">
+            <ns3:Name>Georg-August-Universität Göttingen</ns3:Name>
+            <ns3:TimeDistribution>
+                <ns3:Year>2017</ns3:Year>
+                <ns3:Semester>1</ns3:Semester>
+                <ns3:Value>100</ns3:Value>
+                <ns3:Units>%</ns3:Units>
+            </ns3:TimeDistribution>
+        </ns3:Partner>
+    </Partners>
+    <Investigators>
+        <ns3:Investigator id="Investigator-1">
+            <ns3:Name>Wolfram</ns3:Name>
+            <ns3:Surname>Kollatschny</ns3:Surname>
+            <ns3:Partner ref="Partner-1"/>
+            <ns3:Institute>
+                <ns3:Name>Institute for Astrophysics</ns3:Name>
+                <ns3:Department></ns3:Department>
+            </ns3:Institute>
+            <ns3:Email>wkollat@astro.physik.uni-goettingen.de</ns3:Email>
+            <ns3:Phone>+49 0551 395065</ns3:Phone>
+        </ns3:Investigator>
+        <ns3:Investigator id="Investigator-3">
+            <ns3:Name>Matthias</ns3:Name>
+            <ns3:Surname>Zetzl</ns3:Surname>
+            <ns3:Partner ref="Partner-1"/>
+            <ns3:Institute>
+                <ns3:Name>Institute for Astrophysics</ns3:Name>
+                <ns3:Department></ns3:Department>
+            </ns3:Institute>
+            <ns3:Email>zetzl@astro.physik.uni-goettingen.de</ns3:Email>
+            <ns3:Phone>+49 0551 3912228</ns3:Phone>
+        </ns3:Investigator>
+    </Investigators>
+    <Targets>
+        <ns3:Target id="Target-4">
+            <ns3:Name>3C 120</ns3:Name>
+            <ns3:TargetType>Seyfert_1</ns3:TargetType>
+            <ns3:DummyTarget></ns3:DummyTarget>
+            <ns3:MagnitudeRange>
+                <ns3:Bandpass>V</ns3:Bandpass>
+                <ns3:Minimum>14.5</ns3:Minimum>
+                <ns3:Maximum>15.5</ns3:Maximum>
+            </ns3:MagnitudeRange>
+            <ns3:FindingChart>
+                <ns3:Path>Included/73faf0bcca18ffbd9599127f97a07070.jpg</ns3:Path>
+            </ns3:FindingChart>
+            <ns3:Mandatory>true</ns3:Mandatory>
+        </ns3:Target>
+        <ns3:Target id="Target-1">
+            <ns3:Name>IRAS 23226-3843</ns3:Name>
+            <ns3:TargetType>Seyfert_1</ns3:TargetType>
+            <ns3:Coordinates>
+                <ns2:RightAscension>
+                    <ns2:Hours>23</ns2:Hours>
+                    <ns2:Minutes>25</ns2:Minutes>
+                    <ns2:Seconds>24.207000000001244</ns2:Seconds>
+                </ns2:RightAscension>
+                <ns2:Declination>
+                    <ns2:Sign>-</ns2:Sign>
+                    <ns2:Degrees>38</ns2:Degrees>
+                    <ns2:Arcminutes>26</ns2:Arcminutes>
+                    <ns2:Arcseconds>49.279919999997276</ns2:Arcseconds>
+                </ns2:Declination>
+                <ns2:Equinox>2000.0</ns2:Equinox>
+            </ns3:Coordinates>
+            <ns3:MagnitudeRange>
+                <ns3:Bandpass>V</ns3:Bandpass>
+                <ns3:Minimum>14.4</ns3:Minimum>
+                <ns3:Maximum>15.4</ns3:Maximum>
+            </ns3:MagnitudeRange>
+            <ns3:FindingChart>
+                <ns3:Path>Included/91bbaaf1af89e178b5a670b6b71bc8d1.jpg</ns3:Path>
+            </ns3:FindingChart>
+            <ns3:Mandatory>true</ns3:Mandatory>
+        </ns3:Target>
+        <ns3:Target id="Target-2">
+            <ns3:Name>Gaia17app</ns3:Name>
+            <ns3:TargetType>Unknown</ns3:TargetType>
+            <ns3:DummyTarget></ns3:DummyTarget>
+            <ns3:MagnitudeRange>
+                <ns3:Bandpass>V</ns3:Bandpass>
+                <ns3:Minimum>18.3</ns3:Minimum>
+                <ns3:Maximum>20.0</ns3:Maximum>
+            </ns3:MagnitudeRange>
+            <ns3:FindingChart>
+                <ns3:Path>Included/930b1ed0d204afae146566854fb5db7b.jpg</ns3:Path>
+            </ns3:FindingChart>
+            <ns3:Mandatory>true</ns3:Mandatory>
+        </ns3:Target>
+        <ns3:NumberOfOptionalTargets>0</ns3:NumberOfOptionalTargets>
+    </Targets>
+    <InstrumentConfigurations>
+        <ns10:Rss id="Rss-7">
+            <ns10:Name>[Rss]</ns10:Name>
+            <ns10:RssProcedure/>
+            <ns10:RssConfig>
+                <ns10:SlitMask>
+                    <ns10:PredefinedMask>
+                        <ns10:Barcode>PL0200N001</ns10:Barcode>
+                    </ns10:PredefinedMask>
+                </ns10:SlitMask>
+                <ns10:Mode>
+                    <ns10:Spectroscopy>
+                        <ns10:Grating>pg0900</ns10:Grating>
+                        <ns10:GratingAngle>
+                            <ns11:Value>15.5</ns11:Value>
+                            <ns11:Units>degrees</ns11:Units>
+                        </ns10:GratingAngle>
+                        <ns10:ArtStation>40_31.00</ns10:ArtStation>
+                    </ns10:Spectroscopy>
+                </ns10:Mode>
+                <ns10:FilterId>pc03850</ns10:FilterId>
+                <ns10:FocusPosition>
+                    <ns10:Value>1000</ns10:Value>
+                    <ns10:Units>microns</ns10:Units>
+                </ns10:FocusPosition>
+            </ns10:RssConfig>
+            <ns10:RssDetector>
+                <ns10:DetMode>Normal</ns10:DetMode>
+                <ns10:Iterations>1</ns10:Iterations>
+                <ns10:PreShuffle>0</ns10:PreShuffle>
+                <ns10:PostShuffle>0</ns10:PostShuffle>
+                <ns10:PreBinRows>2</ns10:PreBinRows>
+                <ns10:PreBinCols>2</ns10:PreBinCols>
+                <ns10:Prepare>true</ns10:Prepare>
+                <ns10:ExposureType>Arc</ns10:ExposureType>
+                <ns10:ExposureTime>
+                    <ns2:Value>5.625</ns2:Value>
+                    <ns2:Units>seconds</ns2:Units>
+                </ns10:ExposureTime>
+                <ns10:Gain>Faint</ns10:Gain>
+                <ns10:ReadoutSpeed>Slow</ns10:ReadoutSpeed>
+                <ns10:DetectorCalculation>None</ns10:DetectorCalculation>
+            </ns10:RssDetector>
+            <ns10:MinimumSN>0</ns10:MinimumSN>
+            <ns10:Cycles>1</ns10:Cycles>
+            <ns10:RssCalibration>
+                <ns10:RssArc>
+                    <ns10:ArcLamp>Xe</ns10:ArcLamp>
+                    <ns10:ArcExposureTime>
+                        <ns2:Value>5.0</ns2:Value>
+                        <ns2:Units>seconds</ns2:Units>
+                    </ns10:ArcExposureTime>
+                    <ns10:Iterations>1</ns10:Iterations>
+                    <ns10:ArcRequirement>After science</ns10:ArcRequirement>
+                    <ns10:DoneBetweenDitheringSteps>false</ns10:DoneBetweenDitheringSteps>
+                </ns10:RssArc>
+            </ns10:RssCalibration>
+            <ns10:RssNonChargedCalibration>
+                <ns10:RssStandard>
+                    <ns10:StandardType>Spectrophotometric</ns10:StandardType>
+                </ns10:RssStandard>
+            </ns10:RssNonChargedCalibration>
+            <ns10:RssNonChargedCalibration>
+                <ns10:RssSpectroscopicFlat>
+                    <ns10:Type>Lamp</ns10:Type>
+                    <ns10:Iterations>5</ns10:Iterations>
+                </ns10:RssSpectroscopicFlat>
+            </ns10:RssNonChargedCalibration>
+            <ns10:InCalibration>true</ns10:InCalibration>
+        </ns10:Rss>
+        <ns10:Rss id="Rss-8">
+            <ns10:Name>[Rss]</ns10:Name>
+            <ns10:RssProcedure/>
+            <ns10:RssConfig>
+                <ns10:SlitMask>
+                    <ns10:PredefinedMask>
+                        <ns10:Barcode>PL0200N001</ns10:Barcode>
+                    </ns10:PredefinedMask>
+                </ns10:SlitMask>
+                <ns10:Mode>
+                    <ns10:Spectroscopy>
+                        <ns10:Grating>pg0900</ns10:Grating>
+                        <ns10:GratingAngle>
+                            <ns11:Value>15.5</ns11:Value>
+                            <ns11:Units>degrees</ns11:Units>
+                        </ns10:GratingAngle>
+                        <ns10:ArtStation>40_31.00</ns10:ArtStation>
+                    </ns10:Spectroscopy>
+                </ns10:Mode>
+                <ns10:FilterId>pc03850</ns10:FilterId>
+                <ns10:FocusPosition>
+                    <ns10:Value>1000</ns10:Value>
+                    <ns10:Units>microns</ns10:Units>
+                </ns10:FocusPosition>
+            </ns10:RssConfig>
+            <ns10:RssDetector>
+                <ns10:DetMode>Normal</ns10:DetMode>
+                <ns10:Iterations>5</ns10:Iterations>
+                <ns10:PreShuffle>0</ns10:PreShuffle>
+                <ns10:PostShuffle>0</ns10:PostShuffle>
+                <ns10:PreBinRows>2</ns10:PreBinRows>
+                <ns10:PreBinCols>2</ns10:PreBinCols>
+                <ns10:Prepare>true</ns10:Prepare>
+                <ns10:ExposureType>Flat Field</ns10:ExposureType>
+                <ns10:ExposureTime>
+                    <ns2:Value>1.0</ns2:Value>
+                    <ns2:Units>seconds</ns2:Units>
+                </ns10:ExposureTime>
+                <ns10:Gain>Faint</ns10:Gain>
+                <ns10:ReadoutSpeed>Slow</ns10:ReadoutSpeed>
+                <ns10:DetectorCalculation>None</ns10:DetectorCalculation>
+            </ns10:RssDetector>
+            <ns10:MinimumSN>0</ns10:MinimumSN>
+            <ns10:Cycles>1</ns10:Cycles>
+            <ns10:RssCalibration>
+                <ns10:RssCalibrationFlat>
+                    <ns10:CalibrationFlatLamp>QTH2</ns10:CalibrationFlatLamp>
+                    <ns10:CalibrationFlatExposureTime>
+                        <ns2:Value>1.0</ns2:Value>
+                        <ns2:Units>seconds</ns2:Units>
+                    </ns10:CalibrationFlatExposureTime>
+                    <ns10:Iterations>5</ns10:Iterations>
+                    <ns10:CalibrationFlatRequirement>After science</ns10:CalibrationFlatRequirement>
+                </ns10:RssCalibrationFlat>
+            </ns10:RssCalibration>
+            <ns10:RssNonChargedCalibration>
+                <ns10:RssStandard>
+                    <ns10:StandardType>Spectrophotometric</ns10:StandardType>
+                </ns10:RssStandard>
+            </ns10:RssNonChargedCalibration>
+            <ns10:RssNonChargedCalibration>
+                <ns10:RssSpectroscopicFlat>
+                    <ns10:Type>Lamp</ns10:Type>
+                    <ns10:Iterations>5</ns10:Iterations>
+                </ns10:RssSpectroscopicFlat>
+            </ns10:RssNonChargedCalibration>
+            <ns10:InCalibration>true</ns10:InCalibration>
+        </ns10:Rss>
+        <ns10:Rss id="Rss-9">
+            <ns10:Name>[Rss]</ns10:Name>
+            <ns10:RssProcedure/>
+            <ns10:RssConfig>
+                <ns10:SlitMask>
+                    <ns10:PredefinedMask>
+                        <ns10:Barcode>PL0200N001</ns10:Barcode>
+                    </ns10:PredefinedMask>
+                </ns10:SlitMask>
+                <ns10:Mode>
+                    <ns10:Spectroscopy>
+                        <ns10:Grating>pg0900</ns10:Grating>
+                        <ns10:GratingAngle>
+                            <ns11:Value>15.5</ns11:Value>
+                            <ns11:Units>degrees</ns11:Units>
+                        </ns10:GratingAngle>
+                        <ns10:ArtStation>40_31.00</ns10:ArtStation>
+                    </ns10:Spectroscopy>
+                </ns10:Mode>
+                <ns10:FilterId>pc03850</ns10:FilterId>
+                <ns10:FocusPosition>
+                    <ns10:Value>1000</ns10:Value>
+                    <ns10:Units>microns</ns10:Units>
+                </ns10:FocusPosition>
+            </ns10:RssConfig>
+            <ns10:RssDetector>
+                <ns10:DetMode>Normal</ns10:DetMode>
+                <ns10:Iterations>1</ns10:Iterations>
+                <ns10:PreShuffle>0</ns10:PreShuffle>
+                <ns10:PostShuffle>0</ns10:PostShuffle>
+                <ns10:PreBinRows>2</ns10:PreBinRows>
+                <ns10:PreBinCols>2</ns10:PreBinCols>
+                <ns10:Prepare>true</ns10:Prepare>
+                <ns10:ExposureType>Science</ns10:ExposureType>
+                <ns10:ExposureTime>
+                    <ns2:Value>900.0</ns2:Value>
+                    <ns2:Units>seconds</ns2:Units>
+                </ns10:ExposureTime>
+                <ns10:Gain>Faint</ns10:Gain>
+                <ns10:ReadoutSpeed>Slow</ns10:ReadoutSpeed>
+                <ns10:DetectorCalculation>None</ns10:DetectorCalculation>
+            </ns10:RssDetector>
+            <ns10:MinimumSN>0</ns10:MinimumSN>
+            <ns10:Cycles>1</ns10:Cycles>
+            <ns10:RssCalibration>
+                <ns10:RssArc>
+                    <ns10:UseDefaultArcLamp></ns10:UseDefaultArcLamp>
+                    <ns10:ArcExposureTime>
+                        <ns2:Value>5.0</ns2:Value>
+                        <ns2:Units>seconds</ns2:Units>
+                    </ns10:ArcExposureTime>
+                    <ns10:Iterations>1</ns10:Iterations>
+                    <ns10:ArcRequirement>After science</ns10:ArcRequirement>
+                    <ns10:DoneBetweenDitheringSteps>false</ns10:DoneBetweenDitheringSteps>
+                </ns10:RssArc>
+            </ns10:RssCalibration>
+            <ns10:RssCalibration>
+                <ns10:RssCalibrationFlat>
+                    <ns10:CalibrationFlatLamp>QTH1 and QTH2</ns10:CalibrationFlatLamp>
+                    <ns10:CalibrationFlatExposureTime>
+                        <ns2:Value>1.0</ns2:Value>
+                        <ns2:Units>seconds</ns2:Units>
+                    </ns10:CalibrationFlatExposureTime>
+                    <ns10:Iterations>5</ns10:Iterations>
+                    <ns10:CalibrationFlatRequirement>After science</ns10:CalibrationFlatRequirement>
+                </ns10:RssCalibrationFlat>
+            </ns10:RssCalibration>
+            <ns10:RssNonChargedCalibration>
+                <ns10:RssStandard>
+                    <ns10:StandardType>Spectrophotometric</ns10:StandardType>
+                </ns10:RssStandard>
+            </ns10:RssNonChargedCalibration>
+            <ns10:RssNonChargedCalibration>
+                <ns10:RssSpectroscopicFlat>
+                    <ns10:Type>Lamp</ns10:Type>
+                    <ns10:Iterations>5</ns10:Iterations>
+                </ns10:RssSpectroscopicFlat>
+            </ns10:RssNonChargedCalibration>
+            <ns10:InCalibration>false</ns10:InCalibration>
+        </ns10:Rss>
+        <ns13:Salticam id="Salticam-5">
+            <ns13:Name>[Salticam]</ns13:Name>
+            <ns13:Cycles>1</ns13:Cycles>
+            <ns13:SalticamProcedure>
+                <ns13:SalticamFilterArray>
+                    <ns13:Filter>Johnson V</ns13:Filter>
+                    <ns13:ExposureTime>
+                        <ns2:Value>1.0</ns2:Value>
+                        <ns2:Units>seconds</ns2:Units>
+                    </ns13:ExposureTime>
+                </ns13:SalticamFilterArray>
+            </ns13:SalticamProcedure>
+            <ns13:SalticamDetector>
+                <ns13:DetMode>Normal</ns13:DetMode>
+                <ns13:PreBinRows>2</ns13:PreBinRows>
+                <ns13:PreBinCols>2</ns13:PreBinCols>
+                <ns13:ExposureType>Science</ns13:ExposureType>
+                <ns13:Gain>Bright</ns13:Gain>
+                <ns13:ReadoutSpeed>Fast</ns13:ReadoutSpeed>
+                <ns13:Iterations>1</ns13:Iterations>
+            </ns13:SalticamDetector>
+            <ns13:MinimumSN>0</ns13:MinimumSN>
+            <ns13:InCalibration>false</ns13:InCalibration>
+        </ns13:Salticam>
+    </InstrumentConfigurations>
+    <Pools/>
+    <Blocks>
+        <Block id="Block-2" notForObserving="false">
+            <Name>ToO P2</Name>
+            <BlockCode>FNEV54N4</BlockCode>
+            <BlockType>Science</BlockType>
+            <Charged>true</Charged>
+            <Priority>2</Priority>
+            <Ranking>Medium</Ranking>
+            <Transparency>Any</Transparency>
+            <MaximumLunarPhase>
+                <ns3:Value>100.0</ns3:Value>
+                <ns3:Units>%</ns3:Units>
+            </MaximumLunarPhase>
+            <MinimumLunarAngularDistance>
+                <Value>30.0</Value>
+                <Units>degrees</Units>
+            </MinimumLunarAngularDistance>
+            <SeeingConstraint>
+                <Maximum>
+                    <ns3:Value>4.0</ns3:Value>
+                    <ns3:Units>arcseconds</ns3:Units>
+                </Maximum>
+                <Minimum>
+                    <ns3:Value>0.1</ns3:Value>
+                    <ns3:Units>arcseconds</ns3:Units>
+                </Minimum>
+            </SeeingConstraint>
+            <Visits>1</Visits>
+            <SubBlock ref="SubBlock-2"/>
+        </Block>
+    </Blocks>
+    <SubBlocks>
+        <SubBlock id="SubBlock-2">
+            <Name>[SubBlock]</Name>
+            <Iterations>1</Iterations>
+            <SubSubBlock ref="SubSubBlock-2"/>
+        </SubBlock>
+    </SubBlocks>
+    <SubSubBlocks>
+        <SubSubBlock id="SubSubBlock-2">
+            <Name>[SubSubBlock]</Name>
+            <Iterations>1</Iterations>
+            <Pointing ref="Pointing-2"/>
+        </SubSubBlock>
+    </SubSubBlocks>
+    <Pointings>
+        <Pointing id="Pointing-2">
+            <Name>[Pointing]</Name>
+            <Observation ref="Observation-2"/>
+        </Pointing>
+    </Pointings>
+    <Observations>
+        <Observation id="Observation-2">
+            <Name>ToO P2</Name>
+            <Acquisition ref="Acquisition-2"/>
+            <TelescopeConfig ref="TelescopeConfig-3"/>
+            <TimeRestriction>
+                <TimeStart>2017-05-10T12:00:00.265Z</TimeStart>
+                <TimeEnd>2017-06-30T12:00:00.294Z</TimeEnd>
+            </TimeRestriction>
+            <PipelineConfig>
+                <Notification>Normal</Notification>
+                <ReductionDocumentationFormat>ASCII</ReductionDocumentationFormat>
+            </PipelineConfig>
+        </Observation>
+    </Observations>
+    <Acquisitions>
+        <Acquisition id="Acquisition-2">
+            <Name>ToO P2</Name>
+            <Target ref="Target-1"/>
+        </Acquisition>
+    </Acquisitions>
+    <TelescopeConfigurations>
+        <TelescopeConfig id="TelescopeConfig-3">
+            <Name>[TelescopeConfig]</Name>
+            <Iterations>1</Iterations>
+            <OnSkyPositionAngle>
+                <UseParallacticAngle></UseParallacticAngle>
+            </OnSkyPositionAngle>
+            <PayloadConfig ref="PayloadConfig-3"/>
+            <PayloadConfig ref="PayloadConfig-2"/>
+            <PayloadConfig ref="PayloadConfig-1"/>
+            <PayloadConfig ref="PayloadConfig-4"/>
+        </TelescopeConfig>
+    </TelescopeConfigurations>
+    <PayloadConfigurations>
+        <PayloadConfig id="PayloadConfig-1">
+            <Name>[PayloadConfig]</Name>
+            <Type>Nighttime Calibration</Type>
+            <GuideMethod>RSS Probe</GuideMethod>
+            <PellicleConfig>false</PellicleConfig>
+            <WaitOnOtherInstrument>true</WaitOnOtherInstrument>
+            <Instrument ref="Rss-7"/>
+        </PayloadConfig>
+        <PayloadConfig id="PayloadConfig-2">
+            <Name>[PayloadConfig]</Name>
+            <Type>Science</Type>
+            <GuideMethod>RSS Probe</GuideMethod>
+            <PellicleConfig>false</PellicleConfig>
+            <WaitOnOtherInstrument>true</WaitOnOtherInstrument>
+            <Instrument ref="Rss-9"/>
+        </PayloadConfig>
+        <PayloadConfig id="PayloadConfig-3">
+            <Name>[PayloadConfig]</Name>
+            <Type>Acquisition</Type>
+            <GuideMethod>None</GuideMethod>
+            <PellicleConfig>false</PellicleConfig>
+            <WaitOnOtherInstrument>true</WaitOnOtherInstrument>
+            <Instrument ref="Salticam-5"/>
+        </PayloadConfig>
+        <PayloadConfig id="PayloadConfig-4">
+            <Name>[PayloadConfig]</Name>
+            <Type>Nighttime Calibration</Type>
+            <GuideMethod>RSS Probe</GuideMethod>
+            <PellicleConfig>false</PellicleConfig>
+            <WaitOnOtherInstrument>true</WaitOnOtherInstrument>
+            <Instrument ref="Rss-8"/>
+            <CalibrationFilter>Clear and UV</CalibrationFilter>
+        </PayloadConfig>
+    </PayloadConfigurations>
+    <TimeAllocations>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>0</Priority>
+            <Moon>Dark</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>0</Priority>
+            <Moon>Gray</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>0</Priority>
+            <Moon>Bright</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>0</Priority>
+            <Moon>Any</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>1</Priority>
+            <Moon>Dark</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>1</Priority>
+            <Moon>Gray</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>1</Priority>
+            <Moon>Bright</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>1</Priority>
+            <Moon>Any</Moon>
+            <AllocatedTime>
+                <ns2:Value>4308.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>2</Priority>
+            <Moon>Dark</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>2</Priority>
+            <Moon>Gray</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>2</Priority>
+            <Moon>Bright</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>2</Priority>
+            <Moon>Any</Moon>
+            <AllocatedTime>
+                <ns2:Value>6462.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>3</Priority>
+            <Moon>Dark</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>3</Priority>
+            <Moon>Gray</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>3</Priority>
+            <Moon>Bright</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>3</Priority>
+            <Moon>Any</Moon>
+            <AllocatedTime>
+                <ns2:Value>17232.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>4</Priority>
+            <Moon>Dark</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>4</Priority>
+            <Moon>Gray</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>4</Priority>
+            <Moon>Bright</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+        <TimeAllocation>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+            <Priority>4</Priority>
+            <Moon>Any</Moon>
+            <AllocatedTime>
+                <ns2:Value>0.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </AllocatedTime>
+        </TimeAllocation>
+    </TimeAllocations>
+    <BlockObservations>
+        <BlockObservation>
+            <BlockCode>FNEV54N4</BlockCode>
+            <Priority>2</Priority>
+            <Moon>Any</Moon>
+            <TotalTime>
+                <ns2:Value>1835.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </TotalTime>
+            <OverheadTime>
+                <ns2:Value>935.0</ns2:Value>
+                <ns2:Units>seconds</ns2:Units>
+            </OverheadTime>
+            <Year>2017</Year>
+            <Semester>1</Semester>
+        </BlockObservation>
+    </BlockObservations>
+    <BlockCodes>
+        <BlockCode>
+            <ServerBlockCode>2120-1</ServerBlockCode>
+            <PiptBlockCode>FNEV54N4</PiptBlockCode>
+            <Locked>true</Locked>
+        </BlockCode>
+        <BlockCode>
+            <ServerBlockCode>2120-2</ServerBlockCode>
+            <PiptBlockCode>I8N1WCDW</PiptBlockCode>
+            <Locked>true</Locked>
+        </BlockCode>
+    </BlockCodes>
+    <Phase1Info>
+        <ObservingConditions>
+            <Transparency>Any</Transparency>
+            <MaximumSeeing>
+                <ns3:Value>3.0</ns3:Value>
+                <ns3:Units>arcseconds</ns3:Units>
+            </MaximumSeeing>
+        </ObservingConditions>
+        <Instruments>
+            <Instrument>
+                <InstrumentMode>RSS spectroscopy</InstrumentMode>
+                <DetectorMode>Normal</DetectorMode>
+            </Instrument>
+        </Instruments>
+        <TimeCritical>false</TimeCritical>
+        <TargetOfOpportunity>true</TargetOfOpportunity>
+        <Priority4Proposal>false</Priority4Proposal>
+    </Phase1Info>
+    <Detail>
+        <RequiredElements>
+            <ShowObservation>false</ShowObservation>
+            <ShowTelescopeConfig>false</ShowTelescopeConfig>
+            <ShowPayloadConfig>false</ShowPayloadConfig>
+            <ShowSubBlock>false</ShowSubBlock>
+            <ShowSubSubBlock>false</ShowSubSubBlock>
+        </RequiredElements>
+        <RequestedElements>
+            <ShowObservation>false</ShowObservation>
+            <ShowTelescopeConfig>false</ShowTelescopeConfig>
+            <ShowPayloadConfig>false</ShowPayloadConfig>
+            <ShowSubBlock>false</ShowSubBlock>
+            <ShowSubSubBlock>false</ShowSubSubBlock>
+        </RequestedElements>
+    </Detail>
+    <NightlogSummary>Target of opportunity for variable AGN</NightlogSummary>
+    <Outreach>
+        <ns3:AllowDisplaying>false</ns3:AllowDisplaying>
+    </Outreach>
+</Proposal>

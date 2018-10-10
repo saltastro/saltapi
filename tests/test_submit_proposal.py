@@ -1,29 +1,10 @@
 import json
 import os
-from io import BytesIO
 from unittest.mock import patch, Mock
-import zipfile
-import pytest
+from .tests_util import create_zipfile, create_non_zipfile
 
 ENDPOINT = '/proposals'
-
-
-# Creating a zip file
-def create_zipfile():
-    proposal_content = BytesIO()
-    with zipfile.ZipFile(proposal_content, 'w') as zip_file:
-        zip_file.writestr('content', b'proposal content')
-
-    proposal_content.seek(0)
-
-    return proposal_content.read()
-
-
-# Creating a non zip file
-def create_non_zipfile():
-    file_content = BytesIO(b'any file content')
-
-    return file_content.read()
+TOKEN = os.environ.get('TOKEN')
 
 
 def test_submit_proposal_successful(client, uri):
@@ -36,27 +17,30 @@ def test_submit_proposal_successful(client, uri):
 
         mock_response.json.return_value = {"Proposal_Code": new_proposal_code}
 
-        response = client.post(ENDPOINT, data=create_zipfile())
+        headers = {'Authorization': 'token ' + TOKEN}
 
-        # Assert the response status code to be 200 for successful post request
+        response = client.post(ENDPOINT, data=create_zipfile(), headers=headers)
+
+        # Assert the response status code for successful post request
         assert response.status_code == 200
-        # Assert the response data for the proposal_code to be new_proposal_code when the proposal submitted successful
+        # Assert the response data for the proposal_code when the proposal submitted successful
         assert json.loads(response.data)['proposal_code'] == new_proposal_code
-        # Assert the response content type to be a json when the proposal submitted successful
+        # Assert the response content type to be a json
         assert response.headers['Content-Type'] == 'application/json'
-        # Assert the response headers location to be
-        # /proposals/proposal_code when the proposal submitted successful
+        # Assert the response headers location is correct
         assert response.headers['Location'] == uri('/proposals/' + new_proposal_code)
 
 
 def test_submit_proposal_without_file_response(client):
-    response = client.post(ENDPOINT)
+    headers = {'Authorization': 'token ' + TOKEN}
 
-    # Assert the response status code to be 400 for bad request
+    response = client.post(ENDPOINT, headers=headers)
+
+    # Assert the response status code for bad request
     assert response.status_code == 400
-    # Assert the response error message to be No file is attached when trying to submit with file unattached
+    # Assert the response error message when file is not attached
     assert json.loads(response.data)['error'] == 'No file is attached'
-    # Assert the response content type to be a json when the post response unsupported type error message returned
+    # Assert the response content type
     assert response.headers['Content-Type'] == 'application/json'
 
 
@@ -68,49 +52,33 @@ def test_submit_proposal_unsupported_media_type(client):
 
         mock_response.json.return_value = {'Error': 'Only zip file is supported'}
 
-        response = client.post(ENDPOINT, data=create_non_zipfile())
+        headers = {'Authorization': 'token ' + TOKEN}
 
-        # Assert the response status code to be 415 for unsupported media type
+        response = client.post(ENDPOINT, data=create_non_zipfile(), headers=headers)
+
+        # Assert the response status code for unsupported media type
         assert response.status_code == 415
-        # Assert the response error message to be Only zip file is supported when other format tried to be submitted
+        # Assert the response error message when other format tried to be submitted
         assert json.loads(response.data)['error'] == 'Only zip file is supported'
-        # Assert the response content type to be a json when the post response unsupported type error message returned
+        # Assert the response content type
         assert response.headers['Content-Type'] == 'application/json'
 
 
-@pytest.mark.parametrize(('status_code', 'error_message',), (
-        (403, {'Error': 'Have no permissions to make this request'},),
-        (401, {'Error': 'Invalid credentials'},),)
-                         )
-def test_submit_proposal_forbidden_unauthorized(client, status_code, error_message):
-    with patch('run.requests') as mock_requests:
-        mock_requests.post.return_value = mock_response = Mock()
-        # setting the mock response
-        mock_response.status_code = status_code
+def test_submit_proposal_unauthorized(client):
+    response = client.post(ENDPOINT, data=create_zipfile())
 
-        mock_response.json.return_value = error_message
-
-        response = client.post(ENDPOINT, data=create_zipfile())
-
-        # Assert the response status code for a forbidden and unauthorized user trying to submit a proposal
-        assert response.status_code == status_code
-        # Assert the response error message
-        assert json.loads(response.data)['error'] == error_message['Error']
-        # Assert the response content type to be a json
-        assert response.headers['Content-Type'] == 'application/json'
+    # Assert the response status code for an unauthorized user
+    assert response.status_code == 401
 
 
-@pytest.mark.parametrize(('status_code',), (
-        (405,),)
-                         )
-def test_submit_proposal_disallowed_request_methods(client, status_code):
-    # Assert the response status code to be 405 for not allowed request method when submitting a proposal
-    assert client.get(ENDPOINT).status_code == status_code
-    assert client.put(ENDPOINT).status_code == status_code
-    assert client.patch(ENDPOINT).status_code == status_code
-    assert client.delete(ENDPOINT).status_code == status_code
+def test_submit_proposal_disallowed_request_methods(client):
+    # Assert the response status code for not allowed request method
+    assert client.get(ENDPOINT).status_code == 405
+    assert client.put(ENDPOINT).status_code == 405
+    assert client.patch(ENDPOINT).status_code == 405
+    assert client.delete(ENDPOINT).status_code == 405
 
-    # Assert the response content type to be a json when the post response Not Allowed Method error message returned
+    # Assert the response content type
     assert client.get(ENDPOINT).headers['Content-Type'] == 'application/json'
     assert client.put(ENDPOINT).headers['Content-Type'] == 'application/json'
     assert client.patch(ENDPOINT).headers['Content-Type'] == 'application/json'
@@ -119,9 +87,15 @@ def test_submit_proposal_disallowed_request_methods(client, status_code):
 
 def test_submit_proposal_functionality(client):
     with patch('run.requests.post') as mock_request:
-        client.post(ENDPOINT, data=create_zipfile())
+        mock_request.return_value = mock_response = Mock()
+        mock_response.status_code = 'For testing'
+        mock_response.json.return_value = {'Error': 'For test '}
 
-        # Assert a post request is called with a url http://localhost/webservices/index.php
+        headers = {'Authorization': 'token ' + TOKEN}
+
+        client.post(ENDPOINT, data=create_zipfile(), headers=headers)
+
+        # Assert a post request is called with a correct url
         assert mock_request.call_args[0][0] == os.environ.get('WM_WEB_SERVICES')
 
         # Assert the proposal file content

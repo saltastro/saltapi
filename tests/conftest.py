@@ -3,6 +3,7 @@ import os
 from run import get_app
 
 BASE_URL = 'http://localhost:5001'
+os.environ['PROPOSALS_DIR'] = os.environ.get('TEST_API_PROPOSAL_DIR')
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -32,5 +33,5 @@ def client(app):
 
 
 @pytest.fixture
-def self(app):
-    return self
+def auth_header():
+    return {'Authorization': 'Token ' + os.environ.get('TOKEN')}

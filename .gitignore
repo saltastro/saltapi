@@ -6,3 +6,5 @@ tacvenv/
 venv/
 .cache/
 .pytest_cache/
+*.pyc
+test_proposal_dir/

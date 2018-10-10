@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Proposal xmlns="http://www.salt.ac.za/PIPT/Proposal/Phase1/3.3" xmlns:ns2="http://www.salt.ac.za/PIPT/Proposal/Shared/2.7" xmlns:ns3="http://www.salt.ac.za/PIPT/Shared/1.4" xmlns:ns4="http://www.salt.ac.za/DataTransfer" xmlns:ns5="http://www.salt.ac.za/PIPT/Salticam/Phase1/1.5" xmlns:ns6="http://www.salt.ac.za/PIPT/Salticam/Phase2/1.9" xmlns:ns7="http://www.salt.ac.za/PIPT/HRS/Phase1/1.1" xmlns:ns8="http://www.salt.ac.za/PIPT/HRS/Phase2/1.7" xmlns:ns9="http://www.salt.ac.za/PIPT/RSS/Phase1/1.12" xmlns:ns10="http://www.salt.ac.za/PIPT/RSS/Phase2/2.3" xmlns:ns11="http://www.salt.ac.za/PIPT/RSS/Shared/1.11" xmlns:ns12="http://www.salt.ac.za/PIPT/BVIT/Phase1/1.0" xmlns:ns13="http://www.salt.ac.za/PIPT/BVIT/Phase2/1.6" code="2018-2-SCI-040" final="true" PrincipalInvestigator="lmarchetti@uwc.ac.za" PrincipalContact="ctortora@astro.rug.nl">
+    <ProposalType>Science</ProposalType>
+    <Title>Gotta catch’Em All: the spectroscopic follow-up of strong gravitational lenses from KiDS and KABS surveys</Title>
+    <Abstract>Strong gravitational lenses are rare treasures yielding scientific insight into a large number of astrophysical and cosmological open questions, such as the expansion history of the Universe and the formation and evolution of massive galaxies and their dark matter haloes.
+Progress in these fields is currently limited by the small number of known lenses, whether with extended sources (e.g., gravitational arcs) or compact sources (e.g., multiple images of lensed quasars). 
+For this reason, we decided we "Gotta catch’Em All". We assembled a large team of experts with the goal of finding the largest possible number of new lenses, taking advantage of the improved image quality and the more extended and homogeneous sky coverage achieved with new, deep sky surveys, like KiDS and KABS. 
+Using different techniques, from data mining to colour pre-selection and visual inspection, we have collected ~300 high-grade candidates. 
+With this proposal, we aim to spectroscopically follow-up the 50 most promising systems, with the final goal of unambiguously confirming their lensing nature, and obtaining the redshifts of the sources and the deflectors.</Abstract>
+    <Year>2018</Year>
+    <Semester>2</Semester>
+    <Phase>1</Phase>
+    <Partners>
+        <ns2:Partner id="Partner-2">
+            <ns2:Name>Other</ns2:Name>
+            <ns2:TimeDistribution>
+                <ns2:Year>2018</ns2:Year>
+                <ns2:Semester>2</ns2:Semester>
+                <ns2:Value>0</ns2:Value>
+                <ns2:Units>%</ns2:Units>
+            </ns2:TimeDistribution>
+        </ns2:Partner>
+        <ns2:Partner id="Partner-1">
+            <ns2:Name>South Africa</ns2:Name>
+            <ns2:TimeDistribution>
+                <ns2:Year>2018</ns2:Year>
+                <ns2:Semester>2</ns2:Semester>
+                <ns2:Value>85</ns2:Value>
+                <ns2:Units>%</ns2:Units>
+            </ns2:TimeDistribution>
+        </ns2:Partner>
+        <ns2:Partner id="Partner-3">
+            <ns2:Name>Rutgers University</ns2:Name>
+            <ns2:TimeDistribution>
+                <ns2:Year>2018</ns2:Year>
+                <ns2:Semester>2</ns2:Semester>
+                <ns2:Value>14</ns2:Value>
+                <ns2:Units>%</ns2:Units>
+            </ns2:TimeDistribution>
+        </ns2:Partner>
+        <ns2:Partner id="Partner-4">
+            <ns2:Name>UK SALT Consortium</ns2:Name>
+            <ns2:TimeDistribution>
+                <ns2:Year>2018</ns2:Year>
+                <ns2:Semester>2</ns2:Semester>
+                <ns2:Value>1</ns2:Value>
+                <ns2:Units>%</ns2:Units>
+            </ns2:TimeDistribution>
+        </ns2:Partner>
+    </Partners>
+    <Investigators>
+        <ns2:Investigator id="Investigator-1">
+            <ns2:Name>Lucia</ns2:Name>
+            <ns2:Surname>Marchetti</ns2:Surname>
+            <ns2:Partner ref="Partner-1"/>
+            <ns2:Institute>
+                <ns2:Name>University of the Western Cape</ns2:Name>
+                <ns2:Department></ns2:Department>
+            </ns2:Institute>
+            <ns2:Email>lmarchetti@uwc.ac.za</ns2:Email>
+            <ns2:Phone>0713905116</ns2:Phone>
+        </ns2:Investigator>
+        <ns2:Investigator id="Investigator-2">
+            <ns2:Name>Crescenzo</ns2:Name>
+            <ns2:Surname>Tortora</ns2:Surname>
+            <ns2:Partner ref="Partner-2"/>
+            <ns2:Institute>
+                <ns2:Name>Kapteyn Institute</ns2:Name>
+                <ns2:Department>University of Groningen</ns2:Department>
+            </ns2:Institute>
+            <ns2:Email>ctortora@astro.rug.nl</ns2:Email>
+            <ns2:Phone>+31 (0)50-3634088</ns2:Phone>
+        </ns2:Investigator>
+        <ns2:Investigator id="Investigator-3">
+            <ns2:Name>Chiara</ns2:Name>
+            <ns2:Surname>Spiniello</ns2:Surname>
+            <ns2:Partner ref="Partner-2"/>
+            <ns2:Institute>
+                <ns2:Name>INAF</ns2:Name>
+            </ns2:Institute>
+            <ns2:Email>chiara.spiniello@gmail.com</ns2:Email>
+        </ns2:Investigator>
+        <ns2:Investigator id="Investigator-5">
+            <ns2:Name>Nicola R.</ns2:Name>
+            <ns2:Surname>Napolitano</ns2:Surname>
+            <ns2:Partner ref="Partner-2"/>
+            <ns2:Institute>
+                <ns2:Name>INAF</ns2:Name>
+            </ns2:Institute>
+            <ns2:Email>napolita@na.astro.it</ns2:Email>
+            <ns2:Phone>+390815575509</ns2:Phone>
+        </ns2:Investigator>
+        <ns2:Investigator id="Investigator-6">
+            <ns2:Name>Leon</ns2:Name>
+            <ns2:Surname>Koopmans</ns2:Surname>
+            <ns2:Partner ref="Partner-2"/>
+            <ns2:Institute>
+                <ns2:Name>Kapteyn Institute</ns2:Name>
+                <ns2:Department>University of Groningen</ns2:Department>
+            </ns2:Institute>
+            <ns2:Email>koopmans@astro.rug.nl</ns2:Email>
+            <ns2:Phone>+31(0)503636519</ns2:Phone>
+        </ns2:Investigator>
+        <ns2:Investigator id="Investigator-4">
+            <ns2:Name>Adriano</ns2:Name>
+            <ns2:Surname>Agnello</ns2:Surname>
+            <ns2:Partner ref="Partner-2"/>
+            <ns2:Institute>
+                <ns2:Name>European Southern Observatory</ns2:Name>
+                <ns2:Department></ns2:Department>
+            </ns2:Institute>
+            <ns2:Email>adriagnello@gmail.com</ns2:Email>
+            <ns2:Phone>+49 89 3200 6580</ns2:Phone>
+        </ns2:Investigator>
+        <ns2:Investigator id="Investigator-7">
+            <ns2:Name>Fedor</ns2:Name>
+            <ns2:Surname>Getman</ns2:Surname>
+            <ns2:Partner ref="Partner-2"/>
+            <ns2:Institute>
+                <ns2:Name>INAF</ns2:Name>
+                <ns2:Department>Osservatorio Astronomico di Capodimonte</ns2:Department>
+            </ns2:Institute>
+            <ns2:Email>tig@na.astro.it</ns2:Email>
+        </ns2:Investigator>
+        <ns2:Investigator id="Investigator-8">
+            <ns2:Name>Georgios</ns2:Name>
+            <ns2:Surname>Vernardos</ns2:Surname>
+            <ns2:Partner ref="Partner-2"/>
+            <ns2:Institute>
+                <ns2:Name>Kapteyn Institute</ns2:Name>
+                <ns2:Department>University of Groningen</ns2:Department>
+            </ns2:Institute>
+            <ns2:Email>gvernard@astro.rug.nl</ns2:Email>
+            <ns2:Phone>31 (0)50 - 36 34090</ns2:Phone>
+        </ns2:Investigator>
+        <ns2:Investigator id="Investigator-9">
+            <ns2:Name>Carlo Enrico</ns2:Name>
+            <ns2:Surname>Petrillo</ns2:Surname>
+            <ns2:Partner ref="Partner-2"/>
+            <ns2:Institute>
+                <ns2:Name>Kapteyn Institute</ns2:Name>
+                <ns2:Department>University of Groningen</ns2:Department>
+            </ns2:Institute>
+            <ns2:Email>carlo.enrico.petrillo@gmail.com</ns2:Email>
+            <ns2:Phone>+31644501676</ns2:Phone>
+        </ns2:Investigator>
+        <ns2:Investigator id="Investigator-10">
+            <ns2:Name>Alexey</ns2:Name>
+            <ns2:Surname>Sergeyev</ns2:Surname>
+            <ns2:Partner ref="Partner-2"/>
+            <ns2:Institute>
+                <ns2:Name>Karazin Kharkiv National University</ns2:Name>
+                <ns2:Department>Institute of Astronomy</ns2:Department>
+            </ns2:Institute>
+            <ns2:Email>alexey@astron.kharkov.ua</ns2:Email>
+            <ns2:Phone>+38(057)700-53-49</ns2:Phone>
+        </ns2:Investigator>
+        <ns2:Investigator id="Investigator-11">
+            <ns2:Name>Giovanni</ns2:Name>
+            <ns2:Surname>Covone</ns2:Surname>
+            <ns2:Partner ref="Partner-2"/>
+            <ns2:Institute>
+                <ns2:Name>INAF</ns2:Name>
+            </ns2:Institute>
+            <ns2:Email>giovanni.covone@unina.it</ns2:Email>
+        </ns2:Investigator>
+        <ns2:Investigator id="Investigator-12">
+            <ns2:Name>Andrew</ns2:Name>
+            <ns2:Surname>Baker</ns2:Surname>
+            <ns2:Partner ref="Partner-3"/>
+            <ns2:Institute>
+                <ns2:Name>Rutgers University</ns2:Name>
+                <ns2:Department>Department of Physics and Astronomy</ns2:Department>
+            </ns2:Institute>
+            <ns2:Email>ajbaker@physics.rutgers.edu</ns2:Email>
+            <ns2:Phone>+1-732-445-5500 x2544</ns2:Phone>
+        </ns2:Investigator>
+        <ns2:Investigator id="Investigator-13">
+            <ns2:Name>Stephen</ns2:Name>
+            <ns2:Surname>Serjeant</ns2:Surname>
+            <ns2:Partner ref="Partner-4"/>
+            <ns2:Institute>
+                <ns2:Name>The Open University</ns2:Name>
+                <ns2:Department>Department of Physics and Astronomy</ns2:Department>
+            </ns2:Institute>
+            <ns2:Email>Stephen.Serjeant@open.ac.uk</ns2:Email>
+        </ns2:Investigator>
+        <ns2:Investigator id="Investigator-14">
+            <ns2:Name>Gijs</ns2:Name>
+            <ns2:Surname>Verdoes Kleijn</ns2:Surname>
+            <ns2:Partner ref="Partner-2"/>
+            <ns2:Institute>
+                <ns2:Name>Kapteyn Institute</ns2:Name>
+                <ns2:Department>University of Groningen</ns2:Department>
+            </ns2:Institute>
+            <ns2:Email>g.a.verdoes.kleijn@rug.nl</ns2:Email>
+            <ns2:Phone>+31503638326</ns2:Phone>
+        </ns2:Investigator>
+        <ns2:Investigator id="Investigator-15">
+            <ns2:Name>Thomas</ns2:Name>
+            <ns2:Surname>Jarrett</ns2:Surname>
+            <ns2:Partner ref="Partner-1"/>
+            <ns2:Institute>
+                <ns2:Name>University of Cape Town</ns2:Name>
+                <ns2:Department>Department of Astronomy</ns2:Department>
+            </ns2:Institute>
+            <ns2:Email>jarrett@ast.uct.ac.za</ns2:Email>
+            <ns2:Phone>1-626-395-1844</ns2:Phone>
+        </ns2:Investigator>
+        <ns2:Investigator id="Investigator-16">
+            <ns2:Name>Mattia</ns2:Name>
+            <ns2:Surname>Vaccari</ns2:Surname>
+            <ns2:Partner ref="Partner-1"/>
+            <ns2:Institute>
+                <ns2:Name>University of the Western Cape</ns2:Name>
+                <ns2:Department></ns2:Department>
+            </ns2:Institute>
+            <ns2:Email>mattia.vaccari@gmail.com</ns2:Email>
+            <ns2:Phone>+27 79 425 4530</ns2:Phone>
+        </ns2:Investigator>
+    </Investigators>
+    <SouthAfricanRole>Thanks to the collaboration established with this proposal, the South African team here involved will gain access to proprietary KiDS imaging and value-added data products. In particular, the PI (Lucia Marchetti) will coordinate the scientific exploitation of the SALT data. She will support the data reduction effort and lead the coordinated analysis of the data taken as part of this proposal and those taken in proposal MLT-2015-006 in order to study the evolution of the lensing population up to redshift 1. The rest of the South African team will lead the multi-wavelength analysis and radio follow-up of the confirmed candidates as part of the HIPPO project at IDIA. Within this context we envisage the involvement of existing South African students at the MSc and PhD level at UCT/UWC/IDIA.</SouthAfricanRole>
+    <TimeRequest>
+        <Year>2018</Year>
+        <Semester>2</Semester>
+        <TotalRequestedTime>
+            <ns3:Value>151200.0</ns3:Value>
+            <ns3:Units>seconds</ns3:Units>
+        </TotalRequestedTime>
+        <MinimumUsefulTime>
+            <ns3:Value>120960.0</ns3:Value>
+            <ns3:Units>seconds</ns3:Units>
+        </MinimumUsefulTime>
+        <Comments>Dark nights are preferable; it would be preferable to have observations no more than 3-7 days from new moon. Submitted targets are placeholders, resembling our typical targets. Dummy targets refer to the KiDS/KABS areas where the rest of the targets are distributed (see Fig. 2 for the complete target distribution) and the time request assigned to each dummy target refers to the total time requested to observe all the targets in each areas, KiDS North and KiDS South (and KABS) respectively
+</Comments>
+    </TimeRequest>
+    <ScientificJustification>
+        <ns2:Path>Included/b0d52fb3f80abfb747436bdf9cab33b7.pdf</ns2:Path>
+    </ScientificJustification>
+    <TimeCritical>false</TimeCritical>
+    <Priority4Proposal>false</Priority4Proposal>
+    <Targets>
+        <ns2:Target id="Target-1">
+            <ns2:Name>KiDS J120743.27-010355.40</ns2:Name>
+            <ns2:TargetCode>adfea5d3-0d0a-4577-8dcd-400dbb07458c</ns2:TargetCode>
+            <ns2:TargetType>Candidate_Lens</ns2:TargetType>
+            <ns2:Coordinates>
+                <ns3:RightAscension>
+                    <ns3:Hours>12</ns3:Hours>
+                    <ns3:Minutes>7</ns3:Minutes>
+                    <ns3:Seconds>43.27</ns3:Seconds>
+                </ns3:RightAscension>
+                <ns3:Declination>
+                    <ns3:Sign>-</ns3:Sign>
+                    <ns3:Degrees>1</ns3:Degrees>
+                    <ns3:Arcminutes>3</ns3:Arcminutes>
+                    <ns3:Arcseconds>55.4</ns3:Arcseconds>
+                </ns3:Declination>
+                <ns3:Equinox>2000.0</ns3:Equinox>
+            </ns2:Coordinates>
+            <ns2:MagnitudeRange>
+                <ns2:Bandpass>R</ns2:Bandpass>
+                <ns2:Minimum>18.0</ns2:Minimum>
+                <ns2:Maximum>23.0</ns2:Maximum>
+            </ns2:MagnitudeRange>
+            <ns2:Mandatory>true</ns2:Mandatory>
+        </ns2:Target>
+        <ns2:Target id="Target-2">
+            <ns2:Name>KIDS J144145.10+023743.31 </ns2:Name>
+            <ns2:TargetCode>55a3ef1a-008b-4a3a-896e-4a9223bc9576</ns2:TargetCode>
+            <ns2:TargetType>Candidate_Lens</ns2:TargetType>
+            <ns2:Coordinates>
+                <ns3:RightAscension>
+                    <ns3:Hours>14</ns3:Hours>
+                    <ns3:Minutes>41</ns3:Minutes>
+                    <ns3:Seconds>45.1</ns3:Seconds>
+                </ns3:RightAscension>
+                <ns3:Declination>
+                    <ns3:Sign>+</ns3:Sign>
+                    <ns3:Degrees>2</ns3:Degrees>
+                    <ns3:Arcminutes>37</ns3:Arcminutes>
+                    <ns3:Arcseconds>43.31</ns3:Arcseconds>
+                </ns3:Declination>
+                <ns3:Equinox>2000.0</ns3:Equinox>
+            </ns2:Coordinates>
+            <ns2:MagnitudeRange>
+                <ns2:Bandpass>R</ns2:Bandpass>
+                <ns2:Minimum>18.0</ns2:Minimum>
+                <ns2:Maximum>21.0</ns2:Maximum>
+            </ns2:MagnitudeRange>
+            <ns2:Mandatory>true</ns2:Mandatory>
+        </ns2:Target>
+        <ns2:Target id="Target-3">
+            <ns2:Name>KiDS_north_dummy</ns2:Name>
+            <ns2:TargetCode>a1c9bafc-ed9f-44b2-86bb-4ca686ec9670</ns2:TargetCode>
+            <ns2:TargetType>Candidate_Lens</ns2:TargetType>
+            <ns2:DummyTarget></ns2:DummyTarget>
+            <ns2:MagnitudeRange>
+                <ns2:Bandpass>R</ns2:Bandpass>
+                <ns2:Minimum>18.0</ns2:Minimum>
+                <ns2:Maximum>21.0</ns2:Maximum>
+            </ns2:MagnitudeRange>
+            <ns2:Mandatory>true</ns2:Mandatory>
+        </ns2:Target>
+        <ns2:Target id="Target-4">
+            <ns2:Name>KiDS_south_KABS_dummy</ns2:Name>
+            <ns2:TargetCode>99ba3807-6a06-4fda-8dd7-bc347b4ef6e2</ns2:TargetCode>
+            <ns2:TargetType>Candidate_Lens</ns2:TargetType>
+            <ns2:DummyTarget></ns2:DummyTarget>
+            <ns2:MagnitudeRange>
+                <ns2:Bandpass>R</ns2:Bandpass>
+                <ns2:Minimum>18.0</ns2:Minimum>
+                <ns2:Maximum>21.0</ns2:Maximum>
+            </ns2:MagnitudeRange>
+            <ns2:Mandatory>true</ns2:Mandatory>
+        </ns2:Target>
+        <ns2:NumberOfOptionalTargets>0</ns2:NumberOfOptionalTargets>
+    </Targets>
+    <Observations>
+        <ObservingConditions>
+            <Transparency>Thin cloud</Transparency>
+            <MaximumSeeing>
+                <ns2:Value>1.5</ns2:Value>
+                <ns2:Units>arcseconds</ns2:Units>
+            </MaximumSeeing>
+            <Description>We need quite good seeing conditions (i.e. FWHM of 1.5'' or less)</Description>
+        </ObservingConditions>
+        <Observation>
+            <Target ref="Target-1"/>
+            <ObservingTime>
+                <Value>3600</Value>
+                <Units>seconds</Units>
+            </ObservingTime>
+            <Visits>1</Visits>
+            <MaximumLunarPhase>
+                <ns2:Value>14.6</ns2:Value>
+                <ns2:Units>%</ns2:Units>
+            </MaximumLunarPhase>
+            <Ranking>High</Ranking>
+        </Observation>
+        <Observation>
+            <Target ref="Target-2"/>
+            <ObservingTime>
+                <Value>2700</Value>
+                <Units>seconds</Units>
+            </ObservingTime>
+            <Visits>1</Visits>
+            <MaximumLunarPhase>
+                <ns2:Value>14.6</ns2:Value>
+                <ns2:Units>%</ns2:Units>
+            </MaximumLunarPhase>
+            <Ranking>High</Ranking>
+        </Observation>
+        <Observation>
+            <Target ref="Target-3"/>
+            <ObservingTime>
+                <Value>72450</Value>
+                <Units>seconds</Units>
+            </ObservingTime>
+            <Visits>1</Visits>
+            <MaximumLunarPhase>
+                <ns2:Value>14.6</ns2:Value>
+                <ns2:Units>%</ns2:Units>
+            </MaximumLunarPhase>
+            <Ranking>High</Ranking>
+        </Observation>
+        <Observation>
+            <Target ref="Target-4"/>
+            <ObservingTime>
+                <Value>72450</Value>
+                <Units>seconds</Units>
+            </ObservingTime>
+            <Visits>1</Visits>
+            <MaximumLunarPhase>
+                <ns2:Value>14.6</ns2:Value>
+                <ns2:Units>%</ns2:Units>
+            </MaximumLunarPhase>
+            <Ranking>High</Ranking>
+        </Observation>
+    </Observations>
+    <InstrumentConfigurations>
+        <InstrumentConfiguration>
+            <ns9:Rss id="Rss-1">
+                <ns9:Name>RSS_quasar_example</ns9:Name>
+                <ns9:SlitMask>
+                    <ns9:PredefinedMask>
+                        <ns9:MaskType>Longslit</ns9:MaskType>
+                    </ns9:PredefinedMask>
+                </ns9:SlitMask>
+                <ns9:Mode>
+                    <ns9:Spectroscopy>
+                        <ns9:Grating>pg0900</ns9:Grating>
+                    </ns9:Spectroscopy>
+                </ns9:Mode>
+                <ns9:DetMode>Normal</ns9:DetMode>
+            </ns9:Rss>
+            <InstrumentSimulation>
+                <ns2:Name>RSS_quasar_example</ns2:Name>
+                <ns2:Path>Included/7d3cee8c5e51df3702d6a47097c9cf05.rsim</ns2:Path>
+            </InstrumentSimulation>
+        </InstrumentConfiguration>
+        <InstrumentConfiguration>
+            <ns9:Rss id="Rss-2">
+                <ns9:Name>RSS_arc_example</ns9:Name>
+                <ns9:SlitMask>
+                    <ns9:PredefinedMask>
+                        <ns9:MaskType>Longslit</ns9:MaskType>
+                    </ns9:PredefinedMask>
+                </ns9:SlitMask>
+                <ns9:Mode>
+                    <ns9:Spectroscopy>
+                        <ns9:Grating>pg0900</ns9:Grating>
+                    </ns9:Spectroscopy>
+                </ns9:Mode>
+                <ns9:DetMode>Normal</ns9:DetMode>
+            </ns9:Rss>
+            <InstrumentSimulation>
+                <ns2:Name>RSS_arc_example</ns2:Name>
+                <ns2:Path>Included/26a2f00d41fc0dbb3726c5c146af4716.rsim</ns2:Path>
+            </InstrumentSimulation>
+        </InstrumentConfiguration>
+    </InstrumentConfigurations>
+    <PreviousProposal>
+        <ns2:Code>2018-1-SCI-029</ns2:Code>
+        <ns2:Title>SALT Spectroscopic Survey of IR 12MGS Seyfert Galaxies </ns2:Title>
+        <ns2:Status>The observing program is on-going as well as the related data reduction. We submitted a detailed progress report and time request of 22242 sec (6.2 hours) for semester 2018-2 to complete our program. This is done considering that all our targets are suitable for P3/P4 time allocation and therefore it is unlikely that the remainder of our unobserved targets will be observe by the end of the current semester 2018-1.</ns2:Status>
+        <ns2:AllocatedTime>
+            <ns3:Value>34400.0</ns3:Value>
+            <ns3:Units>seconds</ns3:Units>
+        </ns2:AllocatedTime>
+        <ns2:ObservedTime>
+            <ns3:Value>33573.0</ns3:Value>
+            <ns3:Units>seconds</ns3:Units>
+        </ns2:ObservedTime>
+    </PreviousProposal>
+    <PreviousProposal>
+        <ns2:Code>2015-2-MLT-006</ns2:Code>
+        <ns2:Title>THE SALT GRAVITATIONAL LENSING LEGACY SURVEY</ns2:Title>
+        <ns2:Status>In proposal 2015-2-MLT-006 the PI of the current proposal is not PI, but PC. Project 2015-2-MLT-006 is on-going as well as the related data reduction. A detailed progress report and time request will be submitted for semester 2018-2 in oder to complete the program. The current proposal is a complementary proposal to the work developed within the project 2015-2-MLT-006 as detailed in the submitted science justification.</ns2:Status>
+    </PreviousProposal>
+    <Outreach>
+        <ns2:Summary>Gravitational lensing is an astrophysical phenomenon  predicted by Einstein's general relativity, which consists in the deflection of light by gravitational fields. If two galaxies are approximatively along the same line of sight, then the foreground galaxy (the lens) is bending the light of the background galaxy or quasar, generating arcs and multiple images. The gravitational lens is like a glass and the light of the background source is like the light of a candle, which seen through the bottom of the glass, appear as a series of distorted images and arcs. Gravitational lenses are not only spectacular events, but, are powerful tools to probe the mass distribution of the lens galaxies and constrain the age of the Universe. For these reasons, we are searching and finding new gravitational lenses, and we need to measure their spectra, i.e. the light they emit at different wavelengths, to determine how far are the lens and the background source. This is the first step to have a confirmation that our candidates are real lenses and proceed to more detailed analysis.</ns2:Summary>
+        <ns2:AllowDisplaying>true</ns2:AllowDisplaying>
+    </Outreach>
+</Proposal>
