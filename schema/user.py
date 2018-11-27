@@ -16,6 +16,7 @@ class RoleType(Enum):
     SALT_ASTRONOMER = 2
     TAC_MEMBER = 3
     TAC_CHAIR = 4
+    BOARD = 5
 
     @property
     def description(self):
@@ -27,6 +28,8 @@ class RoleType(Enum):
             return 'Member of a Time Allocation Committee'
         elif self == RoleType.TAC_CHAIR:
             return 'Chair of a Time Allocation Committee'
+        elif self == RoleType.BOARD:
+            return 'Board Member'
         else:
             return str(self)
 
