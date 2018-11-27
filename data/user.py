@@ -12,15 +12,25 @@ def get_role(row, user_id):
     all_partner = get_partners_for_role()
     sql = '''
 SELECT *  FROM PiptUserSetting
-    LEFT JOIN PiptUserTAC using (PiptUser_Id)
-WHERE PiptSetting_Id = 22
-    AND PiptUser_Id = {user_id}
+    JOIN PiptSetting using (PiptSetting_Id)
+WHERE PiptUser_Id = {user_id}
+    AND PiptSetting_Name ='RightBoard'
+    AND Value = 1
 '''.format(user_id=user_id)
     conn = sdb_connect()
     results = pd.read_sql(sql, conn)
     conn.close()
 
     role = []
+
+    if len(results):
+        role.append(
+            Role(
+                type=RoleType.BOARD,
+                partners=all_partner
+            )
+        )
+
     if not pd.isnull(row["Astro"]):
         role.append(
             Role(
@@ -45,6 +55,16 @@ WHERE PiptSetting_Id = 22
                 partners=partner
             )
         )
+
+    sql = '''
+SELECT *  FROM PiptUserSetting
+    LEFT JOIN PiptUserTAC using (PiptUser_Id)
+WHERE PiptSetting_Id = 22
+    AND PiptUser_Id = {user_id}
+'''.format(user_id=user_id)
+    conn = sdb_connect()
+    results = pd.read_sql(sql, conn)
+    conn.close()
 
     if len(results) > 0 and int(results.iloc[0]["Value"]) > 1:
         role.append(
@@ -87,6 +107,8 @@ WHERE u.PiptUser_Id = {user_id}
                 role=[]
             )
         user[username].role += get_role(row, user_id)
+
+
     return user[username]
 
 
