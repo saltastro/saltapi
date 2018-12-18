@@ -2,7 +2,7 @@ from flask import g
 from graphene import Enum, ObjectType, String, List, Field, Boolean
 
 from schema.partner import Partner
-from util.action import Action
+from util.action import Action, Data
 from data.proposal import liaison_astronomer, technical_reviewer, is_investigator
 from util.time_requests import time_requests
 
@@ -139,6 +139,38 @@ class User(ObjectType):
 
         if action == Action.SWITCH_USER:
             return self.has_role(RoleType.ADMINISTRATOR)
+
+        if action == Action.DOWNLOAD_SUMMARY:
+            return self.has_role(RoleType.ADMINISTRATOR) \
+                   or self.has_role(RoleType.SALT_ASTRONOMER) \
+                   or self.has_role(RoleType.TAC_CHAIR, partner) \
+                   or self.has_role(RoleType.TAC_MEMBER, partner)
+
+        return False
+
+    def may_view(self, data, **kwargs):
+        """
+        Check whether this user may view some data.
+
+        Parameters
+        ----------
+        data : util.Action
+            The action.
+        **kwargs : kwargs
+            Additional keyword arguments, as required by the action.
+
+        Returns
+        -------
+        mayview : bool
+            Bool indicating whether this user may view the action.
+        """
+
+        partner = kwargs.get('partner')
+
+        if data == Data.AVAILABLE_TIME:
+            return self.has_role(RoleType.ADMINISTRATOR, partner) or \
+                   self.has_role(RoleType.TAC_CHAIR, partner) or \
+                   self.has_role(RoleType.TAC_MEMBER, partner)
 
         return False
 

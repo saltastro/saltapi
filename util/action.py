@@ -13,4 +13,13 @@ class Action(Enum):
     UPDATE_LIAISON_ASTRONOMER = 5
     VIEW_PROPOSAL = 6
     SWITCH_USER = 7
-    UPDATE_COMPLETION_STAT_COMMENT = 8
+    DOWNLOAD_SUMMARY = 8
+    UPDATE_COMPLETION_STAT_COMMENT = 9
+
+
+class Data(Enum):
+    """
+    An enumeration of data a user may view with this API.
+    """
+
+    AVAILABLE_TIME = 1

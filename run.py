@@ -13,7 +13,7 @@ from zipfile import ZipFile
 from flask import Flask, jsonify, request, g, make_response, Response, render_template, send_file, abort
 from flask_graphql import GraphQLView
 from flask_httpauth import HTTPTokenAuth, HTTPBasicAuth, MultiAuth
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 from raven.contrib.flask import Sentry
 
 from data.completion_comment import update_completion_comments
@@ -500,7 +500,10 @@ def proposal_summary():
     data = request.json
     proposal_code = data['proposalCode']
     semester = data['semester']
-    partner = data['partner']
+    if 'partner' in data:
+        partner = data['partner']
+    else:
+        partner = 'All'
 
     # TODO: check permission
     if not g.user.may_perform(Action.DOWNLOAD_SUMMARY, proposal_code=proposal_code, partner=partner):
@@ -517,7 +520,10 @@ def proposal_summaries():
     data = request.json
     proposal_codes = data['proposalCodes']
     semester = data['semester']
-    partner = data['partner']
+    if 'partner' in data:
+        partner = data['partner']
+    else:
+        partner = 'All'
 
     # check permission
     for proposal_code in proposal_codes:
@@ -562,6 +568,11 @@ def handle_exception(error):
         traceback.print_exc()
         print('Set the SENTRY_DSN environment variable to log to Sentry instead of the command line.')
     return make_response(jsonify(dict(error='Sorry, there has been an internal server error. :-(')), 500)
+
+
+@socketio.on('liaison socket')
+def liaison_socket(data):
+    emit('broadcast new liaison', data, broadcast=True)
 
 
 @app.after_request
