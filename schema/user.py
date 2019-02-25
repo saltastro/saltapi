@@ -117,6 +117,10 @@ class User(ObjectType):
                     (current_reviewer is None or current_reviewer == assigned_reviewer)) and \
                    assigned_reviewer is not None
 
+        if action == Action.UPDATE_COMPLETION_STAT_COMMENT:
+            return self.has_role(RoleType.ADMINISTRATOR, partner) or \
+                   self.has_role(RoleType.SALT_ASTRONOMER, partner)
+
         if action == Action.VIEW_PROPOSAL:
             if self.has_role(RoleType.ADMINISTRATOR) or self.has_role(RoleType.SALT_ASTRONOMER):
                 return True

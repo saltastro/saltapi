@@ -14,6 +14,7 @@ class Action(Enum):
     VIEW_PROPOSAL = 6
     SWITCH_USER = 7
     DOWNLOAD_SUMMARY = 8
+    UPDATE_COMPLETION_STAT_COMMENT = 9
 
 
 class Data(Enum):
@@ -22,4 +23,3 @@ class Data(Enum):
     """
 
     AVAILABLE_TIME = 1
-

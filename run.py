@@ -16,6 +16,7 @@ from flask_httpauth import HTTPTokenAuth, HTTPBasicAuth, MultiAuth
 from flask_socketio import SocketIO, emit
 from raven.contrib.flask import Sentry
 
+from data.completion_comment import update_completion_comments
 from data.proposal import summary_file, latest_version, latest_semester
 from data.blocks import get_blocks_status
 from data.technical_review import update_liaison_astronomers, update_reviews
@@ -369,7 +370,6 @@ def get_blocks(proposal_code, blocks_status):
 
 @app.route("/token", methods=['POST'])
 def token():
-    print(request.json)
     if request.json:
         tok = get_user_token(request.json)
         if "errors" in tok:
@@ -431,6 +431,17 @@ def technical_reviews():
     semester = data['semester']
     reviews = data['reviews']
     update_reviews(semester=semester, reviews=reviews)
+    return jsonify(dict(success=True))
+
+
+@app.route("/completion-comments", methods=['POST'])
+@token_auth.login_required
+def completion_comment():
+    data = request.json
+    print(data)
+    semester = data['semester']
+    completion_comments = data['completionComments']
+    update_completion_comments(semester=semester, completion_comments=completion_comments)
     return jsonify(dict(success=True))
 
 
