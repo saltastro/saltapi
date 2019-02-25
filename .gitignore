@@ -1,5 +1,10 @@
 # Created by .ignore support plugin (hsz.mobi)
 .gitignore
-.idea/*
+.idea/
 __pycache__/
 tacvenv/
+venv/
+.cache/
+.pytest_cache/
+*.pyc
+tests/test_proposal_dir/

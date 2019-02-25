@@ -1,4 +1,8 @@
-from graphene import ObjectType, String, List, Field
+from graphene import ObjectType, Interface, String, Field
+
+
+class Instrument(Interface):
+    type = String()
 
 
 class Spectroscopy(ObjectType):
@@ -6,7 +10,7 @@ class Spectroscopy(ObjectType):
 
 
 class Polarimetry(ObjectType):
-    pattern_name = String()
+    waveplate_pattern = String()
 
 
 class FabryPerot(ObjectType):
@@ -21,34 +25,29 @@ class Mask(ObjectType):
 
 
 class BVIT(ObjectType):
-    type = String()
-    filter_name = String()
+    class Meta:
+        interfaces = (Instrument,)
+    filter = String()
 
 
 class SCAM(ObjectType):
-    type = String()
+    class Meta:
+        interfaces = (Instrument,)
     detector_mode = String()
-    xml_detector_mode = String()
 
 
 class HRS(ObjectType):
-    exposure_mode = String()
-    type = String()
+    class Meta:
+        interfaces = (Instrument,)
+    detector_mode = String()
 
 
 class RSS(ObjectType):
-    type = String()
+    class Meta:
+        interfaces = (Instrument,)
     mode = String()
     detector_mode = String()
-    xml_detector_mode = String()
     spectroscopy = Field(Spectroscopy)
     fabry_perot = Field(FabryPerot)
     polarimetry = Field(Polarimetry)
     mask = Field(Mask)
-
-
-class Instruments(ObjectType):
-    rss = List(RSS)
-    hrs = List(HRS)
-    bvit = List(BVIT)
-    scam = List(SCAM)

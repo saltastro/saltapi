@@ -1,6 +1,8 @@
 from flask import g
 from graphene import Enum, ObjectType, String, List, Field, Boolean
-from util.action import Action
+
+from schema.partner import Partner
+from util.action import Action, Data
 from data.proposal import liaison_astronomer, technical_reviewer, is_investigator
 from util.time_requests import time_requests
 
@@ -14,6 +16,7 @@ class RoleType(Enum):
     SALT_ASTRONOMER = 2
     TAC_MEMBER = 3
     TAC_CHAIR = 4
+    BOARD = 5
 
     @property
     def description(self):
@@ -25,6 +28,8 @@ class RoleType(Enum):
             return 'Member of a Time Allocation Committee'
         elif self == RoleType.TAC_CHAIR:
             return 'Chair of a Time Allocation Committee'
+        elif self == RoleType.BOARD:
+            return 'Board Member'
         else:
             return str(self)
 
@@ -37,7 +42,7 @@ class Role(ObjectType):
         return self.type.value
 
 
-class UserModel(ObjectType):
+class User(ObjectType):
     first_name = String()
     last_name = String()
     email = String()
@@ -95,9 +100,6 @@ class UserModel(ObjectType):
                    self.has_role(RoleType.TAC_MEMBER, partner) or \
                    self.has_role(RoleType.SALT_ASTRONOMER, partner)
 
-        if action == Action.UPDATE_TAC_COMMENTS:
-            return self.has_role(RoleType.ADMINISTRATOR, partner)
-
         if action == Action.UPDATE_LIAISON_ASTRONOMER:
             assigned_liaison = kwargs['liaison_astronomer']
             current_liaison = liaison_astronomer(proposal_code)
@@ -114,6 +116,10 @@ class UserModel(ObjectType):
                    (self.has_role(RoleType.SALT_ASTRONOMER, partner) and
                     (current_reviewer is None or current_reviewer == assigned_reviewer)) and \
                    assigned_reviewer is not None
+
+        if action == Action.UPDATE_COMPLETION_STAT_COMMENT:
+            return self.has_role(RoleType.ADMINISTRATOR, partner) or \
+                   self.has_role(RoleType.SALT_ASTRONOMER, partner)
 
         if action == Action.VIEW_PROPOSAL:
             if self.has_role(RoleType.ADMINISTRATOR) or self.has_role(RoleType.SALT_ASTRONOMER):
@@ -134,6 +140,38 @@ class UserModel(ObjectType):
         if action == Action.SWITCH_USER:
             return self.has_role(RoleType.ADMINISTRATOR)
 
+        if action == Action.DOWNLOAD_SUMMARY:
+            return self.has_role(RoleType.ADMINISTRATOR) \
+                   or self.has_role(RoleType.SALT_ASTRONOMER) \
+                   or self.has_role(RoleType.TAC_CHAIR, partner) \
+                   or self.has_role(RoleType.TAC_MEMBER, partner)
+
+        return False
+
+    def may_view(self, data, **kwargs):
+        """
+        Check whether this user may view some data.
+
+        Parameters
+        ----------
+        data : util.Action
+            The action.
+        **kwargs : kwargs
+            Additional keyword arguments, as required by the action.
+
+        Returns
+        -------
+        mayview : bool
+            Bool indicating whether this user may view the action.
+        """
+
+        partner = kwargs.get('partner')
+
+        if data == Data.AVAILABLE_TIME:
+            return self.has_role(RoleType.ADMINISTRATOR, partner) or \
+                   self.has_role(RoleType.TAC_CHAIR, partner) or \
+                   self.has_role(RoleType.TAC_MEMBER, partner)
+
         return False
 
     def __str__(self):
@@ -143,8 +181,7 @@ class UserModel(ObjectType):
 class TacMember(ObjectType):
     last_name = String()
     first_name = String()
-    partner_code = String()
-    partner_name = String()
+    partner = Field(Partner)
     is_chair = Boolean()
     email = String()
     username = String()

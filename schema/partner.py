@@ -1,29 +1,22 @@
-from graphene import ObjectType, ID, Int, String, Float, List, Field
+from graphene import ObjectType, ID, String, Float,  Field
 
 
-class AllocatedTime(ObjectType):
-    for_semester = String()
-
-    Allocated_p0_p1 = Float()
-    Allocated_p2 = Float()
-    Allocated_p3 = Float()
-
-    used_p0_p1 = Float()
-    used_p2 = Float()
-    used_p3 = Float()
+class Priority(ObjectType):
+    p0_andp1 = Float()
+    p2 = Float()
+    p3 = Float()
+    p4 = Float()
 
 
-class ScienceTime(ObjectType):
-    p0 = Int()
-    p1 = Int()
-    p2 = Int()
-    p3 = Int()
-    p4 = Int()
+class TimeAllocation(ObjectType):
+    semester = String()
+    used_time = Field(Priority)
+    allocated_time = Field(Priority)
+    science_time = Field(Priority)
 
 
-class PartnerAllocations(ObjectType):
+class Partner(ObjectType):
     id = ID()
     name = String()
     code = String()
-    allocated_time = Field(AllocatedTime)
-    science_time = List(ScienceTime)
+    time_allocation = Field(TimeAllocation)
