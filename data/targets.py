@@ -1,4 +1,3 @@
-import time
 from pandas._libs.tslib import NaTType
 from schema.target import Target, Position, Magnitude
 from data.common import get_proposal_ids, sql_list_string
@@ -48,7 +47,6 @@ def get_targets(proposal_code_ids=None, proposals=None, semester=None, partner_c
     """
     if proposal_code_ids is not None and semester is not None:
         raise ValueError("targets are acquired by either ids or semester but not both")
-    print(proposal_code_ids)
     targets = []
     if proposal_code_ids is None:
         if semester is None:
@@ -71,13 +69,9 @@ def get_targets(proposal_code_ids=None, proposals=None, semester=None, partner_c
      """.format(proposal_code_ids=proposal_code_ids)
 
     conn = sdb_connect()
-    start = time.time()
     results = pd.read_sql(sql, conn)
     conn.close()
-    dif = time.time() - start
-    print("Query targets", dif)
 
-    start = time.time()
     for i, row in results.iterrows():
         try:
             if proposals is None:
@@ -86,6 +80,4 @@ def get_targets(proposal_code_ids=None, proposals=None, semester=None, partner_c
                 proposals[row["Proposal_Code"]].targets.append(target(row))
         except KeyError:
             pass
-    dif = time.time() - start
-    print("Add targets to the proposals", dif)
     return targets
