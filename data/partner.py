@@ -59,10 +59,16 @@ WHERE concat(Year,"-", Semester) = "{semester}"
 
 
 def get_partners_for_role(ids=None):
-    par = 'SELECT Partner_Code FROM Partner '
+    par = '''
+SELECT Partner_Code FROM Partner
+    JOIN PartnerShareTimeDist USING(Partner_Id)
+WHERE `Virtual` = 0
+    AND Semester_Id = 27
+    AND SharePercent > 0
+    '''
     if ids is not None:
         ids = [str(id) for id in ids]
-        par += ' WHERE Partner_Id IN ({ids})'.format(ids=", ".join(ids))
+        par += ' AND Partner_Id IN ({ids})'.format(ids=", ".join(ids))
 
     conn = sdb_connect()
     results = pd.read_sql(par, conn)
