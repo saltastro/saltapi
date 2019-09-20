@@ -83,7 +83,6 @@ WHERE `Virtual` = 0
     if partner_ids is not None:
         ids = [str(id) for id in partner_ids]
         par += ' AND Partner_Id IN ({ids})'.format(ids=", ".join(ids))
-
     conn = sdb_connect()
     results = pd.read_sql(par, conn, params=(current_semester()["semester_id"],))
     conn.close()

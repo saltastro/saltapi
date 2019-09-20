@@ -61,6 +61,6 @@ WHERE StartSemester <= "{date}" AND EndSemester >= "{date}"
     sdb_connect().close()
     return {
         "semester": '{year}-{sem}'.format(year=results.iloc[0]["Year"], sem=results.iloc[0]["Semester"]),
-        "semester_id": results.iloc[0]["Semester_Id"]
+        "semester_id": int(results.iloc[0]["Semester_Id"])
     }
 
