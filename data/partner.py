@@ -59,11 +59,11 @@ WHERE concat(Year,"-", Semester) = "{semester}"
     return partners
 
 
-def get_partners_list(partner_ids=None):
+def get_partner_codes(only_partner_ids=None):
     """
     Parameters
     ----------
-    partner_ids : Optional[Array]
+    only_partner_ids : Optional[list]
         Partner ID, .
 
     Returns
@@ -80,8 +80,8 @@ WHERE `Virtual` = 0
     AND Semester_Id = %s
     AND TimePercent > 0
     '''
-    if partner_ids is not None:
-        ids = [str(id) for id in partner_ids]
+    if only_partner_ids is not None:
+        ids = [str(i) for i in only_partner_ids]
         par += ' AND Partner_Id IN ({ids})'.format(ids=", ".join(ids))
     conn = sdb_connect()
     results = pd.read_sql(par, conn, params=(current_semester()["semester_id"],))
