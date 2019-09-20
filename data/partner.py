@@ -77,15 +77,15 @@ SELECT Partner_Code FROM Partner
     JOIN PartnerShareTimeDist USING(Partner_Id)
     JOIN Semester USING(Semester_Id)
 WHERE `Virtual` = 0
-    AND Semester_Id = {semester_id}
+    AND Semester_Id = %s
     AND TimePercent > 0
-    '''.format(semester_id=current_semester()["semester_id"])
+    '''
     if partner_ids is not None:
         ids = [str(id) for id in partner_ids]
         par += ' AND Partner_Id IN ({ids})'.format(ids=", ".join(ids))
 
     conn = sdb_connect()
-    results = pd.read_sql(par, conn)
+    results = pd.read_sql(par, conn, params=(current_semester()["semester_id"],))
     conn.close()
 
     return [row["Partner_Code"] for i, row in results.iterrows()]
