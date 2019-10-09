@@ -1,3 +1,9 @@
+from datetime import datetime
+import pandas as pd
+
+from data import sdb_connect
+
+
 def previous_semester(semester):
     """
     The semester before the given one.
@@ -33,3 +39,28 @@ def previous_semester(semester):
         raise ValueError('Semester must be 1 or 2. Found: {sem}'.format(sem=sem))
 
     return '{year}-{sem}'.format(year=year, sem=sem)
+
+
+def current_semester():
+    """
+    the current semester
+
+    Returns
+    -------
+    semester : dict
+        The current semester.
+    """
+
+    date = datetime.now()
+    sql = """
+SELECT Semester_Id, Year, Semester
+    FROM Semester
+WHERE StartSemester <= "{date}" AND EndSemester >= "{date}"
+""".format(date=date)
+    results = pd.read_sql(sql, sdb_connect())
+    sdb_connect().close()
+    return {
+        "semester": '{year}-{sem}'.format(year=results.iloc[0]["Year"], sem=results.iloc[0]["Semester"]),
+        "semester_id": int(results.iloc[0]["Semester_Id"])
+    }
+

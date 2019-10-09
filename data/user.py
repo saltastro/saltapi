@@ -3,17 +3,20 @@ import pandas as pd
 from data.common import sdb_connect
 from schema.partner import Partner
 from schema.user import User, Role, RoleType, TacMember
-from data.partner import get_partners_for_role
+from data.partner import get_partner_codes
 from util.action import Action
 from util.error import InvalidUsage
 
 
 def get_role(row, user_id):
-    all_partner = get_partners_for_role()
+    all_partner = get_partner_codes()
     sql = '''
-SELECT *  FROM PiptUserSetting
+SELECT Partner_Id FROM PiptUser as pu
+    JOIN Investigator USING (Investigator_Id)
+    JOIN Institute USING (Institute_Id)
+    JOIN PiptUserSetting as pus ON (pu.PiptUser_Id = pus.PiptUser_Id)
     JOIN PiptSetting using (PiptSetting_Id)
-WHERE PiptUser_Id = {user_id}
+where pu.PiptUser_Id={user_id}
     AND PiptSetting_Name ='RightBoard'
     AND Value = 1
 '''.format(user_id=user_id)
@@ -22,12 +25,11 @@ WHERE PiptUser_Id = {user_id}
     conn.close()
 
     role = []
-
     if len(results):
         role.append(
             Role(
                 type=RoleType.BOARD,
-                partners=all_partner
+                partners=get_partner_codes([results.iloc[0]["Partner_Id"]])
             )
         )
 
@@ -39,7 +41,7 @@ WHERE PiptUser_Id = {user_id}
             )
         )
     if not pd.isnull(row["Tac"]):
-        partner = get_partners_for_role(ids=[row["TacPartner"]])
+        partner = get_partner_codes([row["TacPartner"]])
         role.append(
             Role(
                 type=RoleType.TAC_MEMBER,
@@ -48,7 +50,7 @@ WHERE PiptUser_Id = {user_id}
         )
 
     if not pd.isnull(row["Chair"]) and row["Chair"] == 1:
-        partner = get_partners_for_role(ids=[row["TacPartner"]])
+        partner = get_partner_codes([row["TacPartner"]])
         role.append(
             Role(
                 type=RoleType.TAC_CHAIR,
@@ -107,7 +109,6 @@ WHERE u.PiptUser_Id = {user_id}
                 role=[]
             )
         user[username].role += get_role(row, user_id)
-
 
     return user[username]
 

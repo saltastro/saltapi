@@ -2,6 +2,7 @@ import pandas as pd
 from flask import g
 from data import sdb_connect
 from util.action import Data
+from util.semester import current_semester
 
 
 def get_partners(semester, partner):
@@ -58,14 +59,32 @@ WHERE concat(Year,"-", Semester) = "{semester}"
     return partners
 
 
-def get_partners_for_role(ids=None):
-    par = 'SELECT Partner_Code FROM Partner '
-    if ids is not None:
-        ids = [str(id) for id in ids]
-        par += ' WHERE Partner_Id IN ({ids})'.format(ids=", ".join(ids))
+def get_partner_codes(only_partner_ids=None):
+    """
+    Parameters
+    ----------
+    only_partner_ids : Optional[list]
+        Partner ID, .
 
+    Returns
+    -------
+    Partner Code: Array
+        A list of active partner codes for this
+    """
+
+    par = '''
+SELECT Partner_Code FROM Partner
+    JOIN PartnerShareTimeDist USING(Partner_Id)
+    JOIN Semester USING(Semester_Id)
+WHERE `Virtual` = 0
+    AND Semester_Id = %s
+    AND TimePercent > 0
+    '''
+    if only_partner_ids is not None:
+        ids = [str(i) for i in only_partner_ids]
+        par += ' AND Partner_Id IN ({ids})'.format(ids=", ".join(ids))
     conn = sdb_connect()
-    results = pd.read_sql(par, conn)
+    results = pd.read_sql(par, conn, params=(current_semester()["semester_id"],))
     conn.close()
 
     return [row["Partner_Code"] for i, row in results.iterrows()]
