@@ -55,7 +55,8 @@ def get_targets(proposal_code_ids=None, proposals=None, semester=None, partner_c
         proposal_code_ids = sql_list_string(ids['all_proposals']) if partner_code is None \
             else sql_list_string(ids['ProposalCode_Ids'])
     sql = """
-     SELECT *
+     SELECT distinct Target_Id, Proposal_Code, DecSign, Target_Name, Optional, RaH, RaM, RaS, 
+     DecD, DecM, DecS, Epoch, RaDot, DecDot, FilterName, MinMag, MaxMag
         FROM Proposal
             JOIN P1ProposalTarget USING (ProposalCode_Id)
             JOIN ProposalCode USING (ProposalCode_Id)
@@ -70,6 +71,7 @@ def get_targets(proposal_code_ids=None, proposals=None, semester=None, partner_c
     conn = sdb_connect()
     results = pd.read_sql(sql, conn)
     conn.close()
+
     for i, row in results.iterrows():
         try:
             if proposals is None:
