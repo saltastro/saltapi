@@ -51,7 +51,7 @@ def current_semester():
         The current semester.
     """
 
-    date = datetime.now()
+    date = datetime.now().date()
     sql = """
 SELECT Semester_Id, Year, Semester
     FROM Semester
