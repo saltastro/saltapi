@@ -5,9 +5,11 @@ from schema.proposal import *
 from data.user import get_salt_users, get_tac_members
 from data.proposal import get_proposals
 from data.partner import get_partners
+from data.statistics import get_statistics
 from data.targets import get_targets
 from data.salt_astronomer import get_salt_astronomers
 from schema.instruments import HRS, RSS, BVIT, SCAM
+from schema.statistics import Statistics
 from schema.user import User, TacMember
 from schema.mutations import Mutations
 
@@ -27,6 +29,7 @@ class Query(graphene.ObjectType):
     partner_allocations = Field(List(Partner), semester=String(), partner_code=String(),
                                 description="List of all allocations of SALT Partners")
     user = Field(User)
+    statistics = Field(Statistics , partner=String(), semester=String())
     salt_astronomers = Field(List(User))
     tac_members = Field(List(TacMember), partner_code=String())
     salt_users = Field(List(User), partner_code=String())
@@ -62,6 +65,9 @@ class Query(graphene.ObjectType):
 
     def resolve_salt_users(self, info):
         return get_salt_users()
+
+    def resolve_statistics(self, info, partner, semester):
+        return get_statistics(partner, semester)
 
 
 schema = graphene.Schema(query=Query, mutation=Mutations, types=[HRS, RSS, BVIT, SCAM])

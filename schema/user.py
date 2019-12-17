@@ -172,6 +172,11 @@ class User(ObjectType):
                    self.has_role(RoleType.TAC_CHAIR, partner) or \
                    self.has_role(RoleType.TAC_MEMBER, partner)
 
+        if data == Data.STATISTICS:
+            return self.has_role(RoleType.ADMINISTRATOR, partner) or \
+                   self.has_role(RoleType.BOARD, partner) or \
+                   self.has_role(RoleType.TAC_CHAIR, partner)
+
         return False
 
     def __str__(self):
