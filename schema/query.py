@@ -29,7 +29,7 @@ class Query(graphene.ObjectType):
     partner_allocations = Field(List(Partner), semester=String(), partner_code=String(),
                                 description="List of all allocations of SALT Partners")
     user = Field(User)
-    statistics = Field(Statistics , partner=String(), semester=String())
+    statistics = Field(Statistics, partner=String(), semester=String())
     salt_astronomers = Field(List(User))
     tac_members = Field(List(TacMember), partner_code=String())
     salt_users = Field(List(User), partner_code=String())
@@ -66,7 +66,7 @@ class Query(graphene.ObjectType):
     def resolve_salt_users(self, info):
         return get_salt_users()
 
-    def resolve_statistics(self, info, partner, semester):
+    def resolve_statistics(self, info, semester, partner=None):
         return get_statistics(partner, semester)
 
 
