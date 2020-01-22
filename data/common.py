@@ -1,7 +1,9 @@
 import pandas as pd
 from flask import g
 from data import sdb_connect
+from data.partner import get_partner_codes
 from util.action import Action
+from util.semester import query_semester_id
 
 
 def get_proposal_ids(semester, partner_code=None):
@@ -54,7 +56,14 @@ GROUP BY ProposalCode_Id, Semester_Id HAVING Semester = "{semester}"
 
 def proposal_ids_for_statistics(semester, partner_code=None):
     conn = sdb_connect()
-    all_partners = [p['Partner_Code'] for i, p in pd.read_sql("SELECT Partner_Code FROM Partner", conn).iterrows()]
+    all_partners = [p['Partner_Code'] for i, p in pd.read_sql("""
+    SELECT Partner_Code FROM Partner
+        JOIN PartnerShareTimeDist USING(Partner_Id)
+        JOIN Semester USING(Semester_Id)
+    WHERE `Virtual` = 0
+        AND Semester_Id = {semester_id}
+        AND TimePercent > 0
+    """.format(semester_id=query_semester_id(semester)), conn).iterrows()]
     conn.close()
 
     sql = """
