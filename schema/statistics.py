@@ -110,12 +110,12 @@ class DetectorMode(ObjectType):
 class InstrumentStatistics(ObjectType):
     time_requested_per_instrument = Field(Instruments)
     number_of_configurations_per_instrument = Field(Instruments)
-    time_requested_per_rss_detector = Field(DetectorMode)
-    number_of_configurations_per_rss_detector = Field(DetectorMode)
-    time_requested_per_salticam_detector = Field(DetectorMode)
-    number_of_configurations_per_salticam_detector = Field(DetectorMode)
-    time_requested_per_hrs_exposure = Field(ExposureMode)
-    number_of_configurations_per_hrs_exposure = Field(ExposureMode)
+    time_requested_per_rss_detector_mode = Field(DetectorMode)
+    number_of_configurations_per_rss_detector_mode = Field(DetectorMode)
+    time_requested_per_salticam_detector_mode = Field(DetectorMode)
+    number_of_configurations_per_salticam_detector_mode = Field(DetectorMode)
+    time_requested_per_hrs_resolution = Field(ExposureMode)
+    number_of_configurations_per_hrs_resolution = Field(ExposureMode)
     time_requested_per_rss_observing_mode = Field(ObservingMode)
     number_of_configurations_per_rss_observing_mode = Field(ObservingMode)
 
