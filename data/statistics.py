@@ -480,7 +480,7 @@ WHERE ProposalCode_Id IN %(proposal_ids)s
             "FRAME XFER": 0,
             "SLOT": 0,
         },
-        "hrs_exposure": {
+        "hrs_resolution": {
             "HIGH RESOLUTION": 0,
             "HIGH STABILITY": 0,
             "INT CAL FIBRE": 0,
@@ -513,7 +513,7 @@ WHERE ProposalCode_Id IN %(proposal_ids)s
         if not pd.isnull(row_data["SCAMDetectorMode"]):
             final_count["salticam_detector"][row_data["SCAMDetectorMode"]] += 1
         if not pd.isnull(row_data["ExposureMode"]):
-            final_count["hrs_exposure"][row_data["ExposureMode"]] += 1
+            final_count["hrs_resolution"][row_data["ExposureMode"]] += 1
         if not pd.isnull(row_data["P1Rss_Id"]) and not pd.isnull(row_data["RSSMode"]):
             final_count["rss_observing_mode"][row_data["RSSMode"]] += 1
 
@@ -578,7 +578,7 @@ WHERE ProposalCode_Id IN %(proposal_ids)s
             "FRAME XFER": 0,
             "SLOT": 0,
         },
-        "hrs_exposure": {
+        "hrs_resolution": {
             "HIGH RESOLUTION": 0,
             "HIGH STABILITY": 0,
             "INT CAL FIBRE": 0,
@@ -617,7 +617,7 @@ WHERE ProposalCode_Id IN %(proposal_ids)s
         if not pd.isnull(row_data["SCAMDetectorMode"]):
             final_time["salticam_detector"][row_data["SCAMDetectorMode"]] += row_data["TimePerPartner"]
         if not pd.isnull(row_data["ExposureMode"]):
-            final_time["hrs_exposure"][row_data["ExposureMode"]] += row_data["TimePerPartner"]
+            final_time["hrs_resolution"][row_data["ExposureMode"]] += row_data["TimePerPartner"]
 
 
     for _, row in df.iterrows():
@@ -636,7 +636,7 @@ WHERE ProposalCode_Id IN %(proposal_ids)s
             salticam=final_count["scam"],
             rss=final_count["rss"]
         ),
-        time_requested_per_rss_detector=DetectorMode(
+        time_requested_per_rss_detector_mode=DetectorMode(
             drift_scan=final_time["rss_detector"]["Drift Scan"],
             frame_transfer=final_time["rss_detector"]["FRAME TRANSFER"],
             normal=final_time["rss_detector"]["NORMAL"],
@@ -645,38 +645,38 @@ WHERE ProposalCode_Id IN %(proposal_ids)s
         ),
 
 
-        number_of_configurations_per_rss_detector=DetectorMode(
+        number_of_configurations_per_rss_detector_mode=DetectorMode(
             drift_scan=final_count["rss_detector"]["Drift Scan"],
             frame_transfer=final_count["rss_detector"]["FRAME TRANSFER"],
             normal=final_count["rss_detector"]["NORMAL"],
             shuffle=final_count["rss_detector"]["Shuffle"],
             slot_mode=final_count["rss_detector"]["SLOT MODE"],
         ),
-        time_requested_per_salticam_detector=DetectorMode(
+        time_requested_per_salticam_detector_mode=DetectorMode(
             drift_scan=final_time["salticam_detector"]["DRIFTSCAN"],
             frame_transfer=final_time["salticam_detector"]["FRAME XFER"],
             normal=final_time["salticam_detector"]["NORMAL"],
             slot_mode=final_time["salticam_detector"]["SLOT"]
         ),
-        number_of_configurations_per_salticam_detector=DetectorMode(
+        number_of_configurations_per_salticam_detector_mode=DetectorMode(
             drift_scan=final_count["salticam_detector"]["DRIFTSCAN"],
             frame_transfer=final_count["salticam_detector"]["FRAME XFER"],
             normal=final_count["salticam_detector"]["NORMAL"],
             slot_mode=final_count["salticam_detector"]["SLOT"]
         ),
-        time_requested_per_hrs_exposure=ExposureMode(
-            low_resolution=final_time["hrs_exposure"]["LOW RESOLUTION"],
-            medium_resolution=final_time["hrs_exposure"]["MEDIUM RESOLUTION"],
-            high_resolution=final_time["hrs_exposure"]["HIGH RESOLUTION"],
-            high_stability=final_time["hrs_exposure"]["HIGH STABILITY"],
-            int_cal_fibre=final_time["hrs_exposure"]["INT CAL FIBRE"]
+        time_requested_per_hrs_resolution=ExposureMode(
+            low_resolution=final_time["hrs_resolution"]["LOW RESOLUTION"],
+            medium_resolution=final_time["hrs_resolution"]["MEDIUM RESOLUTION"],
+            high_resolution=final_time["hrs_resolution"]["HIGH RESOLUTION"],
+            high_stability=final_time["hrs_resolution"]["HIGH STABILITY"],
+            int_cal_fibre=final_time["hrs_resolution"]["INT CAL FIBRE"]
         ),
-        number_of_configurations_per_hrs_exposure=ExposureMode(
-            low_resolution=final_count["hrs_exposure"]["LOW RESOLUTION"],
-            medium_resolution=final_count["hrs_exposure"]["MEDIUM RESOLUTION"],
-            high_resolution=final_count["hrs_exposure"]["HIGH RESOLUTION"],
-            high_stability=final_count["hrs_exposure"]["HIGH STABILITY"],
-            int_cal_fibre=final_count["hrs_exposure"]["INT CAL FIBRE"]
+        number_of_configurations_per_hrs_resolution=ExposureMode(
+            low_resolution=final_count["hrs_resolution"]["LOW RESOLUTION"],
+            medium_resolution=final_count["hrs_resolution"]["MEDIUM RESOLUTION"],
+            high_resolution=final_count["hrs_resolution"]["HIGH RESOLUTION"],
+            high_stability=final_count["hrs_resolution"]["HIGH STABILITY"],
+            int_cal_fibre=final_count["hrs_resolution"]["INT CAL FIBRE"]
         ),
         time_requested_per_rss_observing_mode=ObservingMode(
             fabry_perot=final_time["rss_observing_mode"]["Fabry Perot"],
