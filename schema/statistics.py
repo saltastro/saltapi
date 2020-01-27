@@ -1,17 +1,17 @@
 from graphene import Boolean
 from graphene import Enum
 from graphene import List
-from graphene import ObjectType, String, Field, Float, Union
+from graphene import ObjectType, Field, Float
 
 
-class CloudConditions(ObjectType):
+class TransparencyDistribution(ObjectType):
     any = Float()
     clear = Float()
     thick_cloud = Float()
     thin_cloud = Float()
 
 
-class SeeingConditions(ObjectType):
+class SeeingDistribution(ObjectType):
     less_equal_1_dot_5 = Float()
     less_equal_2 = Float()
     less_equal_3 = Float()
@@ -32,13 +32,13 @@ class StatisticsPartner(Enum):
 
 
 class SeeingCondition(ObjectType):
-    time_requested = Field(SeeingConditions)
-    number_of_proposals = Field(SeeingConditions)
+    time_requested = Field(SeeingDistribution)
+    number_of_proposals = Field(SeeingDistribution)
 
 
 class CloudCondition(ObjectType):
-    time_requested = Field(CloudConditions)
-    number_of_proposals = Field(CloudConditions)
+    time_requested = Field(TransparencyDistribution)
+    number_of_proposals = Field(TransparencyDistribution)
 
 
 class ObservingConditions(ObjectType):
@@ -137,7 +137,7 @@ class ProposalStatistics(ObjectType):
 
 class Statistics(ObjectType):
     completion = List(CompletionStatistics, description="The completion statistics per partner")
-    instruments = Field(InstrumentStatistics)
+    instruments_statistics = Field(InstrumentStatistics)
     observing_conditions = Field(ObservingConditions)
     proposal_statistics = Field(ProposalStatistics)
     targets = List(StatisticsTarget)

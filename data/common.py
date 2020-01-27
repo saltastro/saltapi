@@ -54,7 +54,19 @@ GROUP BY ProposalCode_Id, Semester_Id HAVING Semester = "{semester}"
     }
 
 
-def proposal_ids_for_statistics(semester, partner_code=None):
+def proposal_code_ids_for_statistics(semester, partner_code=None):
+    """
+     Parameters
+    ----------
+    semester: str
+        The Semester like "2019-2"
+    partner_code: str
+        The partner code like "RSA", "DC",...
+     Returns
+    -------
+    iterable: str
+        Array of proposal code ids
+    """
     conn = sdb_connect()
     all_partners = [p['Partner_Code'] for i, p in pd.read_sql("""
     SELECT Partner_Code FROM Partner
@@ -71,7 +83,6 @@ SELECT distinct
     Partner.Partner_Code AS PartnerCode,
     ProposalCode_Id,
     Proposal_Code,
-    Surname,
     ProposalStatus_Id ,
     CONCAT(Year, '-', Semester) AS Semester
 FROM ProposalCode

@@ -2,9 +2,9 @@ import pandas as pd
 from flask import g
 
 from data import sdb_connect
-from data.common import proposal_ids_for_statistics
-from schema.statistics import TimeBreakdown, Statistics, ObservingConditions, CloudCondition, CloudConditions, \
-    SeeingConditions, SeeingCondition, StatisticsTarget, InstrumentStatistics, Instruments, DetectorMode, ExposureMode, \
+from data.common import proposal_code_ids_for_statistics
+from schema.statistics import TimeBreakdown, Statistics, ObservingConditions, CloudCondition, TransparencyDistribution, \
+    SeeingDistribution, SeeingCondition, StatisticsTarget, InstrumentStatistics, Instruments, DetectorMode, ExposureMode, \
     CompletionStatistics, TimeSummary, Priorities, ObservingMode, ProposalStatistics
 from schema.user import RoleType
 from util.semester import query_semester_id
@@ -30,14 +30,14 @@ class PriorityValue:
             self.p4 += value
 
 
-def number_of_proposals_per_cloud_conditions(proposal_ids, semester, partner):
+def number_of_proposals_per_cloud_conditions(proposal_code_ids, semester, partner):
     params = dict()
     params["semester"] = semester
-    params["proposal_ids"] = proposal_ids
+    params["proposal_code_ids"] = proposal_code_ids
     params["partner_code"] = partner
 
     sql = """
-       SELECT ReqTimeAmount*ReqTimePercent/100.0 as TimePerPartner, Transparency FROM  ProposalCode as pc
+       SELECT ReqTimeAmount*ReqTimePercent/100.0 as TimeForPartner, Transparency FROM  ProposalCode as pc
            JOIN MultiPartner USING(ProposalCode_Id)
            JOIN Partner USING(Partner_Id)
            JOIN Semester as s  USING (Semester_Id)
@@ -45,7 +45,7 @@ def number_of_proposals_per_cloud_conditions(proposal_ids, semester, partner):
                 AND oc.Semester_Id=s.Semester_Id
            JOIN Transparency as t ON oc.Transparency_Id=t.Transparency_Id
         WHERE CONCAT(s.Year, "-", s.Semester)=%(semester)s
-           AND pc.ProposalCode_Id IN %(proposal_ids)s
+           AND pc.ProposalCode_Id IN %(proposal_code_ids)s
        """
     if partner:
         sql += " AND Partner_Code=%(partner_code)s"
@@ -56,7 +56,7 @@ def number_of_proposals_per_cloud_conditions(proposal_ids, semester, partner):
             counts[row["Transparency"]] = 0
         counts[row["Transparency"]] += 1
 
-    return CloudConditions(
+    return TransparencyDistribution(
         any=0 if "Any" not in counts else counts["Any"],
         clear=0 if "Clear" not in counts else counts["Clear"],
         thick_cloud=0 if "Thick cloud" not in counts else counts["Thick cloud"],
@@ -81,14 +81,14 @@ def share_percentage(semester_id):
     return share
 
 
-def conditions_of_clouds_statistics(proposal_ids, semester, partner):
+def transparency_statistics(proposal_code_ids, semester, partner):
     params = dict()
     params["semester"] = semester
-    params["proposal_ids"] = proposal_ids
+    params["proposal_code_ids"] = proposal_code_ids
     params["partner_code"] = partner
 
     sql = """
-       SELECT ReqTimeAmount*ReqTimePercent/100.0 as TimePerPartner, Transparency, MaxSeeing FROM  ProposalCode as pc
+       SELECT ReqTimeAmount*ReqTimePercent/100.0 as TimeForPartner, Transparency, MaxSeeing FROM  ProposalCode as pc
            JOIN MultiPartner USING(ProposalCode_Id)
            JOIN Partner USING(Partner_Id)
            JOIN Semester as s  USING (Semester_Id)
@@ -96,23 +96,23 @@ def conditions_of_clouds_statistics(proposal_ids, semester, partner):
                 AND oc.Semester_Id=s.Semester_Id
            JOIN Transparency as t ON oc.Transparency_Id=t.Transparency_Id
         WHERE CONCAT(s.Year, "-", s.Semester)=%(semester)s
-           AND pc.ProposalCode_Id IN %(proposal_ids)s
+           AND pc.ProposalCode_Id IN %(proposal_code_ids)s
        """
     if partner:
         sql += " AND Partner_Code=%(partner_code)s"
     df = pd.read_sql(sql, con=sdb_connect(), params=params)
-    cloud_conditions = dict()
+    cloud_times = dict()
     cloud_counts = dict()
     for _, row in df.iterrows():
-        if row["Transparency"] not in cloud_conditions:
-            cloud_conditions[row["Transparency"]] = 0
+        if row["Transparency"] not in cloud_times:
+            cloud_times[row["Transparency"]] = 0
             cloud_counts[row["Transparency"]] = 0
-        cloud_conditions[row["Transparency"]] += row["TimePerPartner"]/3600
+        cloud_times[row["Transparency"]] += row["TimeForPartner"]/3600
         cloud_counts[row["Transparency"]] += 1
 
     def get_seeing_range(max_seeing):
         if max_seeing < 0:
-            raise ValueError("Maximum seeing is less that zero.")
+            raise ValueError("Maximum seeing is less than zero.")
         if max_seeing <= 1.5:
             return "less_equal_1_dot_5"
         if max_seeing <= 2:
@@ -121,69 +121,43 @@ def conditions_of_clouds_statistics(proposal_ids, semester, partner):
             return "less_equal_3"
         if max_seeing > 3:
             return "more_than_3"
-        raise ValueError("Unknown seeing value")
-    seeing_conditions = dict()
+        raise ValueError("Unsupported seeing value")
+    seeing_times = dict()
     seeing_counts = dict()
     for _, row in df.iterrows():
         seeing_range = get_seeing_range(row["MaxSeeing"])
-        if seeing_range not in seeing_conditions:
-            seeing_conditions[seeing_range] = 0
+        if seeing_range not in seeing_times:
+            seeing_times[seeing_range] = 0
             seeing_counts[seeing_range] = 0
-        seeing_conditions[seeing_range] += row["TimePerPartner"]/3600
+        seeing_times[seeing_range] += row["TimeForPartner"]/3600
         seeing_counts[seeing_range] += 1
 
     return {
-        "time_request": CloudConditions(
-            any=0 if "Any" not in cloud_conditions else cloud_conditions["Any"],
-            clear=0 if "Clear" not in cloud_conditions else cloud_conditions["Clear"],
-            thick_cloud=0 if "Thick cloud" not in cloud_conditions else cloud_conditions["Thick cloud"],
-            thin_cloud=0 if "Thin cloud" not in cloud_conditions else cloud_conditions["Thin cloud"],
+        "time_request": TransparencyDistribution(
+            any=0 if "Any" not in cloud_times else cloud_times["Any"],
+            clear=0 if "Clear" not in cloud_times else cloud_times["Clear"],
+            thick_cloud=0 if "Thick cloud" not in cloud_times else cloud_times["Thick cloud"],
+            thin_cloud=0 if "Thin cloud" not in cloud_times else cloud_times["Thin cloud"],
         ),
-        "time_request_per_seeing": SeeingConditions(
-            less_equal_1_dot_5=0 if "less_equal_1_dot_5" not in seeing_conditions else seeing_conditions["less_equal_1_dot_5"],
-            less_equal_2=0 if "less_equal_2" not in seeing_conditions else seeing_conditions["less_equal_2"],
-            less_equal_3=0 if "less_equal_3" not in seeing_conditions else seeing_conditions["less_equal_3"],
-            more_than_3=0 if "more_than_3" not in seeing_conditions else seeing_conditions["more_than_3"],
+        "time_request_per_seeing": SeeingDistribution(
+            less_equal_1_dot_5=0 if "less_equal_1_dot_5" not in seeing_times else seeing_times["less_equal_1_dot_5"],
+            less_equal_2=0 if "less_equal_2" not in seeing_times else seeing_times["less_equal_2"],
+            less_equal_3=0 if "less_equal_3" not in seeing_times else seeing_times["less_equal_3"],
+            more_than_3=0 if "more_than_3" not in seeing_times else seeing_times["more_than_3"],
         ),
-        "number_of_proposals": CloudConditions(
+        "number_of_proposals": TransparencyDistribution(
             any=0 if "Any" not in cloud_counts else cloud_counts["Any"],
             clear=0 if "Clear" not in cloud_counts else cloud_counts["Clear"],
             thick_cloud=0 if "Thick cloud" not in cloud_counts else cloud_counts["Thick cloud"],
             thin_cloud=0 if "Thin cloud" not in cloud_counts else cloud_counts["Thin cloud"],
         ),
-        "number_of_proposals_per_seeing": SeeingConditions(
+        "number_of_proposals_per_seeing": SeeingDistribution(
             less_equal_1_dot_5=0 if "less_equal_1_dot_5" not in seeing_counts else seeing_counts["less_equal_1_dot_5"],
             less_equal_2=0 if "less_equal_2" not in seeing_counts else seeing_counts["less_equal_2"],
             less_equal_3=0 if "less_equal_3" not in seeing_counts else seeing_counts["less_equal_3"],
             more_than_3=0 if "more_than_3" not in seeing_counts else seeing_counts["more_than_3"],
         )
     }
-
-
-def proposals(partner_code, semester):
-    params = dict()
-    params["semester"] = semester
-
-    sql = """
-    SELECT DISTINCT pc.ProposalCode_Id as ProposalCode_Id
-        FROM ProposalCode AS pc
-        JOIN Proposal AS p ON pc.ProposalCode_Id = p.ProposalCode_Id
-        JOIN Semester AS s ON p.Semester_Id = s.Semester_Id
-        JOIN ProposalInvestigator AS pi ON pc.ProposalCode_Id = pi.ProposalCode_Id
-        JOIN Investigator AS i ON pi.Investigator_Id = i.Investigator_Id
-        JOIN Institute AS institute ON i.Institute_Id = institute.Institute_Id
-        JOIN Partner AS partner ON institute.Partner_Id = partner.Partner_Id
-        JOIN P1ObservingConditions AS p1o ON p1o.ProposalCode_Id = p.ProposalCode_Id
-    WHERE CONCAT(s.Year, "-", s.Semester)=%(semester)s
-    """
-    if partner_code:
-        params["partner_code"] = partner_code
-        sql += " AND Partner_Code=%(partner_code)s"
-    codes = list()
-    df = pd.read_sql(sql, con=sdb_connect(), params=params)
-    for _, row in df.iterrows():
-        codes.append(int(row["ProposalCode_Id"]))
-    return codes
 
 
 def time_breakdown(semester):
@@ -216,7 +190,7 @@ def allocated_time_per_priority(semester):
     
     allocated = dict()
     sql = """
-    SELECT SUM(TimeAlloc), Partner_Code, Priority FROM PriorityAlloc
+    SELECT SUM(TimeAlloc) as TotalAllocations, Partner_Code, Priority FROM PriorityAlloc
         JOIN MultiPartner USING (MultiPartner_Id)
         JOIN Partner USING(Partner_Id)
         JOIN Semester USING(Semester_Id)
@@ -227,14 +201,14 @@ def allocated_time_per_priority(semester):
     for _, row in df.iterrows():
         if row["Partner_Code"] not in allocated:
             allocated[row["Partner_Code"]] = PriorityValue()
-        allocated[row["Partner_Code"]].add_to_priority(row["SUM(TimeAlloc)"], row["Priority"])
+        allocated[row["Partner_Code"]].add_to_priority(row["TotalAllocations"], row["Priority"])
     return allocated
 
 
-def observed_time_per_proposal(proposal_ids, semester):
+def observed_time_per_proposal(proposal_code_ids, semester):
     params = dict()
     params["semester_id"] = query_semester_id(semester)
-    params["proposal_ids"] = proposal_ids
+    params["proposal_code_ids"] = proposal_code_ids
     proposal_observed = dict()
     sql = """
     SELECT
@@ -252,7 +226,7 @@ def observed_time_per_proposal(proposal_ids, semester):
            JOIN MultiPartner as mp ON (pc.ProposalCode_Id = mp.ProposalCode_Id )
            JOIN Partner USING(Partner_Id)
            JOIN PriorityAlloc as pa USING (MultiPartner_Id)
-    WHERE pc.ProposalCode_Id IN %(proposal_ids)s
+    WHERE pc.ProposalCode_Id IN %(proposal_code_ids)s
             AND BlockVisitStatus_Id = 1
             AND Proposal.Semester_Id = %(semester_id)s and mp.Semester_Id = %(semester_id)s
         """
@@ -280,31 +254,33 @@ def observed_time_per_proposal(proposal_ids, semester):
 def sum_observed_for_partner(proposal_observed):
     
     observed = dict()
-    for p in proposal_observed.items():
+    for proposal_code, observed in proposal_observed.items():
 
         observed_time = PriorityValue()  #
-        aloc_total = PriorityValue()  # Allocated time for the proposal from all the partners per priority
-        for b in p[1]["block_visit"].items():
-            observed_time.add_to_priority(b[1]["time"], b[1]["priority"])
-        for a in p[1]["allocated_time"].items():
-            if a[0] not in observed:
-                observed[a[0]] = PriorityValue()
-            aloc_total.add_to_priority(a[1][0], 0)
-            aloc_total.add_to_priority(a[1][1], 1)
-            aloc_total.add_to_priority(a[1][2], 2)
-            aloc_total.add_to_priority(a[1][3], 3)
-            aloc_total.add_to_priority(a[1][4], 4)
-        for a in p[1]["allocated_time"].items():
-            if aloc_total.p0 > 0:
-                observed[a[0]].add_to_priority(observed_time.p0 * a[1][0] / aloc_total.p0, 0)
-            if aloc_total.p1 > 0:
-                observed[a[0]].add_to_priority(observed_time.p1 * a[1][1] / aloc_total.p1, 1)
-            if aloc_total.p2 > 0:
-                observed[a[0]].add_to_priority(observed_time.p2 * a[1][2] / aloc_total.p2, 2)
-            if aloc_total.p3 > 0:
-                observed[a[0]].add_to_priority(observed_time.p3 * a[1][3] / aloc_total.p3, 3)
-            if aloc_total.p4 > 0:
-                observed[a[0]].add_to_priority(observed_time.p4 * a[1][4] / aloc_total.p4, 4)
+        alloc_total = PriorityValue()  # Allocated time for the proposal from all the partners per priority
+        for block_id, obz_time in observed["block_visit"].items():
+            observed_time.add_to_priority(obz_time["time"], obz_time["priority"])
+
+        for partner_code, allocations in observed["allocated_time"].items():
+            alloc_total.add_to_priority(allocations[0], 0)
+            alloc_total.add_to_priority(allocations[1], 1)
+            alloc_total.add_to_priority(allocations[2], 2)
+            alloc_total.add_to_priority(allocations[3], 3)
+            alloc_total.add_to_priority(allocations[4], 4)
+
+        for partner_code, allocations in observed["allocated_time"].items():
+            if partner_code not in observed:
+                observed[partner_code] = PriorityValue()
+            if alloc_total.p0 > 0:
+                observed[partner_code].add_to_priority(observed_time.p0 * allocations[0] / alloc_total.p0, 0)
+            if alloc_total.p1 > 0:
+                observed[partner_code].add_to_priority(observed_time.p1 * allocations[1] / alloc_total.p1, 1)
+            if alloc_total.p2 > 0:
+                observed[partner_code].add_to_priority(observed_time.p2 * allocations[2] / alloc_total.p2, 2)
+            if alloc_total.p3 > 0:
+                observed[partner_code].add_to_priority(observed_time.p3 * allocations[3] / alloc_total.p3, 3)
+            if alloc_total.p4 > 0:
+                observed[partner_code].add_to_priority(observed_time.p4 * allocations[4] / alloc_total.p4, 4)
     return observed
 
 
@@ -315,44 +291,44 @@ def create_completion_stats(observed, allocated, share, partner):
         "share_percentage": 0
     }
     temp_completion = []
-    for a in allocated.items():
-        if not a[0] == "ALL":
-            if a[0] not in observed:
-                observed[a[0]] = PriorityValue()
-            sum_of_all_partners["allocated"].add_to_priority(a[1].p0, 0)
-            sum_of_all_partners["allocated"].add_to_priority(a[1].p1, 1)
-            sum_of_all_partners["allocated"].add_to_priority(a[1].p2, 2)
-            sum_of_all_partners["allocated"].add_to_priority(a[1].p3, 3)
-            sum_of_all_partners["allocated"].add_to_priority(a[1].p4, 4)
+    for partner_code, time in allocated.items():
+        if not partner_code == "ALL":
+            if partner_code not in observed:
+                observed[partner_code] = PriorityValue()
+            sum_of_all_partners["allocated"].add_to_priority(time.p0, 0)
+            sum_of_all_partners["allocated"].add_to_priority(time.p1, 1)
+            sum_of_all_partners["allocated"].add_to_priority(time.p2, 2)
+            sum_of_all_partners["allocated"].add_to_priority(time.p3, 3)
+            sum_of_all_partners["allocated"].add_to_priority(time.p4, 4)
 
-            sum_of_all_partners["observed"].add_to_priority(observed[a[0]].p0, 0)
-            sum_of_all_partners["observed"].add_to_priority(observed[a[0]].p1, 1)
-            sum_of_all_partners["observed"].add_to_priority(observed[a[0]].p2, 2)
-            sum_of_all_partners["observed"].add_to_priority(observed[a[0]].p3, 3)
-            sum_of_all_partners["observed"].add_to_priority(observed[a[0]].p4, 4)
+            sum_of_all_partners["observed"].add_to_priority(observed[partner_code].p0, 0)
+            sum_of_all_partners["observed"].add_to_priority(observed[partner_code].p1, 1)
+            sum_of_all_partners["observed"].add_to_priority(observed[partner_code].p2, 2)
+            sum_of_all_partners["observed"].add_to_priority(observed[partner_code].p3, 3)
+            sum_of_all_partners["observed"].add_to_priority(observed[partner_code].p4, 4)
 
-            sum_of_all_partners["share_percentage"] += share[a[0]]
+            sum_of_all_partners["share_percentage"] += share[partner_code]
 
         temp_completion.append(
             CompletionStatistics(
-                partner=a[0],
+                partner=partner_code,
                 summary=TimeSummary(
                     allocated_time=Priorities(
-                        p0=a[1].p0,
-                        p1=a[1].p1,
-                        p2=a[1].p2,
-                        p3=a[1].p3,
-                        p4=a[1].p4
+                        p0=time.p0,
+                        p1=time.p1,
+                        p2=time.p2,
+                        p3=time.p3,
+                        p4=time.p4
                     ),
                     observed_time=Priorities(
-                        p0=observed[a[0]].p0,
-                        p1=observed[a[0]].p1,
-                        p2=observed[a[0]].p2,
-                        p3=observed[a[0]].p3,
-                        p4=observed[a[0]].p4
+                        p0=observed[partner_code].p0,
+                        p1=observed[partner_code].p1,
+                        p2=observed[partner_code].p2,
+                        p3=observed[partner_code].p3,
+                        p4=observed[partner_code].p4
                     )
                 ),
-                share_percentage=share[a[0]]
+                share_percentage=share[partner_code]
             )
         )
     # Adding total for all
@@ -378,8 +354,6 @@ def create_completion_stats(observed, allocated, share, partner):
             )
         )
     )
-    if g.user.has_role(RoleType.SALT_ASTRONOMER):
-        return []
     if partner:
         res = []
         for c in temp_completion:
@@ -408,14 +382,14 @@ def create_completion_stats(observed, allocated, share, partner):
 
 
 def completion(partner, semester):
-    proposal_ids = proposal_ids_for_statistics(semester)
+    proposal_code_ids = proposal_code_ids_for_statistics(semester)
     params = dict()
     params["semester_id"] = query_semester_id(semester)
-    params["proposal_ids"] = proposal_ids
+    params["proposal_code_ids"] = proposal_code_ids
 
     allocated = allocated_time_per_priority(semester)
 
-    observed_proposals = observed_time_per_proposal(proposal_ids, semester)
+    observed_proposals = observed_time_per_proposal(proposal_code_ids, semester)
 
     observed = sum_observed_for_partner(observed_proposals)
     share = share_percentage(params["semester_id"])
@@ -423,9 +397,9 @@ def completion(partner, semester):
     return create_completion_stats(observed, allocated, share, partner)
 
 
-def instruments(proposal_ids, partner, semester):
+def instruments_statistics(proposal_code_ids, partner, semester):
     params = dict()
-    params["proposal_ids"] = proposal_ids
+    params["proposal_code_ids"] = proposal_code_ids
     params["semester"] = semester
     params["partner"] = partner
 
@@ -459,10 +433,10 @@ FROM P1Config
         LEFT JOIN BvitFilter USING(BvitFilter_Id)
         LEFT JOIN P1Hrs USING(P1Hrs_Id)
         LEFT JOIN HrsMode USING(HrsMode_Id)
-WHERE ProposalCode_Id IN %(proposal_ids)s
+WHERE ProposalCode_Id IN %(proposal_code_ids)s
                """
     df = pd.read_sql(sql, con=sdb_connect(), params=params)
-    final_count = {
+    total_count = {
         "bvit": 0,
         "hrs": 0,
         "scam": 0,
@@ -501,21 +475,21 @@ WHERE ProposalCode_Id IN %(proposal_ids)s
 
     def count_instrument_data(row_data):
         if not pd.isnull(row_data["P1Bvit_Id"]):
-            final_count["bvit"] += 1
+            total_count["bvit"] += 1
         if not pd.isnull(row_data["P1Hrs_Id"]):
-            final_count["hrs"] += 1
+            total_count["hrs"] += 1
         if not pd.isnull(row_data["P1Salticam_Id"]):
-            final_count["scam"] += 1
+            total_count["scam"] += 1
         if not pd.isnull(row_data["P1Rss_Id"]):
-            final_count["rss"] += 1
+            total_count["rss"] += 1
         if not pd.isnull(row_data["RSSDetectorMode"]):
-            final_count["rss_detector"][row_data["RSSDetectorMode"]] += 1
+            total_count["rss_detector"][row_data["RSSDetectorMode"]] += 1
         if not pd.isnull(row_data["SCAMDetectorMode"]):
-            final_count["salticam_detector"][row_data["SCAMDetectorMode"]] += 1
+            total_count["salticam_detector"][row_data["SCAMDetectorMode"]] += 1
         if not pd.isnull(row_data["ExposureMode"]):
-            final_count["hrs_resolution"][row_data["ExposureMode"]] += 1
+            total_count["hrs_resolution"][row_data["ExposureMode"]] += 1
         if not pd.isnull(row_data["P1Rss_Id"]) and not pd.isnull(row_data["RSSMode"]):
-            final_count["rss_observing_mode"][row_data["RSSMode"]] += 1
+            total_count["rss_observing_mode"][row_data["RSSMode"]] += 1
 
     for _, row in df.iterrows():
         count_instrument_data(row)
@@ -530,7 +504,7 @@ WHERE ProposalCode_Id IN %(proposal_ids)s
         ExposureMode,
         sc.DetectorMode AS SCAMDetectorMode,
         rs.DetectorMode AS RSSDetectorMode,
-        (ReqTimeAmount*ReqTimePercent/100.0)/3600 as TimePerPartner
+        (ReqTimeAmount*ReqTimePercent/100.0)/3600 as TimeForPartner
     FROM P1Config
         JOIN MultiPartner USING(ProposalCode_Id)
         JOIN Semester USING (Semester_Id)
@@ -554,7 +528,7 @@ WHERE ProposalCode_Id IN %(proposal_ids)s
         LEFT JOIN P1Hrs USING(P1Hrs_Id)
         LEFT JOIN HrsMode USING(HrsMode_Id)
     WHERE  CONCAT(Year,"-" ,Semester)=%(semester)s
-        AND ProposalCode_Id IN %(proposal_ids)s
+        AND ProposalCode_Id IN %(proposal_code_ids)s
 
     """
     if partner:
@@ -600,25 +574,24 @@ WHERE ProposalCode_Id IN %(proposal_ids)s
 
     def count_instrument_time(row_data):
         if not pd.isnull(row_data["P1Bvit_Id"]):
-            final_time["bvit"] += row_data["TimePerPartner"]
+            final_time["bvit"] += row_data["TimeForPartner"]
         if not pd.isnull(row_data["P1Hrs_Id"]):
-            final_time["hrs"] += row_data["TimePerPartner"]
+            final_time["hrs"] += row_data["TimeForPartner"]
         if not pd.isnull(row_data["P1Salticam_Id"]):
-            final_time["scam"] += row_data["TimePerPartner"]
+            final_time["scam"] += row_data["TimeForPartner"]
         if not pd.isnull(row_data["P1Rss_Id"]):
-            final_time["rss"] += row_data["TimePerPartner"]
+            final_time["rss"] += row_data["TimeForPartner"]
 
         if not pd.isnull(row_data["RSSDetectorMode"]):
-            final_time["rss_detector"][row_data["RSSDetectorMode"]] += row_data["TimePerPartner"]
+            final_time["rss_detector"][row_data["RSSDetectorMode"]] += row_data["TimeForPartner"]
 
         if not pd.isnull(row_data["P1Rss_Id"]) and not pd.isnull(row_data["RSSMode"]):
-            final_time["rss_observing_mode"][row_data["RSSMode"]] += row_data["TimePerPartner"]
+            final_time["rss_observing_mode"][row_data["RSSMode"]] += row_data["TimeForPartner"]
 
         if not pd.isnull(row_data["SCAMDetectorMode"]):
-            final_time["salticam_detector"][row_data["SCAMDetectorMode"]] += row_data["TimePerPartner"]
+            final_time["salticam_detector"][row_data["SCAMDetectorMode"]] += row_data["TimeForPartner"]
         if not pd.isnull(row_data["ExposureMode"]):
-            final_time["hrs_resolution"][row_data["ExposureMode"]] += row_data["TimePerPartner"]
-
+            final_time["hrs_resolution"][row_data["ExposureMode"]] += row_data["TimeForPartner"]
 
     for _, row in df.iterrows():
         count_instrument_time(row)
@@ -631,10 +604,10 @@ WHERE ProposalCode_Id IN %(proposal_ids)s
             rss=final_time["rss"]
         ),
         number_of_configurations_per_instrument=Instruments(
-            bvit=final_count["bvit"],
-            hrs=final_count["hrs"],
-            salticam=final_count["scam"],
-            rss=final_count["rss"]
+            bvit=total_count["bvit"],
+            hrs=total_count["hrs"],
+            salticam=total_count["scam"],
+            rss=total_count["rss"]
         ),
         time_requested_per_rss_detector_mode=DetectorMode(
             drift_scan=final_time["rss_detector"]["Drift Scan"],
@@ -646,11 +619,11 @@ WHERE ProposalCode_Id IN %(proposal_ids)s
 
 
         number_of_configurations_per_rss_detector_mode=DetectorMode(
-            drift_scan=final_count["rss_detector"]["Drift Scan"],
-            frame_transfer=final_count["rss_detector"]["FRAME TRANSFER"],
-            normal=final_count["rss_detector"]["NORMAL"],
-            shuffle=final_count["rss_detector"]["Shuffle"],
-            slot_mode=final_count["rss_detector"]["SLOT MODE"],
+            drift_scan=total_count["rss_detector"]["Drift Scan"],
+            frame_transfer=total_count["rss_detector"]["FRAME TRANSFER"],
+            normal=total_count["rss_detector"]["NORMAL"],
+            shuffle=total_count["rss_detector"]["Shuffle"],
+            slot_mode=total_count["rss_detector"]["SLOT MODE"],
         ),
         time_requested_per_salticam_detector_mode=DetectorMode(
             drift_scan=final_time["salticam_detector"]["DRIFTSCAN"],
@@ -659,10 +632,10 @@ WHERE ProposalCode_Id IN %(proposal_ids)s
             slot_mode=final_time["salticam_detector"]["SLOT"]
         ),
         number_of_configurations_per_salticam_detector_mode=DetectorMode(
-            drift_scan=final_count["salticam_detector"]["DRIFTSCAN"],
-            frame_transfer=final_count["salticam_detector"]["FRAME XFER"],
-            normal=final_count["salticam_detector"]["NORMAL"],
-            slot_mode=final_count["salticam_detector"]["SLOT"]
+            drift_scan=total_count["salticam_detector"]["DRIFTSCAN"],
+            frame_transfer=total_count["salticam_detector"]["FRAME XFER"],
+            normal=total_count["salticam_detector"]["NORMAL"],
+            slot_mode=total_count["salticam_detector"]["SLOT"]
         ),
         time_requested_per_hrs_resolution=ExposureMode(
             low_resolution=final_time["hrs_resolution"]["LOW RESOLUTION"],
@@ -672,11 +645,11 @@ WHERE ProposalCode_Id IN %(proposal_ids)s
             int_cal_fibre=final_time["hrs_resolution"]["INT CAL FIBRE"]
         ),
         number_of_configurations_per_hrs_resolution=ExposureMode(
-            low_resolution=final_count["hrs_resolution"]["LOW RESOLUTION"],
-            medium_resolution=final_count["hrs_resolution"]["MEDIUM RESOLUTION"],
-            high_resolution=final_count["hrs_resolution"]["HIGH RESOLUTION"],
-            high_stability=final_count["hrs_resolution"]["HIGH STABILITY"],
-            int_cal_fibre=final_count["hrs_resolution"]["INT CAL FIBRE"]
+            low_resolution=total_count["hrs_resolution"]["LOW RESOLUTION"],
+            medium_resolution=total_count["hrs_resolution"]["MEDIUM RESOLUTION"],
+            high_resolution=total_count["hrs_resolution"]["HIGH RESOLUTION"],
+            high_stability=total_count["hrs_resolution"]["HIGH STABILITY"],
+            int_cal_fibre=total_count["hrs_resolution"]["INT CAL FIBRE"]
         ),
         time_requested_per_rss_observing_mode=ObservingMode(
             fabry_perot=final_time["rss_observing_mode"]["Fabry Perot"],
@@ -689,21 +662,21 @@ WHERE ProposalCode_Id IN %(proposal_ids)s
             spectroscopy=final_time["rss_observing_mode"]["Spectroscopy"],
         ),
         number_of_configurations_per_rss_observing_mode=ObservingMode(
-            fabry_perot=final_count["rss_observing_mode"]["Fabry Perot"],
-            fabry_perot_polarimetry=final_count["rss_observing_mode"]["FP polarimetry"],
-            mos=final_count["rss_observing_mode"]["MOS"],
-            mos_polarimetry=final_count["rss_observing_mode"]["MOS polarimetry"],
-            imaging=final_count["rss_observing_mode"]["Imaging"],
-            polarimetric_imaging=final_count["rss_observing_mode"]["Polarimetric imaging"],
-            spectropolarimetry=final_count["rss_observing_mode"]["Spectropolarimetry"],
-            spectroscopy=final_count["rss_observing_mode"]["Spectroscopy"],
+            fabry_perot=total_count["rss_observing_mode"]["Fabry Perot"],
+            fabry_perot_polarimetry=total_count["rss_observing_mode"]["FP polarimetry"],
+            mos=total_count["rss_observing_mode"]["MOS"],
+            mos_polarimetry=total_count["rss_observing_mode"]["MOS polarimetry"],
+            imaging=total_count["rss_observing_mode"]["Imaging"],
+            polarimetric_imaging=total_count["rss_observing_mode"]["Polarimetric imaging"],
+            spectropolarimetry=total_count["rss_observing_mode"]["Spectropolarimetry"],
+            spectroscopy=total_count["rss_observing_mode"]["Spectroscopy"],
         )
     )
 
 
-def target(proposal_ids):
+def targets(proposal_code_ids):
     params = dict()
-    params["proposal_ids"] = proposal_ids
+    params["proposal_code_ids"] = proposal_code_ids
 
     sql = """
         SELECT distinct RaH, RaM, RaS, DecD, DecM, DecS, DecSign, Optional
@@ -711,24 +684,24 @@ def target(proposal_ids):
             JOIN P1ProposalTarget USING (ProposalCode_Id)
             JOIN Target USING (Target_Id)
             JOIN TargetCoordinates USING(TargetCoordinates_Id)
-        WHERE ProposalCode_Id IN %(proposal_ids)s
+        WHERE ProposalCode_Id IN %(proposal_code_ids)s
            """
     df = pd.read_sql(sql, con=sdb_connect(), params=params)
-    targets = []
+    all_targets = []
     for _, row in df.iterrows():
         sign = -1 if row['DecSign'] == '-' else 1
-        targets.append(
+        all_targets.append(
             StatisticsTarget(
                 is_optional=row['Optional'] == 1,
                 right_ascension=(row['RaH'] + row['RaM'] / 60 + row['RaS'] / 3600) / (24 / 360),
                 declination=(sign * (row['DecD'] + row['DecM'] / 60 + row['DecS'] / 3600)),
             )
         )
-    return targets
+    return all_targets
 
 
-def clouds_conditions(proposal_ids, partner, semester):
-    stats = conditions_of_clouds_statistics(proposal_ids, semester, partner)
+def clouds_conditions(proposal_code_ids, partner, semester):
+    stats = transparency_statistics(proposal_code_ids, semester, partner)
     return {
         "clouds": CloudCondition(
             time_requested=stats["time_request"],
@@ -741,17 +714,17 @@ def clouds_conditions(proposal_ids, partner, semester):
     }
 
 
-def observing_conditions(proposal_ids, partner, semester):
-    xx = clouds_conditions(proposal_ids, partner, semester)
+def observing_conditions(proposal_code_ids, partner, semester):
+    xx = clouds_conditions(proposal_code_ids, partner, semester)
     return ObservingConditions(
         clouds=xx["clouds"],
         seeing=xx["seeing"]
     )
 
 
-def proposal_statistics(proposal_ids, semester):
+def proposal_statistics(proposal_code_ids, semester):
     params = dict()
-    params["proposal_ids"] = proposal_ids
+    params["proposal_code_ids"] = proposal_code_ids
     params["semester_id"] = query_semester_id(semester)
     sql = """
 SELECT Proposal_Code, ThesisType_Id, CONCAT(Year, "-", Semester) as Semester, P4 FROM Proposal
@@ -762,7 +735,7 @@ SELECT Proposal_Code, ThesisType_Id, CONCAT(Year, "-", Semester) as Semester, P4
     LEFT JOIN P1Thesis USING(ProposalCode_Id)
 WHERE Current=1
     AND Proposal.Semester_Id=%(semester_id)s
-    AND ProposalCode_Id IN %(proposal_ids)s
+    AND ProposalCode_Id IN %(proposal_code_ids)s
     """
     proposals = dict()
     new_proposals = 0
@@ -779,7 +752,7 @@ WHERE Current=1
                 "is_thesis": None,
                 "is_p4": None
             }
-        proposals[row["Proposal_Code"]]["is_p4"] = True if row["P4"] and row["P4"] == 1 else False
+        proposals[row["Proposal_Code"]]["is_p4"] = True if row["P4"] == 1 else False
         proposals[row["Proposal_Code"]]["is_thesis"] = True if row["ThesisType_Id"] and row["ThesisType_Id"] > 0 else False
         if row["Semester"] not in proposals[row["Proposal_Code"]]["semesters"]:
             proposals[row["Proposal_Code"]]["semesters"].append(row["Semester"])
@@ -797,7 +770,7 @@ WHERE Current=1
             thesis_proposals += 1
 
     return ProposalStatistics(
-        number_of_proposals=len(proposal_ids),
+        number_of_proposals=len(proposal_code_ids),
         new_proposals=new_proposals,
         long_term_proposals=long_term_proposals,
         new_long_term_proposals=new_long_term_proposals,
@@ -807,12 +780,12 @@ WHERE Current=1
 
 
 def get_statistics(partner, semester):
-    proposal_ids = proposal_ids_for_statistics(semester, partner)
+    proposal_code_ids = proposal_code_ids_for_statistics(semester, partner)
     return Statistics(
         completion=completion(partner, semester),
-        instruments=instruments(proposal_ids, partner, semester),
-        observing_conditions=observing_conditions(proposal_ids, partner, semester),
-        proposal_statistics=proposal_statistics(proposal_ids, semester),
-        targets=target(proposal_ids),
+        instruments_statistics=instruments_statistics(proposal_code_ids, partner, semester),
+        observing_conditions=observing_conditions(proposal_code_ids, partner, semester),
+        proposal_statistics=proposal_statistics(proposal_code_ids, semester),
+        targets=targets(proposal_code_ids),
         time_breakdown=time_breakdown(semester)
     )

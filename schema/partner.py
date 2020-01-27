@@ -20,11 +20,3 @@ class Partner(ObjectType):
     name = String()
     code = String()
     time_allocation = Field(TimeAllocation)
-
-
-class PartnerGroupType(Enum):
-    ALL = "All"
-
-
-class PartnerGroup(ObjectType):
-    group_type = PartnerGroupType()

@@ -66,7 +66,7 @@ class User(ObjectType):
             Bool indicating whether this user has the role for the partner.
         """
 
-        # the administrator and SALT Astronomer roles apply to all partners
+        # The administrator, SALT Astronomer and Board roles apply to all partners
         if role in (RoleType.ADMINISTRATOR, RoleType.SALT_ASTRONOMER, RoleType.BOARD):
             return any(r.type == role for r in self.role)
         return any(r.type == role and partner in r.partners for r in self.role)
