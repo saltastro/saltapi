@@ -1,5 +1,6 @@
 import pandas as pd
 from flask import g
+from collections import defaultdict
 
 from data import sdb_connect
 from data.common import proposal_code_ids_for_statistics
@@ -50,17 +51,15 @@ def number_of_proposals_per_cloud_conditions(proposal_code_ids, semester, partne
     if partner:
         sql += " AND Partner_Code=%(partner_code)s"
     df = pd.read_sql(sql, con=sdb_connect(), params=params)
-    counts = dict()
+    counts = defaultdict(int)
     for _, row in df.iterrows():
-        if not row["Transparency"] in counts:
-            counts[row["Transparency"]] = 0
         counts[row["Transparency"]] += 1
 
     return TransparencyDistribution(
-        any=0 if "Any" not in counts else counts["Any"],
-        clear=0 if "Clear" not in counts else counts["Clear"],
-        thick_cloud=0 if "Thick cloud" not in counts else counts["Thick cloud"],
-        thin_cloud=0 if "Thin cloud" not in counts else counts["Thin cloud"],
+        any=counts.get("Any", 0),
+        clear=counts.get("Clear", 0),
+        thick_cloud=counts.get("Thick cloud", 0),
+        thin_cloud=counts.get("Thin cloud", 0),
     )
 
 
@@ -81,7 +80,7 @@ def share_percentage(semester_id):
     return share
 
 
-def transparency_statistics(proposal_code_ids, semester, partner):
+def transparency_and_seeing_statistics(proposal_code_ids, semester, partner):
     params = dict()
     params["semester"] = semester
     params["proposal_code_ids"] = proposal_code_ids
@@ -101,12 +100,9 @@ def transparency_statistics(proposal_code_ids, semester, partner):
     if partner:
         sql += " AND Partner_Code=%(partner_code)s"
     df = pd.read_sql(sql, con=sdb_connect(), params=params)
-    cloud_times = dict()
-    cloud_counts = dict()
+    cloud_times = defaultdict(int)
+    cloud_counts = defaultdict(int)
     for _, row in df.iterrows():
-        if row["Transparency"] not in cloud_times:
-            cloud_times[row["Transparency"]] = 0
-            cloud_counts[row["Transparency"]] = 0
         cloud_times[row["Transparency"]] += row["TimeForPartner"]/3600
         cloud_counts[row["Transparency"]] += 1
 
@@ -122,40 +118,38 @@ def transparency_statistics(proposal_code_ids, semester, partner):
         if max_seeing > 3:
             return "more_than_3"
         raise ValueError("Unsupported seeing value")
-    seeing_times = dict()
-    seeing_counts = dict()
+    seeing_times = defaultdict(int)
+    seeing_counts = defaultdict(int)
+
     for _, row in df.iterrows():
         seeing_range = get_seeing_range(row["MaxSeeing"])
-        if seeing_range not in seeing_times:
-            seeing_times[seeing_range] = 0
-            seeing_counts[seeing_range] = 0
         seeing_times[seeing_range] += row["TimeForPartner"]/3600
         seeing_counts[seeing_range] += 1
 
     return {
-        "time_request": TransparencyDistribution(
-            any=0 if "Any" not in cloud_times else cloud_times["Any"],
-            clear=0 if "Clear" not in cloud_times else cloud_times["Clear"],
-            thick_cloud=0 if "Thick cloud" not in cloud_times else cloud_times["Thick cloud"],
-            thin_cloud=0 if "Thin cloud" not in cloud_times else cloud_times["Thin cloud"],
+        "time_request_per_transparency": TransparencyDistribution(
+            any=cloud_times.get("Any", 0),
+            clear=cloud_times.get("Clear", 0),
+            thick_cloud=cloud_times.get("Thick cloud", 0),
+            thin_cloud=cloud_times.get("Thin cloud", 0)
         ),
         "time_request_per_seeing": SeeingDistribution(
-            less_equal_1_dot_5=0 if "less_equal_1_dot_5" not in seeing_times else seeing_times["less_equal_1_dot_5"],
-            less_equal_2=0 if "less_equal_2" not in seeing_times else seeing_times["less_equal_2"],
-            less_equal_3=0 if "less_equal_3" not in seeing_times else seeing_times["less_equal_3"],
-            more_than_3=0 if "more_than_3" not in seeing_times else seeing_times["more_than_3"],
+            less_equal_1_dot_5=seeing_times.get("less_equal_1_dot_5", 0),
+            less_equal_2=seeing_times.get("less_equal_2", 0),
+            less_equal_3=seeing_times.get("less_equal_3", 0),
+            more_than_3=seeing_times.get("more_than_3", 0)
         ),
-        "number_of_proposals": TransparencyDistribution(
-            any=0 if "Any" not in cloud_counts else cloud_counts["Any"],
-            clear=0 if "Clear" not in cloud_counts else cloud_counts["Clear"],
-            thick_cloud=0 if "Thick cloud" not in cloud_counts else cloud_counts["Thick cloud"],
-            thin_cloud=0 if "Thin cloud" not in cloud_counts else cloud_counts["Thin cloud"],
+        "number_of_proposals_per_transparency": TransparencyDistribution(
+            any=cloud_counts.get("Any", 0),
+            clear=cloud_counts.get("Clear", 0),
+            thick_cloud=cloud_counts.get("Thick cloud", 0),
+            thin_cloud=cloud_counts.get("Thin cloud", 0)
         ),
         "number_of_proposals_per_seeing": SeeingDistribution(
-            less_equal_1_dot_5=0 if "less_equal_1_dot_5" not in seeing_counts else seeing_counts["less_equal_1_dot_5"],
-            less_equal_2=0 if "less_equal_2" not in seeing_counts else seeing_counts["less_equal_2"],
-            less_equal_3=0 if "less_equal_3" not in seeing_counts else seeing_counts["less_equal_3"],
-            more_than_3=0 if "more_than_3" not in seeing_counts else seeing_counts["more_than_3"],
+            less_equal_1_dot_5=seeing_counts.get("less_equal_1_dot_5", 0),
+            less_equal_2=seeing_counts.get("less_equal_2", 0),
+            less_equal_3=seeing_counts.get("less_equal_3", 0),
+            more_than_3=seeing_counts.get("more_than_3", 0)
         )
     }
 
@@ -253,24 +247,22 @@ def observed_time_per_proposal(proposal_code_ids, semester):
 
 def sum_observed_for_partner(proposal_observed):
     
-    observed = dict()
-    for proposal_code, observed in proposal_observed.items():
+    observed = defaultdict(lambda: PriorityValue())
+    for proposal_code, observation in proposal_observed.items():
 
         observed_time = PriorityValue()  #
         alloc_total = PriorityValue()  # Allocated time for the proposal from all the partners per priority
-        for block_id, obz_time in observed["block_visit"].items():
+        for block_id, obz_time in observation["block_visit"].items():
             observed_time.add_to_priority(obz_time["time"], obz_time["priority"])
 
-        for partner_code, allocations in observed["allocated_time"].items():
+        for partner_code, allocations in observation["allocated_time"].items():
             alloc_total.add_to_priority(allocations[0], 0)
             alloc_total.add_to_priority(allocations[1], 1)
             alloc_total.add_to_priority(allocations[2], 2)
             alloc_total.add_to_priority(allocations[3], 3)
             alloc_total.add_to_priority(allocations[4], 4)
 
-        for partner_code, allocations in observed["allocated_time"].items():
-            if partner_code not in observed:
-                observed[partner_code] = PriorityValue()
+        for partner_code, allocations in observation["allocated_time"].items():
             if alloc_total.p0 > 0:
                 observed[partner_code].add_to_priority(observed_time.p0 * allocations[0] / alloc_total.p0, 0)
             if alloc_total.p1 > 0:
@@ -700,25 +692,17 @@ def targets(proposal_code_ids):
     return all_targets
 
 
-def clouds_conditions(proposal_code_ids, partner, semester):
-    stats = transparency_statistics(proposal_code_ids, semester, partner)
-    return {
-        "clouds": CloudCondition(
-            time_requested=stats["time_request"],
-            number_of_proposals=stats["number_of_proposals"]
+def observing_conditions(proposal_code_ids, partner, semester):
+    stats = transparency_and_seeing_statistics(proposal_code_ids, semester, partner)
+    return ObservingConditions(
+        transparency=CloudCondition(
+            time_requested=stats["time_request_per_transparency"],
+            number_of_proposals=stats["number_of_proposals_per_transparency"]
         ),
-        "seeing": SeeingCondition(
+        seeing=SeeingCondition(
             time_requested=stats["time_request_per_seeing"],
             number_of_proposals=stats["number_of_proposals_per_seeing"]
         )
-    }
-
-
-def observing_conditions(proposal_code_ids, partner, semester):
-    xx = clouds_conditions(proposal_code_ids, partner, semester)
-    return ObservingConditions(
-        clouds=xx["clouds"],
-        seeing=xx["seeing"]
     )
 
 
@@ -785,7 +769,7 @@ def get_statistics(partner, semester):
         completion=completion(partner, semester),
         instruments_statistics=instruments_statistics(proposal_code_ids, partner, semester),
         observing_conditions=observing_conditions(proposal_code_ids, partner, semester),
-        proposal_statistics=proposal_statistics(proposal_code_ids, semester),
+        proposals=proposal_statistics(proposal_code_ids, semester),
         targets=targets(proposal_code_ids),
         time_breakdown=time_breakdown(semester)
     )

@@ -42,7 +42,7 @@ class CloudCondition(ObjectType):
 
 
 class ObservingConditions(ObjectType):
-    clouds = Field(CloudCondition)
+    transparency = Field(CloudCondition)
     seeing = Field(SeeingCondition)
 
 
@@ -139,6 +139,6 @@ class Statistics(ObjectType):
     completion = List(CompletionStatistics, description="The completion statistics per partner")
     instruments_statistics = Field(InstrumentStatistics)
     observing_conditions = Field(ObservingConditions)
-    proposal_statistics = Field(ProposalStatistics)
+    proposals = Field(ProposalStatistics)
     targets = List(StatisticsTarget)
     time_breakdown = Field(TimeBreakdown)
