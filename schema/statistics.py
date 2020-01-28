@@ -5,6 +5,9 @@ from graphene import ObjectType, Field, Float
 
 
 class TransparencyDistribution(ObjectType):
+    """
+    Types of transparency SALT support
+    """
     any = Float()
     clear = Float()
     thick_cloud = Float()
@@ -12,8 +15,13 @@ class TransparencyDistribution(ObjectType):
 
 
 class SeeingDistribution(ObjectType):
+    """
+    Distribution of time from the max seeing request per category.
+    "less_equal_1_dot_5" means seeing between 0 and 1.2 and
+    """
     less_equal_1_dot_5 = Float()
     less_equal_2 = Float()
+    less_equal_2_dot_5 = Float()
     less_equal_3 = Float()
     more_than_3 = Float()
 

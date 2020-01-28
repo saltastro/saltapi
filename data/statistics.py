@@ -113,6 +113,8 @@ def transparency_and_seeing_statistics(proposal_code_ids, semester, partner):
             return "less_equal_1_dot_5"
         if max_seeing <= 2:
             return "less_equal_2"
+        if max_seeing <= 2.5:
+            return "less_equal_2_dot_5"
         if max_seeing <= 3:
             return "less_equal_3"
         if max_seeing > 3:
@@ -136,6 +138,7 @@ def transparency_and_seeing_statistics(proposal_code_ids, semester, partner):
         "time_request_per_seeing": SeeingDistribution(
             less_equal_1_dot_5=seeing_times.get("less_equal_1_dot_5", 0),
             less_equal_2=seeing_times.get("less_equal_2", 0),
+            less_equal_2_dot_5=seeing_times.get("less_equal_2_dot_5", 0),
             less_equal_3=seeing_times.get("less_equal_3", 0),
             more_than_3=seeing_times.get("more_than_3", 0)
         ),
@@ -148,6 +151,7 @@ def transparency_and_seeing_statistics(proposal_code_ids, semester, partner):
         "number_of_proposals_per_seeing": SeeingDistribution(
             less_equal_1_dot_5=seeing_counts.get("less_equal_1_dot_5", 0),
             less_equal_2=seeing_counts.get("less_equal_2", 0),
+            less_equal_2_dot_5=seeing_counts.get("less_equal_2_dot_5", 0),
             less_equal_3=seeing_counts.get("less_equal_3", 0),
             more_than_3=seeing_counts.get("more_than_3", 0)
         )
@@ -389,80 +393,54 @@ def completion(partner, semester):
     return create_completion_stats(observed, allocated, share, partner)
 
 
-def instruments_statistics(proposal_code_ids, partner, semester):
+def instruments_statistics_count(proposal_code_ids, partner, semester):
     params = dict()
     params["proposal_code_ids"] = proposal_code_ids
     params["semester"] = semester
     params["partner"] = partner
 
     sql = """
-SELECT
-    Mode as RSSMode,
-    P1Bvit_Id,
-    P1Hrs_Id,
-    P1Rss_Id,
-    P1Salticam_Id,
-    ExposureMode,
-    sc.DetectorMode AS SCAMDetectorMode,
-    rs.DetectorMode AS RSSDetectorMode
-FROM P1Config
-    JOIN ProposalCode USING(ProposalCode_Id)
-        LEFT JOIN P1Rss USING(P1Rss_Id)
-        LEFT JOIN RssDetectorMode AS rs USING(RssDetectorMode_Id)
-        LEFT JOIN RssMode USING(RssMode_Id)
-        LEFT JOIN P1RssSpectroscopy USING(P1RssSpectroscopy_Id)
-        LEFT JOIN RssGrating USING(RssGrating_Id)
-        LEFT JOIN P1RssFabryPerot USING(P1RssFabryPerot_Id)
-        LEFT JOIN RssFabryPerotMode USING(RssFabryPerotMode_Id)
-        LEFT JOIN RssEtalonConfig USING(RssEtalonConfig_Id)
-        LEFT JOIN P1RssPolarimetry USING(P1RssPolarimetry_Id)
-        LEFT JOIN RssPolarimetryPattern USING(RssPolarimetryPattern_Id)
-        LEFT JOIN P1RssMask USING(P1RssMask_Id)
-        LEFT JOIN RssMaskType USING(RssMaskType_Id)
-        LEFT JOIN P1Salticam USING(P1Salticam_Id)
-        LEFT JOIN SalticamDetectorMode AS sc USING(SalticamDetectorMode_Id)
-        LEFT JOIN P1Bvit USING(P1Bvit_Id)
-        LEFT JOIN BvitFilter USING(BvitFilter_Id)
-        LEFT JOIN P1Hrs USING(P1Hrs_Id)
-        LEFT JOIN HrsMode USING(HrsMode_Id)
-WHERE ProposalCode_Id IN %(proposal_code_ids)s
-               """
+    SELECT
+        Mode as RSSMode,
+        P1Bvit_Id,
+        P1Hrs_Id,
+        P1Rss_Id,
+        P1Salticam_Id,
+        ExposureMode,
+        sc.DetectorMode AS SCAMDetectorMode,
+        rs.DetectorMode AS RSSDetectorMode
+    FROM P1Config
+        JOIN ProposalCode USING(ProposalCode_Id)
+            LEFT JOIN P1Rss USING(P1Rss_Id)
+            LEFT JOIN RssDetectorMode AS rs USING(RssDetectorMode_Id)
+            LEFT JOIN RssMode USING(RssMode_Id)
+            LEFT JOIN P1RssSpectroscopy USING(P1RssSpectroscopy_Id)
+            LEFT JOIN RssGrating USING(RssGrating_Id)
+            LEFT JOIN P1RssFabryPerot USING(P1RssFabryPerot_Id)
+            LEFT JOIN RssFabryPerotMode USING(RssFabryPerotMode_Id)
+            LEFT JOIN RssEtalonConfig USING(RssEtalonConfig_Id)
+            LEFT JOIN P1RssPolarimetry USING(P1RssPolarimetry_Id)
+            LEFT JOIN RssPolarimetryPattern USING(RssPolarimetryPattern_Id)
+            LEFT JOIN P1RssMask USING(P1RssMask_Id)
+            LEFT JOIN RssMaskType USING(RssMaskType_Id)
+            LEFT JOIN P1Salticam USING(P1Salticam_Id)
+            LEFT JOIN SalticamDetectorMode AS sc USING(SalticamDetectorMode_Id)
+            LEFT JOIN P1Bvit USING(P1Bvit_Id)
+            LEFT JOIN BvitFilter USING(BvitFilter_Id)
+            LEFT JOIN P1Hrs USING(P1Hrs_Id)
+            LEFT JOIN HrsMode USING(HrsMode_Id)
+    WHERE ProposalCode_Id IN %(proposal_code_ids)s
+                   """
     df = pd.read_sql(sql, con=sdb_connect(), params=params)
     total_count = {
         "bvit": 0,
         "hrs": 0,
         "scam": 0,
         "rss": 0,
-        "rss_detector": {
-            "Drift Scan": 0,
-            "FRAME TRANSFER": 0,
-            "NORMAL": 0,
-            "Shuffle": 0,
-            "SLOT MODE": 0,
-        },
-        "salticam_detector": {
-            "DRIFTSCAN": 0,
-            "NORMAL": 0,
-            "FRAME XFER": 0,
-            "SLOT": 0,
-        },
-        "hrs_resolution": {
-            "HIGH RESOLUTION": 0,
-            "HIGH STABILITY": 0,
-            "INT CAL FIBRE": 0,
-            "LOW RESOLUTION": 0,
-            "MEDIUM RESOLUTION": 0,
-        },
-        "rss_observing_mode": {
-            "Fabry Perot": 0,
-            "FP polarimetry": 0,
-            "Imaging": 0,
-            "MOS polarimetry": 0,
-            "MOS": 0,
-            "Polarimetric imaging": 0,
-            "Spectroscopy": 0,
-            "Spectropolarimetry": 0,
-        }
+        "rss_detector": defaultdict(int),
+        "salticam_detector": defaultdict(int),
+        "hrs_resolution": defaultdict(int),
+        "rss_observing_mode": defaultdict(int)
     }
 
     def count_instrument_data(row_data):
@@ -486,114 +464,111 @@ WHERE ProposalCode_Id IN %(proposal_code_ids)s
     for _, row in df.iterrows():
         count_instrument_data(row)
 
-    sql = """
-    SELECT
-        P1Rss_Id,
-        Mode as RSSMode,
-        P1Hrs_Id,
-        P1Salticam_Id,
-        P1Bvit_Id,
-        ExposureMode,
-        sc.DetectorMode AS SCAMDetectorMode,
-        rs.DetectorMode AS RSSDetectorMode,
-        (ReqTimeAmount*ReqTimePercent/100.0)/3600 as TimeForPartner
-    FROM P1Config
-        JOIN MultiPartner USING(ProposalCode_Id)
-        JOIN Semester USING (Semester_Id)
-        JOIN Partner USING (Partner_Id)
-        LEFT JOIN P1Rss USING(P1Rss_Id)
-        LEFT JOIN RssDetectorMode AS rs USING(RssDetectorMode_Id)
-        LEFT JOIN RssMode USING(RssMode_Id)
-        LEFT JOIN P1RssSpectroscopy USING(P1RssSpectroscopy_Id)
-        LEFT JOIN RssGrating USING(RssGrating_Id)
-        LEFT JOIN P1RssFabryPerot USING(P1RssFabryPerot_Id)
-        LEFT JOIN RssFabryPerotMode USING(RssFabryPerotMode_Id)
-        LEFT JOIN RssEtalonConfig USING(RssEtalonConfig_Id)
-        LEFT JOIN P1RssPolarimetry USING(P1RssPolarimetry_Id)
-        LEFT JOIN RssPolarimetryPattern USING(RssPolarimetryPattern_Id)
-        LEFT JOIN P1RssMask USING(P1RssMask_Id)
-        LEFT JOIN RssMaskType USING(RssMaskType_Id)
-        LEFT JOIN P1Salticam USING(P1Salticam_Id)
-        LEFT JOIN SalticamDetectorMode AS sc USING(SalticamDetectorMode_Id)
-        LEFT JOIN P1Bvit USING(P1Bvit_Id)
-        LEFT JOIN BvitFilter USING(BvitFilter_Id)
-        LEFT JOIN P1Hrs USING(P1Hrs_Id)
-        LEFT JOIN HrsMode USING(HrsMode_Id)
-    WHERE  CONCAT(Year,"-" ,Semester)=%(semester)s
-        AND ProposalCode_Id IN %(proposal_code_ids)s
+    return total_count
 
-    """
+
+def instruments_statistics_requested_time(proposal_code_ids, partner, semester):
+    params = dict()
+    params["proposal_code_ids"] = proposal_code_ids
+    params["semester"] = semester
+    params["partner"] = partner
+
+    total_count = instruments_statistics_count(proposal_code_ids, partner, semester)
+
+    sql = """
+       SELECT
+           P1Rss_Id,
+           Mode as RSSMode,
+           P1Hrs_Id,
+           P1Salticam_Id,
+           P1Bvit_Id,
+           ExposureMode,
+           sc.DetectorMode AS SCAMDetectorMode,
+           rs.DetectorMode AS RSSDetectorMode,
+           (ReqTimeAmount*ReqTimePercent/100.0)/3600 as TimeForPartner
+       FROM P1Config
+           JOIN MultiPartner USING(ProposalCode_Id)
+           JOIN Semester USING (Semester_Id)
+           JOIN Partner USING (Partner_Id)
+           LEFT JOIN P1Rss USING(P1Rss_Id)
+           LEFT JOIN RssDetectorMode AS rs USING(RssDetectorMode_Id)
+           LEFT JOIN RssMode USING(RssMode_Id)
+           LEFT JOIN P1RssSpectroscopy USING(P1RssSpectroscopy_Id)
+           LEFT JOIN RssGrating USING(RssGrating_Id)
+           LEFT JOIN P1RssFabryPerot USING(P1RssFabryPerot_Id)
+           LEFT JOIN RssFabryPerotMode USING(RssFabryPerotMode_Id)
+           LEFT JOIN RssEtalonConfig USING(RssEtalonConfig_Id)
+           LEFT JOIN P1RssPolarimetry USING(P1RssPolarimetry_Id)
+           LEFT JOIN RssPolarimetryPattern USING(RssPolarimetryPattern_Id)
+           LEFT JOIN P1RssMask USING(P1RssMask_Id)
+           LEFT JOIN RssMaskType USING(RssMaskType_Id)
+           LEFT JOIN P1Salticam USING(P1Salticam_Id)
+           LEFT JOIN SalticamDetectorMode AS sc USING(SalticamDetectorMode_Id)
+           LEFT JOIN P1Bvit USING(P1Bvit_Id)
+           LEFT JOIN BvitFilter USING(BvitFilter_Id)
+           LEFT JOIN P1Hrs USING(P1Hrs_Id)
+           LEFT JOIN HrsMode USING(HrsMode_Id)
+       WHERE  CONCAT(Year,"-" ,Semester)=%(semester)s
+           AND ProposalCode_Id IN %(proposal_code_ids)s
+
+       """
     if partner:
         sql += " AND Partner_Code = %(partner)s"
     sql += " GROUP BY ProposalCode_Id, Partner_Id"
-    final_time = {
+    total_time = {
         "bvit": 0,
         "hrs": 0,
         "scam": 0,
         "rss": 0,
-        "rss_detector": {
-            "Drift Scan": 0,
-            "FRAME TRANSFER": 0,
-            "NORMAL": 0,
-            "Shuffle": 0,
-            "SLOT MODE": 0,
-        },
-        "salticam_detector": {
-            "DRIFTSCAN": 0,
-            "NORMAL": 0,
-            "FRAME XFER": 0,
-            "SLOT": 0,
-        },
-        "hrs_resolution": {
-            "HIGH RESOLUTION": 0,
-            "HIGH STABILITY": 0,
-            "INT CAL FIBRE": 0,
-            "LOW RESOLUTION": 0,
-            "MEDIUM RESOLUTION": 0,
-        },
-        "rss_observing_mode": {
-            "Fabry Perot": 0,
-            "FP polarimetry": 0,
-            "Imaging": 0,
-            "MOS polarimetry": 0,
-            "MOS": 0,
-            "Polarimetric imaging": 0,
-            "Spectroscopy": 0,
-            "Spectropolarimetry": 0,
-        }
+        "rss_detector": defaultdict(int),
+        "salticam_detector": defaultdict(int),
+        "hrs_resolution": defaultdict(int),
+        "rss_observing_mode": defaultdict(int)
     }
     df = pd.read_sql(sql, con=sdb_connect(), params=params)
 
     def count_instrument_time(row_data):
         if not pd.isnull(row_data["P1Bvit_Id"]):
-            final_time["bvit"] += row_data["TimeForPartner"]
+            total_time["bvit"] += row_data["TimeForPartner"]
         if not pd.isnull(row_data["P1Hrs_Id"]):
-            final_time["hrs"] += row_data["TimeForPartner"]
+            total_time["hrs"] += row_data["TimeForPartner"]
         if not pd.isnull(row_data["P1Salticam_Id"]):
-            final_time["scam"] += row_data["TimeForPartner"]
+            total_time["scam"] += row_data["TimeForPartner"]
         if not pd.isnull(row_data["P1Rss_Id"]):
-            final_time["rss"] += row_data["TimeForPartner"]
+            total_time["rss"] += row_data["TimeForPartner"]
 
         if not pd.isnull(row_data["RSSDetectorMode"]):
-            final_time["rss_detector"][row_data["RSSDetectorMode"]] += row_data["TimeForPartner"]
+            total_time["rss_detector"][row_data["RSSDetectorMode"]] += row_data["TimeForPartner"]
 
         if not pd.isnull(row_data["P1Rss_Id"]) and not pd.isnull(row_data["RSSMode"]):
-            final_time["rss_observing_mode"][row_data["RSSMode"]] += row_data["TimeForPartner"]
+            total_time["rss_observing_mode"][row_data["RSSMode"]] += row_data["TimeForPartner"]
 
         if not pd.isnull(row_data["SCAMDetectorMode"]):
-            final_time["salticam_detector"][row_data["SCAMDetectorMode"]] += row_data["TimeForPartner"]
+            total_time["salticam_detector"][row_data["SCAMDetectorMode"]] += row_data["TimeForPartner"]
         if not pd.isnull(row_data["ExposureMode"]):
-            final_time["hrs_resolution"][row_data["ExposureMode"]] += row_data["TimeForPartner"]
+            total_time["hrs_resolution"][row_data["ExposureMode"]] += row_data["TimeForPartner"]
 
     for _, row in df.iterrows():
         count_instrument_time(row)
+    return total_time
+
+
+def instruments_statistics(proposal_code_ids, partner, semester):
+    params = dict()
+    params["proposal_code_ids"] = proposal_code_ids
+    params["semester"] = semester
+    params["partner"] = partner
+
+    total_count = instruments_statistics_count(proposal_code_ids, partner, semester)
+
+    total_time = instruments_statistics_requested_time(proposal_code_ids, partner, semester)
 
     return InstrumentStatistics(
         time_requested_per_instrument=Instruments(
-            bvit=final_time["bvit"],
-            hrs=final_time["hrs"],
-            salticam=final_time["scam"],
-            rss=final_time["rss"]
+            bvit=total_time["bvit"],
+            hrs=total_time["hrs"],
+            salticam=total_time["scam"],
+            rss=total_time["rss"]
         ),
         number_of_configurations_per_instrument=Instruments(
             bvit=total_count["bvit"],
@@ -602,11 +577,11 @@ WHERE ProposalCode_Id IN %(proposal_code_ids)s
             rss=total_count["rss"]
         ),
         time_requested_per_rss_detector_mode=DetectorMode(
-            drift_scan=final_time["rss_detector"]["Drift Scan"],
-            frame_transfer=final_time["rss_detector"]["FRAME TRANSFER"],
-            normal=final_time["rss_detector"]["NORMAL"],
-            shuffle=final_time["rss_detector"]["Shuffle"],
-            slot_mode=final_time["rss_detector"]["SLOT MODE"],
+            drift_scan=total_time["rss_detector"]["Drift Scan"],
+            frame_transfer=total_time["rss_detector"]["FRAME TRANSFER"],
+            normal=total_time["rss_detector"]["NORMAL"],
+            shuffle=total_time["rss_detector"]["Shuffle"],
+            slot_mode=total_time["rss_detector"]["SLOT MODE"],
         ),
 
 
@@ -618,10 +593,10 @@ WHERE ProposalCode_Id IN %(proposal_code_ids)s
             slot_mode=total_count["rss_detector"]["SLOT MODE"],
         ),
         time_requested_per_salticam_detector_mode=DetectorMode(
-            drift_scan=final_time["salticam_detector"]["DRIFTSCAN"],
-            frame_transfer=final_time["salticam_detector"]["FRAME XFER"],
-            normal=final_time["salticam_detector"]["NORMAL"],
-            slot_mode=final_time["salticam_detector"]["SLOT"]
+            drift_scan=total_time["salticam_detector"]["DRIFTSCAN"],
+            frame_transfer=total_time["salticam_detector"]["FRAME XFER"],
+            normal=total_time["salticam_detector"]["NORMAL"],
+            slot_mode=total_time["salticam_detector"]["SLOT"]
         ),
         number_of_configurations_per_salticam_detector_mode=DetectorMode(
             drift_scan=total_count["salticam_detector"]["DRIFTSCAN"],
@@ -630,11 +605,11 @@ WHERE ProposalCode_Id IN %(proposal_code_ids)s
             slot_mode=total_count["salticam_detector"]["SLOT"]
         ),
         time_requested_per_hrs_resolution=ExposureMode(
-            low_resolution=final_time["hrs_resolution"]["LOW RESOLUTION"],
-            medium_resolution=final_time["hrs_resolution"]["MEDIUM RESOLUTION"],
-            high_resolution=final_time["hrs_resolution"]["HIGH RESOLUTION"],
-            high_stability=final_time["hrs_resolution"]["HIGH STABILITY"],
-            int_cal_fibre=final_time["hrs_resolution"]["INT CAL FIBRE"]
+            low_resolution=total_time["hrs_resolution"]["LOW RESOLUTION"],
+            medium_resolution=total_time["hrs_resolution"]["MEDIUM RESOLUTION"],
+            high_resolution=total_time["hrs_resolution"]["HIGH RESOLUTION"],
+            high_stability=total_time["hrs_resolution"]["HIGH STABILITY"],
+            int_cal_fibre=total_time["hrs_resolution"]["INT CAL FIBRE"]
         ),
         number_of_configurations_per_hrs_resolution=ExposureMode(
             low_resolution=total_count["hrs_resolution"]["LOW RESOLUTION"],
@@ -644,14 +619,14 @@ WHERE ProposalCode_Id IN %(proposal_code_ids)s
             int_cal_fibre=total_count["hrs_resolution"]["INT CAL FIBRE"]
         ),
         time_requested_per_rss_observing_mode=ObservingMode(
-            fabry_perot=final_time["rss_observing_mode"]["Fabry Perot"],
-            fabry_perot_polarimetry=final_time["rss_observing_mode"]["FP polarimetry"],
-            mos=final_time["rss_observing_mode"]["MOS"],
-            mos_polarimetry=final_time["rss_observing_mode"]["MOS polarimetry"],
-            imaging=final_time["rss_observing_mode"]["Imaging"],
-            polarimetric_imaging=final_time["rss_observing_mode"]["Polarimetric imaging"],
-            spectropolarimetry=final_time["rss_observing_mode"]["Spectropolarimetry"],
-            spectroscopy=final_time["rss_observing_mode"]["Spectroscopy"],
+            fabry_perot=total_time["rss_observing_mode"]["Fabry Perot"],
+            fabry_perot_polarimetry=total_time["rss_observing_mode"]["FP polarimetry"],
+            mos=total_time["rss_observing_mode"]["MOS"],
+            mos_polarimetry=total_time["rss_observing_mode"]["MOS polarimetry"],
+            imaging=total_time["rss_observing_mode"]["Imaging"],
+            polarimetric_imaging=total_time["rss_observing_mode"]["Polarimetric imaging"],
+            spectropolarimetry=total_time["rss_observing_mode"]["Spectropolarimetry"],
+            spectroscopy=total_time["rss_observing_mode"]["Spectroscopy"],
         ),
         number_of_configurations_per_rss_observing_mode=ObservingMode(
             fabry_perot=total_count["rss_observing_mode"]["Fabry Perot"],
