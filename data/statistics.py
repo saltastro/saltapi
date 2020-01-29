@@ -11,7 +11,7 @@ from schema.user import RoleType
 from util.semester import query_semester_id
 
 
-class PriorityValue:
+class PriorityValues:
     p0 = 0
     p1 = 0
     p2 = 0
@@ -188,7 +188,7 @@ def allocated_time_per_priority(semester):
     
     allocated = dict()
     sql = """
-    SELECT SUM(TimeAlloc) as TotalAllocations, Partner_Code, Priority FROM PriorityAlloc
+    SELECT SUM(TimeAlloc) as TotalAllocation, Partner_Code, Priority FROM PriorityAlloc
         JOIN MultiPartner USING (MultiPartner_Id)
         JOIN Partner USING(Partner_Id)
         JOIN Semester USING(Semester_Id)
@@ -198,8 +198,8 @@ def allocated_time_per_priority(semester):
     df = pd.read_sql(sql, con=sdb_connect(), params=params)
     for _, row in df.iterrows():
         if row["Partner_Code"] not in allocated:
-            allocated[row["Partner_Code"]] = PriorityValue()
-        allocated[row["Partner_Code"]].add_to_priority(row["TotalAllocations"], row["Priority"])
+            allocated[row["Partner_Code"]] = PriorityValues()
+        allocated[row["Partner_Code"]].add_to_priority(row["TotalAllocation"], row["Priority"])
     return allocated
 
 
@@ -251,11 +251,11 @@ def observed_time_per_proposal(proposal_code_ids, semester):
 
 def sum_observed_for_partner(proposal_observed):
     
-    observed = defaultdict(lambda: PriorityValue())
+    observed = defaultdict(lambda: PriorityValues())
     for proposal_code, observation in proposal_observed.items():
 
-        observed_time = PriorityValue()  #
-        alloc_total = PriorityValue()  # Allocated time for the proposal from all the partners per priority
+        observed_time = PriorityValues()  #
+        alloc_total = PriorityValues()  # Allocated time for the proposal from all the partners per priority
         for block_id, obz_time in observation["block_visit"].items():
             observed_time.add_to_priority(obz_time["time"], obz_time["priority"])
 
@@ -280,32 +280,32 @@ def sum_observed_for_partner(proposal_observed):
     return observed
 
 
-def create_completion_stats(observed, allocated, share, partner):
-    sum_of_all_partners = {
-        "allocated": PriorityValue(),
-        "observed": PriorityValue(),
+def partners_time_summary(allocated, observed, share):
+    time_summary = []
+    all_partners_time_summary = {
+        "allocated": PriorityValues(),
+        "observed": PriorityValues(),
         "share_percentage": 0
     }
-    temp_completion = []
     for partner_code, time in allocated.items():
         if not partner_code == "ALL":
             if partner_code not in observed:
-                observed[partner_code] = PriorityValue()
-            sum_of_all_partners["allocated"].add_to_priority(time.p0, 0)
-            sum_of_all_partners["allocated"].add_to_priority(time.p1, 1)
-            sum_of_all_partners["allocated"].add_to_priority(time.p2, 2)
-            sum_of_all_partners["allocated"].add_to_priority(time.p3, 3)
-            sum_of_all_partners["allocated"].add_to_priority(time.p4, 4)
+                observed[partner_code] = PriorityValues()
+            all_partners_time_summary["allocated"].add_to_priority(time.p0, 0)
+            all_partners_time_summary["allocated"].add_to_priority(time.p1, 1)
+            all_partners_time_summary["allocated"].add_to_priority(time.p2, 2)
+            all_partners_time_summary["allocated"].add_to_priority(time.p3, 3)
+            all_partners_time_summary["allocated"].add_to_priority(time.p4, 4)
 
-            sum_of_all_partners["observed"].add_to_priority(observed[partner_code].p0, 0)
-            sum_of_all_partners["observed"].add_to_priority(observed[partner_code].p1, 1)
-            sum_of_all_partners["observed"].add_to_priority(observed[partner_code].p2, 2)
-            sum_of_all_partners["observed"].add_to_priority(observed[partner_code].p3, 3)
-            sum_of_all_partners["observed"].add_to_priority(observed[partner_code].p4, 4)
+            all_partners_time_summary["observed"].add_to_priority(observed[partner_code].p0, 0)
+            all_partners_time_summary["observed"].add_to_priority(observed[partner_code].p1, 1)
+            all_partners_time_summary["observed"].add_to_priority(observed[partner_code].p2, 2)
+            all_partners_time_summary["observed"].add_to_priority(observed[partner_code].p3, 3)
+            all_partners_time_summary["observed"].add_to_priority(observed[partner_code].p4, 4)
 
-            sum_of_all_partners["share_percentage"] += share[partner_code]
+            all_partners_time_summary["share_percentage"] += share[partner_code]
 
-        temp_completion.append(
+        time_summary.append(
             CompletionStatistics(
                 partner=partner_code,
                 summary=TimeSummary(
@@ -328,53 +328,59 @@ def create_completion_stats(observed, allocated, share, partner):
             )
         )
     # Adding total for all
-    temp_completion.append(
+    time_summary.append(
         CompletionStatistics(
             partner="ALL",
-            share_percentage=sum_of_all_partners["share_percentage"],
+            share_percentage=all_partners_time_summary["share_percentage"],
             summary=TimeSummary(
                 allocated_time=Priorities(
-                    p0=sum_of_all_partners["allocated"].p0,
-                    p1=sum_of_all_partners["allocated"].p1,
-                    p2=sum_of_all_partners["allocated"].p2,
-                    p3=sum_of_all_partners["allocated"].p3,
-                    p4=sum_of_all_partners["allocated"].p4
+                    p0=all_partners_time_summary["allocated"].p0,
+                    p1=all_partners_time_summary["allocated"].p1,
+                    p2=all_partners_time_summary["allocated"].p2,
+                    p3=all_partners_time_summary["allocated"].p3,
+                    p4=all_partners_time_summary["allocated"].p4
                 ),
                 observed_time=Priorities(
-                    p0=sum_of_all_partners["observed"].p0,
-                    p1=sum_of_all_partners["observed"].p1,
-                    p2=sum_of_all_partners["observed"].p2,
-                    p3=sum_of_all_partners["observed"].p3,
-                    p4=sum_of_all_partners["observed"].p4
+                    p0=all_partners_time_summary["observed"].p0,
+                    p1=all_partners_time_summary["observed"].p1,
+                    p2=all_partners_time_summary["observed"].p2,
+                    p3=all_partners_time_summary["observed"].p3,
+                    p4=all_partners_time_summary["observed"].p4
                 )
             )
         )
     )
+    return time_summary
+
+
+def create_completion_stats(observed, allocated, share, partner):
+
+    all_time_summaries = partners_time_summary(allocated, observed, share)
     if partner:
-        res = []
-        for c in temp_completion:
+        time_summaries = []
+        for c in all_time_summaries:
             if c.partner == partner or c.partner == "ALL":
-                res.append(c)
+                time_summaries.append(c)
         if g.user.has_role(RoleType.ADMINISTRATOR) \
                 or g.user.has_role(RoleType.BOARD)\
                 or g.user.has_role(RoleType.TAC_CHAIR, partner) or g.user.has_role(RoleType.TAC_MEMBER, partner):
-            return res
+            return time_summaries
         return []
     else:
         if g.user.has_role(RoleType.ADMINISTRATOR) or g.user.has_role(RoleType.BOARD):
-            return temp_completion
+            return all_time_summaries
         else:
-            res = []
+            time_summaries = []
             for r in g.user.role:
                 if r.type == RoleType.TAC_CHAIR:
-                    for c in temp_completion:
+                    for c in all_time_summaries:
                         if c.partner in r.partners or c.partner == "ALL":
-                            res.append(c)
+                            time_summaries.append(c)
                 if r.type == RoleType.TAC_MEMBER:
-                    for c in temp_completion:
+                    for c in all_time_summaries:
                         if c.partner in r.partners:
-                            res.append(c)
-            return res
+                            time_summaries.append(c)
+            return time_summaries
 
 
 def completion(partner, semester):
