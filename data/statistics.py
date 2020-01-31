@@ -4,8 +4,8 @@ from collections import defaultdict
 
 from data import sdb_connect
 from data.common import proposal_code_ids_for_statistics
-from schema.statistics import TimeBreakdown, Statistics, ObservingConditions, CloudCondition, TransparencyDistribution, \
-    SeeingDistribution, SeeingCondition, StatisticsTarget, InstrumentStatistics, Instruments, DetectorMode, ExposureMode, \
+from schema.statistics import TimeBreakdown, Statistics, ObservingConditions, TransparencyCondition, TransparencyDistribution, \
+    SeeingDistribution, SeeingCondition, StatisticsTarget, InstrumentStatistics, Instruments, DetectorMode, Resolution, \
     CompletionStatistics, TimeSummary, Priorities, ObservingMode, ProposalStatistics
 from schema.user import RoleType
 from util.semester import query_semester_id
@@ -81,6 +81,18 @@ def share_percentage(semester_id):
 
 
 def transparency_and_seeing_statistics(proposal_code_ids, semester, partner):
+    """
+    Calculate the statistics of observing conditions per seen and transparency return how they have been distributed.
+
+    :param proposal_code_ids: list
+        List of proposal code ids
+    :param semester: str
+        The semester
+    :param partner: str
+        The partner code
+    :return: ObservingConditions
+        The observing conditions
+    """
     params = dict()
     params["semester"] = semester
     params["proposal_code_ids"] = proposal_code_ids
@@ -159,7 +171,7 @@ def transparency_and_seeing_statistics(proposal_code_ids, semester, partner):
 
 
 def time_breakdown(semester):
-    # get the filter conditions
+    # get the filter parameters
     params = dict()
     params["semester"] = semester
 
@@ -249,7 +261,7 @@ def observed_time_per_proposal(proposal_code_ids, semester):
     return proposal_observed
 
 
-def sum_observed_for_partner(proposal_observed):
+def sum_observed_and_allocated_time_for_partner(proposal_observed):
     
     observed = defaultdict(lambda: PriorityValues())
     for proposal_code, observation in proposal_observed.items():
@@ -393,170 +405,143 @@ def completion(partner, semester):
 
     observed_proposals = observed_time_per_proposal(proposal_code_ids, semester)
 
-    observed = sum_observed_for_partner(observed_proposals)
+    observed = sum_observed_and_allocated_time_for_partner(observed_proposals)
     share = share_percentage(params["semester_id"])
 
     return create_completion_stats(observed, allocated, share, partner)
 
 
-def instruments_statistics_count(proposal_code_ids, partner, semester):
-    params = dict()
-    params["proposal_code_ids"] = proposal_code_ids
-    params["semester"] = semester
-    params["partner"] = partner
+def proposal_configurations(data):
+    """
+    Create a dict as with a proposal code as a key, instrument configurations and requested time per partner.
 
-    sql = """
-    SELECT
-        Mode as RSSMode,
-        P1Bvit_Id,
-        P1Hrs_Id,
-        P1Rss_Id,
-        P1Salticam_Id,
-        ExposureMode,
-        sc.DetectorMode AS SCAMDetectorMode,
-        rs.DetectorMode AS RSSDetectorMode
-    FROM P1Config
-        JOIN ProposalCode USING(ProposalCode_Id)
-            LEFT JOIN P1Rss USING(P1Rss_Id)
-            LEFT JOIN RssDetectorMode AS rs USING(RssDetectorMode_Id)
-            LEFT JOIN RssMode USING(RssMode_Id)
-            LEFT JOIN P1RssSpectroscopy USING(P1RssSpectroscopy_Id)
-            LEFT JOIN RssGrating USING(RssGrating_Id)
-            LEFT JOIN P1RssFabryPerot USING(P1RssFabryPerot_Id)
-            LEFT JOIN RssFabryPerotMode USING(RssFabryPerotMode_Id)
-            LEFT JOIN RssEtalonConfig USING(RssEtalonConfig_Id)
-            LEFT JOIN P1RssPolarimetry USING(P1RssPolarimetry_Id)
-            LEFT JOIN RssPolarimetryPattern USING(RssPolarimetryPattern_Id)
-            LEFT JOIN P1RssMask USING(P1RssMask_Id)
-            LEFT JOIN RssMaskType USING(RssMaskType_Id)
-            LEFT JOIN P1Salticam USING(P1Salticam_Id)
-            LEFT JOIN SalticamDetectorMode AS sc USING(SalticamDetectorMode_Id)
-            LEFT JOIN P1Bvit USING(P1Bvit_Id)
-            LEFT JOIN BvitFilter USING(BvitFilter_Id)
-            LEFT JOIN P1Hrs USING(P1Hrs_Id)
-            LEFT JOIN HrsMode USING(HrsMode_Id)
-    WHERE ProposalCode_Id IN %(proposal_code_ids)s
-                   """
-    df = pd.read_sql(sql, con=sdb_connect(), params=params)
-    total_count = {
-        "bvit": 0,
-        "hrs": 0,
-        "scam": 0,
-        "rss": 0,
-        "rss_detector": defaultdict(int),
-        "salticam_detector": defaultdict(int),
-        "hrs_resolution": defaultdict(int),
-        "rss_observing_mode": defaultdict(int)
-    }
+    :param data: DataFrame
+        Instruments query results
+    :return: dict
+        Proposal and it's instrument configuration
+    """
+    proposals = dict()
 
-    def count_instrument_data(row_data):
+    def _instrument_counter(row_data):
+
+        proposals[row_data["Proposal_Code"]]["time_requested_pp"][row_data["Partner_Code"]] = row_data["TimeForPartner"]
+
+
         if not pd.isnull(row_data["P1Bvit_Id"]):
-            total_count["bvit"] += 1
+            proposals[row_data["Proposal_Code"]]["is_bvit"] = True
         if not pd.isnull(row_data["P1Hrs_Id"]):
-            total_count["hrs"] += 1
+            proposals[row_data["Proposal_Code"]]["is_hrs"] = True
         if not pd.isnull(row_data["P1Salticam_Id"]):
-            total_count["scam"] += 1
+            proposals[row_data["Proposal_Code"]]["is_scam"] = True
         if not pd.isnull(row_data["P1Rss_Id"]):
-            total_count["rss"] += 1
-        if not pd.isnull(row_data["RSSDetectorMode"]):
-            total_count["rss_detector"][row_data["RSSDetectorMode"]] += 1
-        if not pd.isnull(row_data["SCAMDetectorMode"]):
-            total_count["salticam_detector"][row_data["SCAMDetectorMode"]] += 1
-        if not pd.isnull(row_data["ExposureMode"]):
-            total_count["hrs_resolution"][row_data["ExposureMode"]] += 1
-        if not pd.isnull(row_data["P1Rss_Id"]) and not pd.isnull(row_data["RSSMode"]):
-            total_count["rss_observing_mode"][row_data["RSSMode"]] += 1
-
-    for _, row in df.iterrows():
-        count_instrument_data(row)
-
-    return total_count
-
-
-def instruments_statistics_requested_time(proposal_code_ids, partner, semester):
-    params = dict()
-    params["proposal_code_ids"] = proposal_code_ids
-    params["semester"] = semester
-    params["partner"] = partner
-
-    total_count = instruments_statistics_count(proposal_code_ids, partner, semester)
-
-    sql = """
-       SELECT
-           P1Rss_Id,
-           Mode as RSSMode,
-           P1Hrs_Id,
-           P1Salticam_Id,
-           P1Bvit_Id,
-           ExposureMode,
-           sc.DetectorMode AS SCAMDetectorMode,
-           rs.DetectorMode AS RSSDetectorMode,
-           (ReqTimeAmount*ReqTimePercent/100.0)/3600 as TimeForPartner
-       FROM P1Config
-           JOIN MultiPartner USING(ProposalCode_Id)
-           JOIN Semester USING (Semester_Id)
-           JOIN Partner USING (Partner_Id)
-           LEFT JOIN P1Rss USING(P1Rss_Id)
-           LEFT JOIN RssDetectorMode AS rs USING(RssDetectorMode_Id)
-           LEFT JOIN RssMode USING(RssMode_Id)
-           LEFT JOIN P1RssSpectroscopy USING(P1RssSpectroscopy_Id)
-           LEFT JOIN RssGrating USING(RssGrating_Id)
-           LEFT JOIN P1RssFabryPerot USING(P1RssFabryPerot_Id)
-           LEFT JOIN RssFabryPerotMode USING(RssFabryPerotMode_Id)
-           LEFT JOIN RssEtalonConfig USING(RssEtalonConfig_Id)
-           LEFT JOIN P1RssPolarimetry USING(P1RssPolarimetry_Id)
-           LEFT JOIN RssPolarimetryPattern USING(RssPolarimetryPattern_Id)
-           LEFT JOIN P1RssMask USING(P1RssMask_Id)
-           LEFT JOIN RssMaskType USING(RssMaskType_Id)
-           LEFT JOIN P1Salticam USING(P1Salticam_Id)
-           LEFT JOIN SalticamDetectorMode AS sc USING(SalticamDetectorMode_Id)
-           LEFT JOIN P1Bvit USING(P1Bvit_Id)
-           LEFT JOIN BvitFilter USING(BvitFilter_Id)
-           LEFT JOIN P1Hrs USING(P1Hrs_Id)
-           LEFT JOIN HrsMode USING(HrsMode_Id)
-       WHERE  CONCAT(Year,"-" ,Semester)=%(semester)s
-           AND ProposalCode_Id IN %(proposal_code_ids)s
-
-       """
-    if partner:
-        sql += " AND Partner_Code = %(partner)s"
-    sql += " GROUP BY ProposalCode_Id, Partner_Id"
-    total_time = {
-        "bvit": 0,
-        "hrs": 0,
-        "scam": 0,
-        "rss": 0,
-        "rss_detector": defaultdict(int),
-        "salticam_detector": defaultdict(int),
-        "hrs_resolution": defaultdict(int),
-        "rss_observing_mode": defaultdict(int)
-    }
-    df = pd.read_sql(sql, con=sdb_connect(), params=params)
-
-    def count_instrument_time(row_data):
-        if not pd.isnull(row_data["P1Bvit_Id"]):
-            total_time["bvit"] += row_data["TimeForPartner"]
-        if not pd.isnull(row_data["P1Hrs_Id"]):
-            total_time["hrs"] += row_data["TimeForPartner"]
-        if not pd.isnull(row_data["P1Salticam_Id"]):
-            total_time["scam"] += row_data["TimeForPartner"]
-        if not pd.isnull(row_data["P1Rss_Id"]):
-            total_time["rss"] += row_data["TimeForPartner"]
+            proposals[row_data["Proposal_Code"]]["is_rss"] = True
 
         if not pd.isnull(row_data["RSSDetectorMode"]):
-            total_time["rss_detector"][row_data["RSSDetectorMode"]] += row_data["TimeForPartner"]
+            proposals[row_data["Proposal_Code"]]["rss_detector_modes"].add(row_data["RSSDetectorMode"])
 
         if not pd.isnull(row_data["P1Rss_Id"]) and not pd.isnull(row_data["RSSMode"]):
-            total_time["rss_observing_mode"][row_data["RSSMode"]] += row_data["TimeForPartner"]
-
+            proposals[row_data["Proposal_Code"]]["rss_observing_modes"].add(row_data["RSSMode"])
         if not pd.isnull(row_data["SCAMDetectorMode"]):
-            total_time["salticam_detector"][row_data["SCAMDetectorMode"]] += row_data["TimeForPartner"]
-        if not pd.isnull(row_data["ExposureMode"]):
-            total_time["hrs_resolution"][row_data["ExposureMode"]] += row_data["TimeForPartner"]
+            proposals[row_data["Proposal_Code"]]["scam_detector_modes"].add(row_data["SCAMDetectorMode"])
+        if not pd.isnull(row_data["HRSResolution"]):
+            proposals[row_data["Proposal_Code"]]["hrs_resolutions"].add(row_data["HRSResolution"])
 
-    for _, row in df.iterrows():
-        count_instrument_time(row)
-    return total_time
+    for _, row in data.iterrows():
+        if row["Proposal_Code"] not in proposals:
+            proposals[row["Proposal_Code"]] = {
+                "is_bvit": False,
+                "is_hrs": False,
+                "is_rss": False,
+                "is_scam": False,
+                "hrs_resolutions": set([]),
+                "rss_observing_modes": set([]),
+                "scam_detector_modes": set([]),
+                "rss_detector_modes": set([]),
+                "time_requested_pp": dict(),
+            }
+        _instrument_counter(row)
+    return proposals
+
+
+def instruments_statistics_count(proposal_conf, partner):
+    """
+    Count number of configurations per instrument and mode and how much time is requested per instrument and mode.
+
+    :param proposal_conf: dict
+        The proposal and it's instrument configuration
+    :param partner: str
+        The partner code
+    :return: dict
+        The instruments statistics
+    """
+    stats = {
+        "bvit_total": 0,
+        "bvit_requested_total": 0,
+        "hrs_total": 0,
+        "hrs_requested_total": 0,
+        "scam_total": 0,
+        "scam_requested_total": 0,
+        "rss_total": 0,
+        "rss_requested_total": 0,
+        "rss_detector_mode_total": defaultdict(int),
+        "rss_detector_mode_requested_total": defaultdict(int),
+        "scam_detector_mode_total": defaultdict(int),
+        "scam_detector_mode_requested_total": defaultdict(int),
+        "hrs_resolution_total": defaultdict(int),
+        "hrs_resolution_requested_total": defaultdict(int),
+        "rss_observing_mode_total": defaultdict(int),
+        "rss_observing_mode_requested_total": defaultdict(int)
+    }
+
+    def _get_requested_total(requested_times):
+        requested_total = 0
+        for partner_code, time in requested_times.items():
+            if partner:
+                if partner == partner_code:
+                    requested_total += time
+            else:
+                requested_total += time
+        return requested_total
+
+    for _, data in proposal_conf.items():
+        total_requested = _get_requested_total(data["time_requested_pp"])
+        if data["is_bvit"]:
+            stats["bvit_total"] += 1
+            stats["bvit_requested_total"] += total_requested
+
+        if data["is_hrs"]:
+
+            stats["hrs_total"] += 1
+            stats["hrs_requested_total"] += total_requested
+
+            # data["hrs_resolutions"] is a set so it is guaranteed to have only one resolution type per proposal
+            for resolution in data["hrs_resolutions"]:
+                stats["hrs_resolution_requested_total"][resolution] += total_requested
+                stats["hrs_resolution_total"][resolution] += 1
+
+        if data["is_rss"]:
+            stats["rss_total"] += 1
+            stats["rss_requested_total"] += total_requested
+
+            # data["rss_detector_modes"] is a set so it is guaranteed to have only one detector modes type per proposal
+            for detector_modes in data["rss_detector_modes"]:
+                stats["rss_detector_mode_requested_total"][detector_modes] += total_requested
+                stats["rss_detector_mode_total"][detector_modes] += 1
+
+            # data["scam_detector_modes"] is a set so it is guaranteed to have only one detector modes type per proposal
+            for observing_mode in data["rss_observing_modes"]:
+                stats["rss_observing_mode_requested_total"][observing_mode] += total_requested
+                stats["rss_observing_mode_total"][observing_mode] += 1
+        if data["is_scam"]:
+            stats["scam_total"] += 1
+            stats["scam_requested_total"] += total_requested
+
+            # data["scam_detector_modes"] is a set so it is guaranteed to have only one detector modes type per proposal
+            for detector_modes in data["scam_detector_modes"]:
+                stats["scam_detector_mode_requested_total"][detector_modes] += total_requested
+                stats["scam_detector_mode_total"][detector_modes] += 1
+
+    return stats
 
 
 def instruments_statistics(proposal_code_ids, partner, semester):
@@ -565,89 +550,141 @@ def instruments_statistics(proposal_code_ids, partner, semester):
     params["semester"] = semester
     params["partner"] = partner
 
-    total_count = instruments_statistics_count(proposal_code_ids, partner, semester)
+    sql = """
+SELECT
+    Proposal_Code,
+    Partner_Code,
+    Mode as RSSMode,
+    P1Hrs_Id,
+    P1Rss_Id,
+    P1Salticam_Id,
+    P1Bvit_Id,
+    ExposureMode as HRSResolution,
+    sc.DetectorMode AS SCAMDetectorMode,
+    rs.DetectorMode AS RSSDetectorMode,
+    (ReqTimeAmount*ReqTimePercent/100.0)/3600 as TimeForPartner
+FROM P1Config
+    JOIN ProposalCode USING(ProposalCode_Id)
+    JOIN MultiPartner USING(ProposalCode_Id)
+    JOIN Semester USING (Semester_Id)
+    JOIN Partner USING (Partner_Id)
+    LEFT JOIN P1Rss USING(P1Rss_Id)
+    LEFT JOIN RssDetectorMode AS rs USING(RssDetectorMode_Id)
+    LEFT JOIN RssMode USING(RssMode_Id)
+    LEFT JOIN P1RssSpectroscopy USING(P1RssSpectroscopy_Id)
+    LEFT JOIN RssGrating USING(RssGrating_Id)
+    LEFT JOIN P1RssFabryPerot USING(P1RssFabryPerot_Id)
+    LEFT JOIN RssFabryPerotMode USING(RssFabryPerotMode_Id)
+    LEFT JOIN RssEtalonConfig USING(RssEtalonConfig_Id)
+    LEFT JOIN P1RssPolarimetry USING(P1RssPolarimetry_Id)
+    LEFT JOIN RssPolarimetryPattern USING(RssPolarimetryPattern_Id)
+    LEFT JOIN P1RssMask USING(P1RssMask_Id)
+    LEFT JOIN RssMaskType USING(RssMaskType_Id)
+    LEFT JOIN P1Salticam USING(P1Salticam_Id)
+    LEFT JOIN SalticamDetectorMode AS sc USING(SalticamDetectorMode_Id)
+    LEFT JOIN P1Bvit USING(P1Bvit_Id)
+    LEFT JOIN BvitFilter USING(BvitFilter_Id)
+    LEFT JOIN P1Hrs USING(P1Hrs_Id)
+    LEFT JOIN HrsMode USING(HrsMode_Id)
+WHERE  CONCAT(Year,"-" ,Semester)=%(semester)s
+    AND ProposalCode_Id IN %(proposal_code_ids)s
+    """
+    df = pd.read_sql(sql, con=sdb_connect(), params=params)
 
-    total_time = instruments_statistics_requested_time(proposal_code_ids, partner, semester)
+    proposal_conf = proposal_configurations(df)
+
+    instruments_stats_count = instruments_statistics_count(proposal_conf, partner)
+    import pprint
+    pprint.pprint(proposal_conf)
 
     return InstrumentStatistics(
-        time_requested_per_instrument=Instruments(
-            bvit=total_time["bvit"],
-            hrs=total_time["hrs"],
-            salticam=total_time["scam"],
-            rss=total_time["rss"]
+        bvit_total=instruments_stats_count["bvit_total"],
+        bvit_requested_total=instruments_stats_count["bvit_requested_total"],
+
+        hrs_total=instruments_stats_count["hrs_total"],
+        hrs_requested_total=instruments_stats_count["hrs_requested_total"],
+        hrs_resolution_total=Resolution(
+            low_resolution=instruments_stats_count["hrs_resolution_total"].get("LOW RESOLUTION", 0),
+            medium_resolution=instruments_stats_count["hrs_resolution_total"].get("MEDIUM RESOLUTION", 0),
+            high_resolution=instruments_stats_count["hrs_resolution_total"].get("HIGH RESOLUTION", 0),
+            high_stability=instruments_stats_count["hrs_resolution_total"].get("HIGH STABILITY", 0),
+            int_cal_fibre=instruments_stats_count["hrs_resolution_total"].get("INT CAL FIBRE", 0),
         ),
-        number_of_configurations_per_instrument=Instruments(
-            bvit=total_count["bvit"],
-            hrs=total_count["hrs"],
-            salticam=total_count["scam"],
-            rss=total_count["rss"]
-        ),
-        time_requested_per_rss_detector_mode=DetectorMode(
-            drift_scan=total_time["rss_detector"]["Drift Scan"],
-            frame_transfer=total_time["rss_detector"]["FRAME TRANSFER"],
-            normal=total_time["rss_detector"]["NORMAL"],
-            shuffle=total_time["rss_detector"]["Shuffle"],
-            slot_mode=total_time["rss_detector"]["SLOT MODE"],
+        hrs_resolution_requested_total=Resolution(
+            low_resolution=instruments_stats_count["hrs_resolution_requested_total"].get("LOW RESOLUTION", 0),
+            medium_resolution=instruments_stats_count["hrs_resolution_requested_total"].get("MEDIUM RESOLUTION", 0),
+            high_resolution=instruments_stats_count["hrs_resolution_requested_total"].get("HIGH RESOLUTION", 0),
+            high_stability=instruments_stats_count["hrs_resolution_requested_total"].get("HIGH STABILITY", 0),
+            int_cal_fibre=instruments_stats_count["hrs_resolution_requested_total"].get("INT CAL FIBRE", 0),
         ),
 
+        rss_total=instruments_stats_count["rss_total"],
+        rss_requested_total=instruments_stats_count["rss_requested_total"],
 
-        number_of_configurations_per_rss_detector_mode=DetectorMode(
-            drift_scan=total_count["rss_detector"]["Drift Scan"],
-            frame_transfer=total_count["rss_detector"]["FRAME TRANSFER"],
-            normal=total_count["rss_detector"]["NORMAL"],
-            shuffle=total_count["rss_detector"]["Shuffle"],
-            slot_mode=total_count["rss_detector"]["SLOT MODE"],
+        rss_detector_mode_total=DetectorMode(
+            drift_scan=instruments_stats_count["rss_detector_mode_total"].get("DRIFT SCAN", 0),
+            frame_transfer=instruments_stats_count["rss_detector_mode_total"].get("FRAME TRANSFER", 0),
+            normal=instruments_stats_count["rss_detector_mode_total"].get("NORMAL", 0),
+            shuffle=instruments_stats_count["rss_detector_mode_total"].get("SHUFFLE", 0),
+            slot_mode=instruments_stats_count["rss_detector_mode_total"].get("SLOT MODE", 0)
         ),
-        time_requested_per_salticam_detector_mode=DetectorMode(
-            drift_scan=total_time["salticam_detector"]["DRIFTSCAN"],
-            frame_transfer=total_time["salticam_detector"]["FRAME XFER"],
-            normal=total_time["salticam_detector"]["NORMAL"],
-            slot_mode=total_time["salticam_detector"]["SLOT"]
+        rss_detector_mode_requested_total=DetectorMode(
+            drift_scan=instruments_stats_count["rss_detector_mode_requested_total"].get("DRIFT SCAN", 0),
+            frame_transfer=instruments_stats_count["rss_detector_mode_requested_total"].get("FRAME TRANSFER", 0),
+            normal=instruments_stats_count["rss_detector_mode_requested_total"].get("NORMAL", 0),
+            shuffle=instruments_stats_count["rss_detector_mode_requested_total"].get("SHUFFLE", 0),
+            slot_mode=instruments_stats_count["rss_detector_mode_requested_total"].get("SLOT MODE", 0)
         ),
-        number_of_configurations_per_salticam_detector_mode=DetectorMode(
-            drift_scan=total_count["salticam_detector"]["DRIFTSCAN"],
-            frame_transfer=total_count["salticam_detector"]["FRAME XFER"],
-            normal=total_count["salticam_detector"]["NORMAL"],
-            slot_mode=total_count["salticam_detector"]["SLOT"]
+
+        rss_observing_mode_total=ObservingMode(
+            fabry_perot=instruments_stats_count["rss_observing_mode_total"].get("Fabry Perot", 0),
+            fabry_perot_polarimetry=instruments_stats_count["rss_observing_mode_total"].get("FP polarimetry", 0),
+            mos=instruments_stats_count["rss_observing_mode_total"].get("MOS", 0),
+            mos_polarimetry=instruments_stats_count["rss_observing_mode_total"].get("MOS polarimetry", 0),
+            imaging=instruments_stats_count["rss_observing_mode_total"].get("Imaging", 0),
+            polarimetric_imaging=instruments_stats_count["rss_observing_mode_total"].get("Polarimetric imaging", 0),
+            spectropolarimetry=instruments_stats_count["rss_observing_mode_total"].get("Spectropolarimetry", 0),
+            spectroscopy=instruments_stats_count["rss_observing_mode_total"].get("Spectroscopy", 0)
         ),
-        time_requested_per_hrs_resolution=ExposureMode(
-            low_resolution=total_time["hrs_resolution"]["LOW RESOLUTION"],
-            medium_resolution=total_time["hrs_resolution"]["MEDIUM RESOLUTION"],
-            high_resolution=total_time["hrs_resolution"]["HIGH RESOLUTION"],
-            high_stability=total_time["hrs_resolution"]["HIGH STABILITY"],
-            int_cal_fibre=total_time["hrs_resolution"]["INT CAL FIBRE"]
+        rss_observing_mode_requested_total=ObservingMode(
+            fabry_perot=instruments_stats_count["rss_observing_mode_requested_total"].get("Fabry Perot", 0),
+            fabry_perot_polarimetry=instruments_stats_count["rss_observing_mode_requested_total"].get("FP polarimetry", 0),
+            mos=instruments_stats_count["rss_observing_mode_requested_total"].get("MOS", 0),
+            mos_polarimetry=instruments_stats_count["rss_observing_mode_requested_total"].get("MOS polarimetry", 0),
+            imaging=instruments_stats_count["rss_observing_mode_requested_total"].get("Imaging", 0),
+            polarimetric_imaging=instruments_stats_count["rss_observing_mode_requested_total"].get("Polarimetric imaging", 0),
+            spectropolarimetry=instruments_stats_count["rss_observing_mode_requested_total"].get("Spectropolarimetry", 0),
+            spectroscopy=instruments_stats_count["rss_observing_mode_requested_total"].get("Spectroscopy", 0)
         ),
-        number_of_configurations_per_hrs_resolution=ExposureMode(
-            low_resolution=total_count["hrs_resolution"]["LOW RESOLUTION"],
-            medium_resolution=total_count["hrs_resolution"]["MEDIUM RESOLUTION"],
-            high_resolution=total_count["hrs_resolution"]["HIGH RESOLUTION"],
-            high_stability=total_count["hrs_resolution"]["HIGH STABILITY"],
-            int_cal_fibre=total_count["hrs_resolution"]["INT CAL FIBRE"]
+
+        salticam_detector_mode_total=DetectorMode(
+            drift_scan=instruments_stats_count["scam_detector_mode_total"].get("DRIFTSCAN", 0),
+            frame_transfer=instruments_stats_count["scam_detector_mode_total"].get("FRAME XFER", 0),
+            normal=instruments_stats_count["scam_detector_mode_total"].get("NORMAL", 0),
+            slot_mode=instruments_stats_count["scam_detector_mode_total"].get("SLOT", 0)
         ),
-        time_requested_per_rss_observing_mode=ObservingMode(
-            fabry_perot=total_time["rss_observing_mode"]["Fabry Perot"],
-            fabry_perot_polarimetry=total_time["rss_observing_mode"]["FP polarimetry"],
-            mos=total_time["rss_observing_mode"]["MOS"],
-            mos_polarimetry=total_time["rss_observing_mode"]["MOS polarimetry"],
-            imaging=total_time["rss_observing_mode"]["Imaging"],
-            polarimetric_imaging=total_time["rss_observing_mode"]["Polarimetric imaging"],
-            spectropolarimetry=total_time["rss_observing_mode"]["Spectropolarimetry"],
-            spectroscopy=total_time["rss_observing_mode"]["Spectroscopy"],
+        salticam_detector_mode_requested_total=DetectorMode(
+            drift_scan=instruments_stats_count["scam_detector_mode_requested_total"].get("DRIFTSCAN", 0),
+            frame_transfer=instruments_stats_count["scam_detector_mode_requested_total"].get("FRAME XFER", 0),
+            normal=instruments_stats_count["scam_detector_mode_requested_total"].get("NORMAL", 0),
+            slot_mode=instruments_stats_count["scam_detector_mode_requested_total"].get("SLOT", 0)
         ),
-        number_of_configurations_per_rss_observing_mode=ObservingMode(
-            fabry_perot=total_count["rss_observing_mode"]["Fabry Perot"],
-            fabry_perot_polarimetry=total_count["rss_observing_mode"]["FP polarimetry"],
-            mos=total_count["rss_observing_mode"]["MOS"],
-            mos_polarimetry=total_count["rss_observing_mode"]["MOS polarimetry"],
-            imaging=total_count["rss_observing_mode"]["Imaging"],
-            polarimetric_imaging=total_count["rss_observing_mode"]["Polarimetric imaging"],
-            spectropolarimetry=total_count["rss_observing_mode"]["Spectropolarimetry"],
-            spectroscopy=total_count["rss_observing_mode"]["Spectroscopy"],
-        )
+
+        scam_total=instruments_stats_count["scam_total"],
+        scam_requested_total=instruments_stats_count["scam_requested_total"]
     )
 
 
 def targets(proposal_code_ids):
+    """
+    Basic target information that will be used for statistics.
+    Like, RA and DEC of the target and if target P4
+
+    :param proposal_code_ids: list
+        List of proposal code ids
+    :return: list[dict]
+        The basic target information
+    """
     params = dict()
     params["proposal_code_ids"] = proposal_code_ids
 
@@ -674,9 +711,21 @@ def targets(proposal_code_ids):
 
 
 def observing_conditions(proposal_code_ids, partner, semester):
+    """
+    Get the statistics of observing conditions per seen and transparency fit it to schema.
+
+    :param proposal_code_ids: list
+        List of proposal code ids
+    :param semester: str
+        The semester
+    :param partner: str
+        The partner code
+    :return: ObservingConditions
+        The observing conditions
+    """
     stats = transparency_and_seeing_statistics(proposal_code_ids, semester, partner)
     return ObservingConditions(
-        transparency=CloudCondition(
+        transparency=TransparencyCondition(
             time_requested=stats["time_request_per_transparency"],
             number_of_proposals=stats["number_of_proposals_per_transparency"]
         ),
@@ -688,6 +737,16 @@ def observing_conditions(proposal_code_ids, partner, semester):
 
 
 def proposal_statistics(proposal_code_ids, semester):
+    """
+    Query and calculate proposals relate statistics
+
+    :param proposal_code_ids: list
+        List of proposal code ids
+    :param semester: str
+        The semester
+    :return: dict
+        Proposal statistics
+    """
     params = dict()
     params["proposal_code_ids"] = proposal_code_ids
     params["semester_id"] = query_semester_id(semester)
@@ -722,16 +781,16 @@ WHERE Current=1
         if row["Semester"] not in proposals[row["Proposal_Code"]]["semesters"]:
             proposals[row["Proposal_Code"]]["semesters"].append(row["Semester"])
 
-    for p in proposals.items():
-        if not any([s < semester for s in p[1]["semesters"]]):
+    for proposal_code, stats in proposals.items():
+        if not any([s < semester for s in stats["semesters"]]):
             new_proposals += 1
-            if len(p[1]["semesters"]) > 1:
+            if len(stats["semesters"]) > 1:
                 new_long_term_proposals += 1
-        if len(p[1]["semesters"]) > 1:
+        if len(stats["semesters"]) > 1:
             long_term_proposals += 1
-        if p[1]["is_p4"]:
+        if stats["is_p4"]:
             p4_proposals += 1
-        if p[1]["is_thesis"]:
+        if stats["is_thesis"]:
             thesis_proposals += 1
 
     return ProposalStatistics(
