@@ -12,6 +12,9 @@ from util.semester import query_semester_id
 
 
 class PriorityValues:
+    """
+    Priority and its values
+    """
     p0 = 0
     p1 = 0
     p2 = 0
@@ -19,6 +22,15 @@ class PriorityValues:
     p4 = 0
 
     def add_to_priority(self, value, priority):
+        """
+        Add value to given priority
+
+        :param value: float
+            The value to add
+        :param priority: int
+            The priority adding value too.
+        :return: None
+        """
         if priority == 0:
             self.p0 += value
         if priority == 1:
@@ -29,6 +41,9 @@ class PriorityValues:
             self.p3 += value
         if priority == 4:
             self.p4 += value
+        if priority < 0 or priority > 4 or not isinstance(priority, int):
+            raise ValueError("Priority is integer between 0 and 4")
+
 
 
 def number_of_proposals_per_cloud_conditions(proposal_code_ids, semester, partner):
