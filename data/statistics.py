@@ -45,7 +45,6 @@ class PriorityValues:
             raise ValueError("Priority is integer between 0 and 4")
 
 
-
 def number_of_proposals_per_cloud_conditions(proposal_code_ids, semester, partner):
     params = dict()
     params["semester"] = semester
@@ -97,7 +96,7 @@ def share_percentage(semester_id):
 
 def transparency_and_seeing_statistics(proposal_code_ids, semester, partner):
     """
-    Calculate the statistics of observing conditions per seen and transparency return how they have been distributed.
+    Calculate the statistics of observing conditions per seeing and transparency return how they have been distributed.
 
     :param proposal_code_ids: list
         List of proposal code ids
@@ -230,7 +229,7 @@ def allocated_time_per_priority(semester):
     return allocated
 
 
-def observed_time_per_proposal(proposal_code_ids, semester):
+def proposal_observed_time(proposal_code_ids, semester):
     params = dict()
     params["semester_id"] = query_semester_id(semester)
     params["proposal_code_ids"] = proposal_code_ids
@@ -418,7 +417,7 @@ def completion(partner, semester):
 
     allocated = allocated_time_per_priority(semester)
 
-    observed_proposals = observed_time_per_proposal(proposal_code_ids, semester)
+    observed_proposals = proposal_observed_time(proposal_code_ids, semester)
 
     observed = sum_observed_and_allocated_time_for_partner(observed_proposals)
     share = share_percentage(params["semester_id"])
@@ -609,8 +608,6 @@ WHERE  CONCAT(Year,"-" ,Semester)=%(semester)s
     proposal_conf = proposal_configurations(df)
 
     instruments_stats_count = instruments_statistics_count(proposal_conf, partner)
-    import pprint
-    pprint.pprint(proposal_conf)
 
     return InstrumentStatistics(
         bvit_total=instruments_stats_count["bvit_total"],
