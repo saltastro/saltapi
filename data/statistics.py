@@ -6,7 +6,8 @@ from data import sdb_connect
 from data.common import proposal_code_ids_for_statistics
 from schema.statistics import TimeBreakdown, Statistics, ObservingConditions, TransparencyCondition, TransparencyTimeDistribution, \
     SeeingTimeDistribution, SeeingCondition, StatisticsTarget, InstrumentStatistics, Instruments, DetectorMode, Resolution, \
-    CompletionStatistics, TimeSummary, Priorities, ObservingMode, ProposalStatistics
+    CompletionStatistics, TimeSummary, Priorities, ObservingMode, ProposalStatistics, TransparencyNumberDistribution, \
+    SeeingNumberDistribution
 from schema.user import RoleType
 from util.semester import query_semester_id
 
@@ -45,38 +46,6 @@ class PriorityValues:
             raise ValueError("Priority is integer between 0 and 4")
 
 
-def number_of_proposals_per_cloud_conditions(proposal_code_ids, semester, partner):
-    params = dict()
-    params["semester"] = semester
-    params["proposal_code_ids"] = proposal_code_ids
-    params["partner_code"] = partner
-
-    sql = """
-       SELECT ReqTimeAmount*ReqTimePercent/100.0 as TimeForPartner, Transparency FROM  ProposalCode as pc
-           JOIN MultiPartner USING(ProposalCode_Id)
-           JOIN Partner USING(Partner_Id)
-           JOIN Semester as s  USING (Semester_Id)
-           JOIN P1ObservingConditions as oc  ON pc.ProposalCode_Id=oc.ProposalCode_Id
-                AND oc.Semester_Id=s.Semester_Id
-           JOIN Transparency as t ON oc.Transparency_Id=t.Transparency_Id
-        WHERE CONCAT(s.Year, "-", s.Semester)=%(semester)s
-           AND pc.ProposalCode_Id IN %(proposal_code_ids)s
-       """
-    if partner:
-        sql += " AND Partner_Code=%(partner_code)s"
-    df = pd.read_sql(sql, con=sdb_connect(), params=params)
-    counts = defaultdict(int)
-    for _, row in df.iterrows():
-        counts[row["Transparency"]] += 1
-
-    return TransparencyTimeDistribution(
-        any=counts.get("Any", 0),
-        clear=counts.get("Clear", 0),
-        thick_cloud=counts.get("Thick cloud", 0),
-        thin_cloud=counts.get("Thin cloud", 0),
-    )
-
-
 def share_percentage(semester_id):
     params = dict()
     params["semester_id"] = semester_id
@@ -113,15 +82,19 @@ def transparency_and_seeing_statistics(proposal_code_ids, semester, partner):
     params["partner_code"] = partner
 
     sql = """
-       SELECT ReqTimeAmount*ReqTimePercent/100.0 as TimeForPartner, Transparency, MaxSeeing FROM  ProposalCode as pc
-           JOIN MultiPartner USING(ProposalCode_Id)
-           JOIN Partner USING(Partner_Id)
-           JOIN Semester as s  USING (Semester_Id)
-           JOIN P1ObservingConditions as oc  ON pc.ProposalCode_Id=oc.ProposalCode_Id
-                AND oc.Semester_Id=s.Semester_Id
-           JOIN Transparency as t ON oc.Transparency_Id=t.Transparency_Id
-        WHERE CONCAT(s.Year, "-", s.Semester)=%(semester)s
-           AND pc.ProposalCode_Id IN %(proposal_code_ids)s
+SELECT
+    ReqTimeAmount*ReqTimePercent/100.0 as TimeForPartner,
+    Transparency,
+    MaxSeeing
+FROM  ProposalCode as pc
+    JOIN MultiPartner USING(ProposalCode_Id)
+    JOIN Partner USING(Partner_Id)
+    JOIN Semester as s  USING (Semester_Id)
+    JOIN P1ObservingConditions as oc  ON pc.ProposalCode_Id=oc.ProposalCode_Id
+        AND oc.Semester_Id=s.Semester_Id
+    JOIN Transparency as t ON oc.Transparency_Id=t.Transparency_Id
+WHERE CONCAT(s.Year, "-", s.Semester)=%(semester)s
+    AND pc.ProposalCode_Id IN %(proposal_code_ids)s
        """
     if partner:
         sql += " AND Partner_Code=%(partner_code)s"
@@ -168,13 +141,13 @@ def transparency_and_seeing_statistics(proposal_code_ids, semester, partner):
             less_equal_3=seeing_times.get("less_equal_3", 0),
             more_than_3=seeing_times.get("more_than_3", 0)
         ),
-        "number_of_proposals_per_transparency": TransparencyTimeDistribution(
+        "number_of_proposals_per_transparency": TransparencyNumberDistribution(
             any=cloud_counts.get("Any", 0),
             clear=cloud_counts.get("Clear", 0),
             thick_cloud=cloud_counts.get("Thick cloud", 0),
             thin_cloud=cloud_counts.get("Thin cloud", 0)
         ),
-        "number_of_proposals_per_seeing": SeeingTimeDistribution(
+        "number_of_proposals_per_seeing": SeeingNumberDistribution(
             less_equal_1_dot_5=seeing_counts.get("less_equal_1_dot_5", 0),
             less_equal_2=seeing_counts.get("less_equal_2", 0),
             less_equal_2_dot_5=seeing_counts.get("less_equal_2_dot_5", 0),
