@@ -205,7 +205,6 @@ class InstrumentStatistics(ObjectType):
     scam_requested_total = Float()
 
 
-
 class StatisticsTarget(ObjectType):
     """
     The statistics related to SALT targets
@@ -232,7 +231,7 @@ class Statistics(ObjectType):
     The statistics data for SALT
     """
     completion = List(CompletionStatistics, description="The completion statistics per partner")
-    instruments_statistics = Field(InstrumentStatistics)
+    instruments = Field(InstrumentStatistics)
     observing_conditions = Field(ObservingConditions)
     proposals = Field(ProposalStatistics)
     targets = List(StatisticsTarget)

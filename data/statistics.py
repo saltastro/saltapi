@@ -793,7 +793,7 @@ def get_statistics(partner, semester):
     proposal_code_ids = proposal_code_ids_for_statistics(semester, partner)
     return Statistics(
         completion=completion(partner, semester),
-        instruments_statistics=instruments_statistics(proposal_code_ids, partner, semester),
+        instruments=instruments_statistics(proposal_code_ids, partner, semester),
         observing_conditions=observing_conditions(proposal_code_ids, partner, semester),
         proposals=proposal_statistics(proposal_code_ids, semester),
         targets=targets(proposal_code_ids),
