@@ -528,7 +528,8 @@ def instruments_statistics_count(proposal_conf, partner):
             stats["hrs_total"] += 1
             stats["hrs_requested_total"] += total_requested
 
-            # data["hrs_resolutions"] is a set so it is guaranteed to have only one resolution type per proposal
+            # data["hrs_resolutions"] is a set of so a given resolution so it is guaranteed to have only
+            # one resolution type per proposal
             for resolution in data["hrs_resolutions"]:
                 stats["hrs_resolution_requested_total"][resolution] += total_requested
                 stats["hrs_resolution_total"][resolution] += 1
@@ -537,23 +538,27 @@ def instruments_statistics_count(proposal_conf, partner):
             stats["rss_total"] += 1
             stats["rss_requested_total"] += total_requested
 
-            # data["rss_detector_modes"] is a set so it is guaranteed to have only one detector modes type per proposal
-            for detector_modes in data["rss_detector_modes"]:
-                stats["rss_detector_mode_requested_total"][detector_modes] += total_requested
-                stats["rss_detector_mode_total"][detector_modes] += 1
+            # data["rss_detector_modes"] is a set of a given detector mode so it is guaranteed to have only
+            # one detector modes type per proposal
+            for detector_mode in data["rss_detector_modes"]:
+                stats["rss_detector_mode_requested_total"][detector_mode] += total_requested
+                stats["rss_detector_mode_total"][detector_mode] += 1
 
-            # data["scam_detector_modes"] is a set so it is guaranteed to have only one detector modes type per proposal
+            # data["rss_observing_modes"] is a set of a given observing mode so it is guaranteed to have only
+            # one observing mode type per proposal
             for observing_mode in data["rss_observing_modes"]:
                 stats["rss_observing_mode_requested_total"][observing_mode] += total_requested
                 stats["rss_observing_mode_total"][observing_mode] += 1
+                
         if data["is_scam"]:
             stats["scam_total"] += 1
             stats["scam_requested_total"] += total_requested
 
-            # data["scam_detector_modes"] is a set so it is guaranteed to have only one detector modes type per proposal
-            for detector_modes in data["scam_detector_modes"]:
-                stats["scam_detector_mode_requested_total"][detector_modes] += total_requested
-                stats["scam_detector_mode_total"][detector_modes] += 1
+            # data["scam_detector_modes"] is a set of a given detector mode so it is guaranteed to have only
+            # one detector modes type per proposal
+            for detector_mode in data["scam_detector_modes"]:
+                stats["scam_detector_mode_requested_total"][detector_mode] += total_requested
+                stats["scam_detector_mode_total"][detector_mode] += 1
 
     return stats
 
@@ -724,7 +729,7 @@ def targets(proposal_code_ids):
 
 def observing_conditions(proposal_code_ids, partner, semester):
     """
-    Get the statistics of observing conditions per seen and transparency fit it to schema.
+    Get the statistics of observing conditions per seen and transparency, and fit it to schema.
 
     :param proposal_code_ids: list
         List of proposal code ids

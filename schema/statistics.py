@@ -6,7 +6,7 @@ from graphene import ObjectType, Field, Float
 
 class TransparencyDistribution(ObjectType):
     """
-    Types of transparencies that SALT support
+    Types of transparencies that SALT supports
     """
     any = Float()
     clear = Float()
@@ -17,7 +17,8 @@ class TransparencyDistribution(ObjectType):
 class SeeingDistribution(ObjectType):
     """
     Distribution of time from the max seeing request per category.
-    "less_equal_1_dot_5" means seeing between 0 and 1.5 and "less_equal_2" means it is between 1.5 and 2 and forth
+    "less_equal_1_dot_5" means seeing between 0 and 1.5 arcseconds, "less_equal_2" means it is between 1.5 and 2
+    arcseconds, and so forth
     """
     less_equal_1_dot_5 = Float()
     less_equal_2 = Float()
