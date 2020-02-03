@@ -4,8 +4,8 @@ from collections import defaultdict
 
 from data import sdb_connect
 from data.common import proposal_code_ids_for_statistics
-from schema.statistics import TimeBreakdown, Statistics, ObservingConditions, TransparencyCondition, TransparencyDistribution, \
-    SeeingDistribution, SeeingCondition, StatisticsTarget, InstrumentStatistics, Instruments, DetectorMode, Resolution, \
+from schema.statistics import TimeBreakdown, Statistics, ObservingConditions, TransparencyCondition, TransparencyTimeDistribution, \
+    SeeingTimeDistribution, SeeingCondition, StatisticsTarget, InstrumentStatistics, Instruments, DetectorMode, Resolution, \
     CompletionStatistics, TimeSummary, Priorities, ObservingMode, ProposalStatistics
 from schema.user import RoleType
 from util.semester import query_semester_id
@@ -69,7 +69,7 @@ def number_of_proposals_per_cloud_conditions(proposal_code_ids, semester, partne
     for _, row in df.iterrows():
         counts[row["Transparency"]] += 1
 
-    return TransparencyDistribution(
+    return TransparencyTimeDistribution(
         any=counts.get("Any", 0),
         clear=counts.get("Clear", 0),
         thick_cloud=counts.get("Thick cloud", 0),
@@ -155,26 +155,26 @@ def transparency_and_seeing_statistics(proposal_code_ids, semester, partner):
         seeing_counts[seeing_range] += 1
 
     return {
-        "time_request_per_transparency": TransparencyDistribution(
+        "time_request_per_transparency": TransparencyTimeDistribution(
             any=cloud_times.get("Any", 0),
             clear=cloud_times.get("Clear", 0),
             thick_cloud=cloud_times.get("Thick cloud", 0),
             thin_cloud=cloud_times.get("Thin cloud", 0)
         ),
-        "time_request_per_seeing": SeeingDistribution(
+        "time_request_per_seeing": SeeingTimeDistribution(
             less_equal_1_dot_5=seeing_times.get("less_equal_1_dot_5", 0),
             less_equal_2=seeing_times.get("less_equal_2", 0),
             less_equal_2_dot_5=seeing_times.get("less_equal_2_dot_5", 0),
             less_equal_3=seeing_times.get("less_equal_3", 0),
             more_than_3=seeing_times.get("more_than_3", 0)
         ),
-        "number_of_proposals_per_transparency": TransparencyDistribution(
+        "number_of_proposals_per_transparency": TransparencyTimeDistribution(
             any=cloud_counts.get("Any", 0),
             clear=cloud_counts.get("Clear", 0),
             thick_cloud=cloud_counts.get("Thick cloud", 0),
             thin_cloud=cloud_counts.get("Thin cloud", 0)
         ),
-        "number_of_proposals_per_seeing": SeeingDistribution(
+        "number_of_proposals_per_seeing": SeeingTimeDistribution(
             less_equal_1_dot_5=seeing_counts.get("less_equal_1_dot_5", 0),
             less_equal_2=seeing_counts.get("less_equal_2", 0),
             less_equal_2_dot_5=seeing_counts.get("less_equal_2_dot_5", 0),
@@ -528,8 +528,7 @@ def instruments_statistics_count(proposal_conf, partner):
             stats["hrs_total"] += 1
             stats["hrs_requested_total"] += total_requested
 
-            # data["hrs_resolutions"] is a set of so a given resolution so it is guaranteed to have only
-            # one resolution type per proposal
+            # data["hrs_resolutions"] is a set, so any given resolution is guaranteed to be in it at most once.
             for resolution in data["hrs_resolutions"]:
                 stats["hrs_resolution_requested_total"][resolution] += total_requested
                 stats["hrs_resolution_total"][resolution] += 1
@@ -538,24 +537,21 @@ def instruments_statistics_count(proposal_conf, partner):
             stats["rss_total"] += 1
             stats["rss_requested_total"] += total_requested
 
-            # data["rss_detector_modes"] is a set of a given detector mode so it is guaranteed to have only
-            # one detector modes type per proposal
+            # data["rss_detector_modes"] is a set, so any given detector mode is guaranteed to be in it at most once
             for detector_mode in data["rss_detector_modes"]:
                 stats["rss_detector_mode_requested_total"][detector_mode] += total_requested
                 stats["rss_detector_mode_total"][detector_mode] += 1
 
-            # data["rss_observing_modes"] is a set of a given observing mode so it is guaranteed to have only
-            # one observing mode type per proposal
+            # data["rss_observing_modes"] is a set, so any given observing mode is guaranteed to be in it at most once
             for observing_mode in data["rss_observing_modes"]:
                 stats["rss_observing_mode_requested_total"][observing_mode] += total_requested
                 stats["rss_observing_mode_total"][observing_mode] += 1
-                
+
         if data["is_scam"]:
             stats["scam_total"] += 1
             stats["scam_requested_total"] += total_requested
 
-            # data["scam_detector_modes"] is a set of a given detector mode so it is guaranteed to have only
-            # one detector modes type per proposal
+            # data["scam_detector_modes"] is a set, so any given detector mode is guaranteed to be in it at most once
             for detector_mode in data["scam_detector_modes"]:
                 stats["scam_detector_mode_requested_total"][detector_mode] += total_requested
                 stats["scam_detector_mode_total"][detector_mode] += 1
@@ -729,7 +725,7 @@ def targets(proposal_code_ids):
 
 def observing_conditions(proposal_code_ids, partner, semester):
     """
-    Get the statistics of observing conditions per seen and transparency, and fit it to schema.
+    Get the statistics of observing conditions per seeing and transparency, and fit it to schema.
 
     :param proposal_code_ids: list
         List of proposal code ids

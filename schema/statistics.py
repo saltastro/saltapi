@@ -1,10 +1,10 @@
 from graphene import Boolean
 from graphene import Enum
 from graphene import List
-from graphene import ObjectType, Field, Float
+from graphene import ObjectType, Field, Float, Int
 
 
-class TransparencyDistribution(ObjectType):
+class TransparencyTimeDistribution(ObjectType):
     """
     Types of transparencies that SALT supports
     """
@@ -14,9 +14,19 @@ class TransparencyDistribution(ObjectType):
     thin_cloud = Float()
 
 
-class SeeingDistribution(ObjectType):
+class TransparencyNumberDistribution(ObjectType):
     """
-    Distribution of time from the max seeing request per category.
+    Types of transparencies that SALT supports
+    """
+    any = Int()
+    clear = Int()
+    thick_cloud = Int()
+    thin_cloud = Int()
+
+
+class SeeingTimeDistribution(ObjectType):
+    """
+    Distribution of time from the maximum seeing request per category.
     "less_equal_1_dot_5" means seeing between 0 and 1.5 arcseconds, "less_equal_2" means it is between 1.5 and 2
     arcseconds, and so forth
     """
@@ -25,6 +35,19 @@ class SeeingDistribution(ObjectType):
     less_equal_2_dot_5 = Float()
     less_equal_3 = Float()
     more_than_3 = Float()
+
+
+class SeeingNumberDistribution(ObjectType):
+    """
+    Number of proposals requesting time from the maximum seeing request per category.
+    "less_equal_1_dot_5" means seeing between 0 and 1.5 arcseconds, "less_equal_2" means it is between 1.5 and 2
+    arcseconds, and so forth
+    """
+    less_equal_1_dot_5 = Int()
+    less_equal_2 = Int()
+    less_equal_2_dot_5 = Int()
+    less_equal_3 = Int()
+    more_than_3 = Int()
 
 
 class StatisticsPartner(Enum):
@@ -47,16 +70,16 @@ class SeeingCondition(ObjectType):
     """
     The seeing observing condition
     """
-    time_requested = Field(SeeingDistribution)
-    number_of_proposals = Field(SeeingDistribution)
+    time_requested = Field(SeeingTimeDistribution)
+    number_of_proposals = Field(SeeingNumberDistribution)
 
 
 class TransparencyCondition(ObjectType):
     """
     The transparency observing condition
     """
-    time_requested = Field(TransparencyDistribution)
-    number_of_proposals = Field(TransparencyDistribution)
+    time_requested = Field(TransparencyTimeDistribution)
+    number_of_proposals = Field(TransparencyNumberDistribution)
 
 
 class ObservingConditions(ObjectType):
