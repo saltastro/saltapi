@@ -66,8 +66,8 @@ class User(ObjectType):
             Bool indicating whether this user has the role for the partner.
         """
 
-        # the administrator and SALT Astronomer roles apply to all partners
-        if role in (RoleType.ADMINISTRATOR, RoleType.SALT_ASTRONOMER):
+        # The administrator, SALT Astronomer and Board roles apply to all partners
+        if role in (RoleType.ADMINISTRATOR, RoleType.SALT_ASTRONOMER, RoleType.BOARD):
             return any(r.type == role for r in self.role)
         return any(r.type == role and partner in r.partners for r in self.role)
 
@@ -171,6 +171,11 @@ class User(ObjectType):
             return self.has_role(RoleType.ADMINISTRATOR, partner) or \
                    self.has_role(RoleType.TAC_CHAIR, partner) or \
                    self.has_role(RoleType.TAC_MEMBER, partner)
+
+        if data == Data.STATISTICS:
+            return self.has_role(RoleType.ADMINISTRATOR, partner) or \
+                   self.has_role(RoleType.BOARD, partner) or \
+                   self.has_role(RoleType.TAC_CHAIR, partner)
 
         return False
 

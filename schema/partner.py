@@ -1,4 +1,4 @@
-from graphene import ObjectType, ID, String, Float,  Field
+from graphene import ObjectType, ID, String, Float,  Field, Enum
 
 
 class Priority(ObjectType):
