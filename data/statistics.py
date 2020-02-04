@@ -374,11 +374,13 @@ def create_completion_stats(observed, allocated, share, partner):
                 if r.type == RoleType.TAC_CHAIR:
                     for c in all_time_summaries:
                         if c.partner in r.partners or c.partner == "ALL":
-                            time_summaries.append(c)
+                            if c not in time_summaries:
+                                time_summaries.append(c)
                 if r.type == RoleType.TAC_MEMBER:
                     for c in all_time_summaries:
                         if c.partner in r.partners:
-                            time_summaries.append(c)
+                            if c not in time_summaries:
+                                time_summaries.append(c)
             return time_summaries
 
 
