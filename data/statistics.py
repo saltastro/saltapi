@@ -374,11 +374,13 @@ def create_completion_stats(observed, allocated, share, partner):
                 if r.type == RoleType.TAC_CHAIR:
                     for c in all_time_summaries:
                         if c.partner in r.partners or c.partner == "ALL":
-                            time_summaries.append(c)
+                            if c not in time_summaries:
+                                time_summaries.append(c)
                 if r.type == RoleType.TAC_MEMBER:
                     for c in all_time_summaries:
                         if c.partner in r.partners:
-                            time_summaries.append(c)
+                            if c not in time_summaries:
+                                time_summaries.append(c)
             return time_summaries
 
 
@@ -793,7 +795,7 @@ def get_statistics(partner, semester):
     proposal_code_ids = proposal_code_ids_for_statistics(semester, partner)
     return Statistics(
         completion=completion(partner, semester),
-        instruments_statistics=instruments_statistics(proposal_code_ids, partner, semester),
+        instruments=instruments_statistics(proposal_code_ids, partner, semester),
         observing_conditions=observing_conditions(proposal_code_ids, partner, semester),
         proposals=proposal_statistics(proposal_code_ids, semester),
         targets=targets(proposal_code_ids),
