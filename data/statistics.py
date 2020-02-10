@@ -362,11 +362,14 @@ def create_completion_stats(observed, allocated, share, partner):
                 time_summaries.append(c)
         if g.user.has_role(RoleType.ADMINISTRATOR) \
                 or g.user.has_role(RoleType.BOARD)\
+                or g.user.has_role(RoleType.SALT_ASTRONOMER)\
                 or g.user.has_role(RoleType.TAC_CHAIR, partner) or g.user.has_role(RoleType.TAC_MEMBER, partner):
             return time_summaries
         return []
     else:
-        if g.user.has_role(RoleType.ADMINISTRATOR) or g.user.has_role(RoleType.BOARD):
+        if g.user.has_role(RoleType.ADMINISTRATOR) \
+                or g.user.has_role(RoleType.BOARD) \
+                or g.user.has_role(RoleType.SALT_ASTRONOMER):
             return all_time_summaries
         else:
             time_summaries = []
@@ -414,7 +417,6 @@ def proposal_configurations(data):
     def _instrument_counter(row_data):
 
         proposals[row_data["Proposal_Code"]]["time_requested_pp"][row_data["Partner_Code"]] = row_data["TimeForPartner"]
-
 
         if not pd.isnull(row_data["P1Bvit_Id"]):
             proposals[row_data["Proposal_Code"]]["is_bvit"] = True
