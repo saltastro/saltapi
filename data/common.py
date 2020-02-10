@@ -67,16 +67,19 @@ def proposal_code_ids_for_statistics(semester, partner_code=None):
     iterable: str
         Array of proposal code ids
     """
-    conn = sdb_connect()
-    all_partners = [p['Partner_Code'] for i, p in pd.read_sql("""
-    SELECT Partner_Code FROM Partner
-        JOIN PartnerShareTimeDist USING(Partner_Id)
-        JOIN Semester USING(Semester_Id)
-    WHERE `Virtual` = 0
-        AND Semester_Id = {semester_id}
-        AND TimePercent > 0
-    """.format(semester_id=query_semester_id(semester)), conn).iterrows()]
-    conn.close()
+
+    # TODO: find a better way to handle active partners
+    # conn = sdb_connect()
+    # all_partners = [p['Partner_Code'] for i, p in pd.read_sql("""
+    # SELECT Partner_Code FROM Partner
+    #     JOIN PartnerShareTimeDist USING(Partner_Id)
+    #     JOIN Semester USING(Semester_Id)
+    # WHERE `Virtual` = 0
+    #     AND Semester_Id = {semester_id}
+    #     AND TimePercent > 0
+    # """.format(semester_id=query_semester_id(semester)), conn).iterrows()]
+    # conn.close()
+    all_partners = ['UW', 'RSA', 'UNC', 'UKSC', 'DC', 'RU', 'POL', 'AMNH', 'IUCAA']
 
     sql = """
 SELECT distinct
@@ -99,8 +102,8 @@ GROUP BY ProposalCode_Id, Semester_Id HAVING Semester = "{semester}"
     conn = sdb_connect()
 
     if partner_code is not None:
-        sql += """  AND PartnerCode IN ("{partner_codes}")
-                    """.format(partner_codes='", "'.join([partner_code]))
+        sql += """  AND PartnerCode = "{partner_code}"
+                    """.format(partner_code=partner_code)
     else:
         sql += """  AND PartnerCode IN ("{partner_codes}")
             """.format(partner_codes='", "'.join(all_partners))
