@@ -242,7 +242,8 @@ def proposal_observed_time(proposal_code_ids, semester):
         }
 
         if row["Partner_Code"] not in proposal_observed[row["Proposal_Code"]]["allocated_time"]:
-            proposal_observed[row["Proposal_Code"]]["allocated_time"][row["Partner_Code"]] = dict()
+            proposal_observed[row["Proposal_Code"]]["allocated_time"][row["Partner_Code"]] = \
+                {0: 0, 1: 0, 2: 0, 3: 0, 4: 0}
         proposal_observed[row["Proposal_Code"]]["allocated_time"][row["Partner_Code"]][row["AllocPriority"]] = \
             row["TimeAlloc"]
     return proposal_observed
@@ -286,7 +287,9 @@ def partners_time_summary(allocated, observed, share):
         "observed": PriorityValues(),
         "share_percentage": 0
     }
+
     for partner_code, time in allocated.items():
+        print(share, allocated)
         if not partner_code == "ALL":
             if partner_code not in observed:
                 observed[partner_code] = PriorityValues()
@@ -302,7 +305,7 @@ def partners_time_summary(allocated, observed, share):
             all_partners_time_summary["observed"].add_to_priority(observed[partner_code].p3, 3)
             all_partners_time_summary["observed"].add_to_priority(observed[partner_code].p4, 4)
 
-            all_partners_time_summary["share_percentage"] += share[partner_code]
+            all_partners_time_summary["share_percentage"] += share.get(partner_code, 0)
 
         time_summary.append(
             CompletionStatistics(
@@ -323,7 +326,7 @@ def partners_time_summary(allocated, observed, share):
                         p4=observed[partner_code].p4
                     )
                 ),
-                share_percentage=share[partner_code]
+                share_percentage=share.get(partner_code, 0)
             )
         )
     # Adding total for all
