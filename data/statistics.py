@@ -289,7 +289,6 @@ def partners_time_summary(allocated, observed, share):
     }
 
     for partner_code, time in allocated.items():
-        print(share, allocated)
         if not partner_code == "ALL":
             if partner_code not in observed:
                 observed[partner_code] = PriorityValues()
