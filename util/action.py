@@ -23,3 +23,4 @@ class Data(Enum):
     """
 
     AVAILABLE_TIME = 1
+    STATISTICS = 2

@@ -13,7 +13,7 @@ chardet==3.0.4
 click==6.6
 cryptography==2.1.4
 dominate==2.2.1
-ecdsa==0.13
+ecdsa==0.13.3
 enum34==1.1.6
 Fabric3==1.13.1.post1
 fabulous==0.3.0

@@ -64,3 +64,12 @@ WHERE StartSemester <= "{date}" AND EndSemester >= "{date}"
         "semester_id": int(results.iloc[0]["Semester_Id"])
     }
 
+
+def query_semester_id(semester):
+    sql = """
+    SELECT Semester_Id FROM Semester WHERE CONCAT(Year, "-",Semester) = %(semester)s
+    """
+    df = pd.read_sql(sql, con=sdb_connect(), params={"semester": semester})
+    if pd.isnull(df["Semester_Id"][0]):
+        raise ValueError("Semester {semester} is not known".format(semester=semester))
+    return int(df["Semester_Id"][0])
