@@ -98,7 +98,10 @@ WHERE CONCAT(s.Year, "-", s.Semester)=%(semester)s
        """
     if partner:
         sql += " AND Partner_Code=%(partner_code)s"
-    df = pd.read_sql(sql, con=sdb_connect(), params=params)
+    if not proposal_code_ids:
+        df = pd.DataFrame()
+    else:
+        df = pd.read_sql(sql, con=sdb_connect(), params=params)
     cloud_times = defaultdict(int)
     cloud_counts = defaultdict(int)
     for _, row in df.iterrows():
@@ -228,7 +231,10 @@ def proposal_observed_time(proposal_code_ids, semester):
             AND Proposal.Semester_Id = %(semester_id)s and mp.Semester_Id = %(semester_id)s
         """
 
-    df = pd.read_sql(sql, con=sdb_connect(), params=params)
+    if not proposal_code_ids:
+        df = pd.DataFrame()
+    else:
+        df = pd.read_sql(sql, con=sdb_connect(), params=params)
 
     for _, row in df.iterrows():
         if row["Proposal_Code"] not in proposal_observed:
@@ -583,7 +589,10 @@ FROM P1Config
 WHERE  CONCAT(Year,"-" ,Semester)=%(semester)s
     AND ProposalCode_Id IN %(proposal_code_ids)s
     """
-    df = pd.read_sql(sql, con=sdb_connect(), params=params)
+    if not proposal_code_ids:
+        df = pd.DataFrame()
+    else:
+        df = pd.read_sql(sql, con=sdb_connect(), params=params)
 
     proposal_conf = proposal_configurations(df)
 
@@ -688,7 +697,10 @@ def targets(proposal_code_ids):
             JOIN TargetCoordinates USING(TargetCoordinates_Id)
         WHERE ProposalCode_Id IN %(proposal_code_ids)s
            """
-    df = pd.read_sql(sql, con=sdb_connect(), params=params)
+    if not proposal_code_ids:
+        df = pd.DataFrame()
+    else:
+        df = pd.read_sql(sql, con=sdb_connect(), params=params)
     all_targets = []
     for _, row in df.iterrows():
         sign = -1 if row['DecSign'] == '-' else 1
@@ -760,7 +772,10 @@ WHERE Current=1
     thesis_proposals = 0
     p4_proposals = 0
 
-    df = pd.read_sql(sql, con=sdb_connect(), params=params)
+    if not proposal_code_ids:
+        df = pd.DataFrame()
+    else:
+        df = pd.read_sql(sql, con=sdb_connect(), params=params)
     for _, row in df.iterrows():
         if not row["Proposal_Code"] in proposals:
             proposals[row["Proposal_Code"]] = {
