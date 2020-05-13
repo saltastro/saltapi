@@ -73,7 +73,6 @@ def get_proposal_ids(semester, partner_code=None):
     for index, row in user_proposals.iterrows():
         if g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code=str(row['Proposal_Code'])):
             all_user_proposals.append(str(row["ProposalCode_Id"]))
-    print("cc", all_user_proposals)
     return {
         'ProposalCode_Ids': all_user_proposals,
         "all_proposals": all_user_proposals,
