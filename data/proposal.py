@@ -151,6 +151,7 @@ def get_proposals(**args):
     ids = get_proposal_ids(semester, partner)
     proposal_code_ids = sql_list_string(ids['ProposalCode_Ids'])
     data = query_proposal_data(proposal_code_ids, semester, public=public)
+    print("PPP", data)
     return data
 
 

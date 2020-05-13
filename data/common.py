@@ -1,9 +1,52 @@
 import pandas as pd
 from flask import g
 from data import sdb_connect
-from data.partner import get_partner_codes
 from util.action import Action
-from util.semester import query_semester_id
+
+
+def find_proposals_allocated_time(partner_codes, semester):
+    sql = """
+SELECT DISTINCT ProposalCode_Id, Proposal_Code
+FROM MultiPartner
+    JOIN PriorityAlloc USING (MultiPartner_Id)
+    JOIN Semester USING (Semester_Id)
+    JOIN Partner USING (Partner_Id)
+    JOIN ProposalCode USING (ProposalCode_Id)
+WHERE Year = {year} AND Semester = {semester} AND Partner_Code IN ("{partner_codes}")
+    """.format(
+        semester=semester.split("-")[1],
+        year=semester.split("-")[0],
+        partner_codes='", "'.join(partner_codes)
+    )
+    conn = sdb_connect()
+    results = pd.read_sql(sql, conn)
+    conn.close()
+    return results
+
+
+def find_proposals_submitted(partner_codes, semester):
+    sql = """
+SELECT DISTINCT ProposalCode_Id, Proposal_Code
+FROM Proposal
+    JOIN ProposalCode USING(ProposalCode_Id)
+    JOIN ProposalGeneralInfo USING (ProposalCode_Id)
+    JOIN ProposalStatus USING (ProposalStatus_Id)
+    JOIN Semester USING (Semester_Id)
+    JOIN MultiPartner USING(ProposalCode_Id)
+    JOIN Partner ON (MultiPartner.Partner_Id = Partner.Partner_Id)
+WHERE Current = 1 AND Status NOT IN ("Deleted", "Rejected")
+    AND Year = {year} AND Semester = {semester}
+    AND Partner_Code IN ("{partner_codes}")
+    """.format(
+        semester=semester.split("-")[1],
+        year=semester.split("-")[0],
+        partner_codes='", "'.join(partner_codes)
+    )
+    conn = sdb_connect()
+    results = pd.read_sql(sql, conn)
+    conn.close()
+
+    return results
 
 
 def get_proposal_ids(semester, partner_code=None):
@@ -12,45 +55,28 @@ def get_proposal_ids(semester, partner_code=None):
     all_partners = [p['Partner_Code'] for i, p in pd.read_sql("SELECT Partner_Code FROM Partner", conn).iterrows()]
     conn.close()
 
-    sql = """
-SELECT distinct
-    Partner.Partner_Code AS PartnerCode,
-    ProposalCode_Id,
-    Proposal_Code,
-    Surname,
-    ProposalStatus_Id ,
-    CONCAT(Year, '-', Semester) AS Semester
-FROM ProposalCode
-    JOIN ProposalGeneralInfo USING(ProposalCode_Id)
-    JOIN MultiPartner USING(ProposalCode_Id)
-    JOIN ProposalContact USING(ProposalCode_Id)
-    JOIN Investigator ON (Leader_Id=Investigator_Id)
-    JOIN Semester USING(Semester_Id)
-    JOIN Partner ON (MultiPartner.Partner_Id = Partner.Partner_Id)
-GROUP BY ProposalCode_Id, Semester_Id HAVING Semester = "{semester}"
-    AND ProposalStatus_Id NOT IN (9, 3)
-""".format(semester=semester)  # status 9 => Deleted, 3 => Rejected
-
-    conn = sdb_connect()
-    all_proposals = [str(p["ProposalCode_Id"]) for i, p in pd.read_sql(sql, conn).iterrows()]
-
     user_partners = [partner for partner in all_partners if g.user.may_perform(Action.VIEW_PARTNER_PROPOSALS,
                                                                                partner=partner)]
-    if partner_code is not None:
-        sql += """  AND PartnerCode IN ("{partner_codes}")
-                """.format(partner_codes='", "'.join([partner_code]))
-    else:
-        sql += """  AND PartnerCode IN ("{partner_codes}")
-        """.format(partner_codes='", "'.join(user_partners))
+    partner_codes = user_partners if partner_code is None else [partner_code]
 
-    proposal_code_ids = []
-    for index, r in pd.read_sql(sql, conn).iterrows():
-        if g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code=str(r['Proposal_Code'])):
-            proposal_code_ids.append(str(r['ProposalCode_Id']))
-    conn.close()
+    proposals_allocated_time = find_proposals_allocated_time(partner_codes=partner_codes, semester=semester)
+    user_proposals = find_proposals_submitted(partner_codes=partner_codes, semester=semester)
+
+    for index, proposal in proposals_allocated_time.iterrows():
+        if proposal["Proposal_Code"] not in user_proposals["Proposal_Code"]:
+            user_proposals.append({
+                'ProposalCode_Id': proposal['ProposalCode_Id'],
+                "Proposal_Code": proposal['Proposal_Code']},
+                ignore_index=True)
+
+    all_user_proposals = []
+    for index, row in user_proposals.iterrows():
+        if g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code=str(row['Proposal_Code'])):
+            all_user_proposals.append(str(row["ProposalCode_Id"]))
+    print("cc", all_user_proposals)
     return {
-        'ProposalCode_Ids': proposal_code_ids,
-        "all_proposals": all_proposals
+        'ProposalCode_Ids': all_user_proposals,
+        "all_proposals": all_user_proposals,
     }
 
 
