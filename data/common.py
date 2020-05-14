@@ -5,7 +5,7 @@ from util.action import Action
 
 
 def find_proposals_allocated_time(partner_codes, semester):
-    sql = """
+    allocated_time_sql = """
 SELECT DISTINCT ProposalCode_Id, Proposal_Code
 FROM MultiPartner
     JOIN PriorityAlloc USING (MultiPartner_Id)
@@ -19,13 +19,13 @@ WHERE Year = {year} AND Semester = {semester} AND Partner_Code IN ("{partner_cod
         partner_codes='", "'.join(partner_codes)
     )
     conn = sdb_connect()
-    results = pd.read_sql(sql, conn)
+    results = pd.read_sql(allocated_time_sql, conn)
     conn.close()
     return results
 
 
 def find_proposals_submitted(partner_codes, semester):
-    sql = """
+    submitted_sql = """
 SELECT DISTINCT ProposalCode_Id, Proposal_Code
 FROM Proposal
     JOIN ProposalCode USING(ProposalCode_Id)
@@ -43,7 +43,7 @@ WHERE Current = 1 AND Status NOT IN ("Deleted", "Rejected")
         partner_codes='", "'.join(partner_codes)
     )
     conn = sdb_connect()
-    results = pd.read_sql(sql, conn)
+    results = pd.read_sql(submitted_sql, conn)
     conn.close()
 
     return results
@@ -62,15 +62,10 @@ def get_proposal_ids(semester, partner_code=None):
     proposals_allocated_time = find_proposals_allocated_time(partner_codes=partner_codes, semester=semester)
     user_proposals = find_proposals_submitted(partner_codes=partner_codes, semester=semester)
 
-    for index, proposal in proposals_allocated_time.iterrows():
-        if proposal["Proposal_Code"] not in user_proposals["Proposal_Code"]:
-            user_proposals.append({
-                'ProposalCode_Id': proposal['ProposalCode_Id'],
-                "Proposal_Code": proposal['Proposal_Code']},
-                ignore_index=True)
+    all_proposals = pd.concat([proposals_allocated_time, user_proposals], ignore_index=True).drop_duplicates()
 
     all_user_proposals = []
-    for index, row in user_proposals.iterrows():
+    for index, row in all_proposals.iterrows():
         if g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code=str(row['Proposal_Code'])):
             all_user_proposals.append(str(row["ProposalCode_Id"]))
     return {
