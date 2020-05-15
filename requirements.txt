@@ -64,7 +64,7 @@ PyMySQL==0.7.11
 PyNaCl==1.2.1
 pytest==3.2.0
 python-dateutil==2.6.1
-python-engineio==2.1.0
+python-engineio==3.8.2.post1
 python-mimeparse==1.6.0
 python-socketio==1.9.0
 pytz==2017.3
