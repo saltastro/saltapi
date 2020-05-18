@@ -6,11 +6,11 @@ from util.action import Action
 
 def find_proposals_allocated_time(partner_codes, semester):
     allocated_time_sql = """
-SELECT DISTINCT ProposalCode_Id, Proposal_Code
+SELECT DISTINCT Proposal_Code
 FROM MultiPartner
     JOIN PriorityAlloc USING (MultiPartner_Id)
-    JOIN Semester USING (Semester_Id)
-    JOIN Partner USING (Partner_Id)
+    JOIN Semester AS s USING (Semester_Id)
+    JOIN Partner AS partner USING (Partner_Id)
     JOIN ProposalCode USING (ProposalCode_Id)
 WHERE Year = {year} AND Semester = {semester} AND Partner_Code IN ("{partner_codes}")
     """.format(
@@ -26,14 +26,14 @@ WHERE Year = {year} AND Semester = {semester} AND Partner_Code IN ("{partner_cod
 
 def find_proposals_submitted(partner_codes, semester):
     submitted_sql = """
-SELECT DISTINCT ProposalCode_Id, Proposal_Code
+SELECT DISTINCT Proposal_Code
 FROM Proposal
     JOIN ProposalCode USING(ProposalCode_Id)
     JOIN ProposalGeneralInfo USING (ProposalCode_Id)
     JOIN ProposalStatus USING (ProposalStatus_Id)
-    JOIN Semester USING (Semester_Id)
     JOIN MultiPartner USING(ProposalCode_Id)
-    JOIN Partner ON (MultiPartner.Partner_Id = Partner.Partner_Id)
+    JOIN Semester AS s ON MultiPartner.Semester_Id=Semester.Semester_Id
+    JOIN Partner AS partner ON (MultiPartner.Partner_Id = partner.Partner_Id)
 WHERE Current = 1 AND Status NOT IN ("Deleted", "Rejected")
     AND Year = {year} AND Semester = {semester}
     AND Partner_Code IN ("{partner_codes}")
