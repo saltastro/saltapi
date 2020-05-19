@@ -4,13 +4,29 @@ from data import sdb_connect
 from util.action import Action
 
 
-def find_proposals_allocated_time(partner_codes, semester):
+def find_proposals_with_allocated_time(partner_codes, semester):
+    """
+    All of the proposal that are allocated time.
+
+    Parameters
+    ----------
+    partner_codes : Iterable[str]
+        The partner code
+    semester : str
+        The semester such as 2020-1.
+
+    Returns
+    -------
+    Proposal Code : DataFrame
+        The data frame of proposal codes.
+
+    """
     allocated_time_sql = """
 SELECT DISTINCT ProposalCode_Id, Proposal_Code
 FROM MultiPartner
     JOIN PriorityAlloc USING (MultiPartner_Id)
-    JOIN Semester AS s USING (Semester_Id)
-    JOIN Partner AS partner USING (Partner_Id)
+    JOIN Semester USING (Semester_Id)
+    JOIN Partner USING (Partner_Id)
     JOIN ProposalCode USING (ProposalCode_Id)
 WHERE Year = {year} AND Semester = {semester} AND Partner_Code IN ("{partner_codes}")
     """.format(
@@ -25,6 +41,23 @@ WHERE Year = {year} AND Semester = {semester} AND Partner_Code IN ("{partner_cod
 
 
 def find_proposals_with_time_requests(partner_codes, semester):
+    """
+    All of the proposal that are requesting time.
+    The proposal is included even if the time request is for 0 seconds.
+
+    Parameters
+    ----------
+    partner_codes : Iterable[str]
+        The partner code
+    semester : str
+        The semester such as 2020-1.
+
+    Returns
+    -------
+    Proposal Code : DataFrame
+        The data frame of proposal codes.
+
+    """
     submitted_sql = """
 SELECT DISTINCT ProposalCode_Id, Proposal_Code
 FROM Proposal
@@ -32,10 +65,10 @@ FROM Proposal
     JOIN ProposalGeneralInfo USING (ProposalCode_Id)
     JOIN ProposalStatus USING (ProposalStatus_Id)
     JOIN MultiPartner USING(ProposalCode_Id)
-    JOIN Semester AS s ON MultiPartner.Semester_Id = s.Semester_Id
-    JOIN Partner AS partner ON (MultiPartner.Partner_Id = partner.Partner_Id)
+    JOIN Semester ON MultiPartner.Semester_Id = Semester.Semester_Id
+    JOIN Partner ON (MultiPartner.Partner_Id = Partner.Partner_Id)
 WHERE Current = 1 AND Status NOT IN ("Deleted", "Rejected")
-    AND s.Year = {year} AND s.Semester = {semester}
+    AND Year = {year} AND Semester = {semester}
     AND Partner_Code IN ("{partner_codes}")
     """.format(
         semester=semester.split("-")[1],
@@ -49,7 +82,7 @@ WHERE Current = 1 AND Status NOT IN ("Deleted", "Rejected")
     return results
 
 
-def get_user_proposal_ids(semester, partner_code=None):
+def get_user_viewable_proposal_ids(semester, partner_code=None):
 
     conn = sdb_connect()
     all_partners = [p['Partner_Code'] for i, p in pd.read_sql("SELECT Partner_Code FROM Partner", conn).iterrows()]
@@ -59,7 +92,7 @@ def get_user_proposal_ids(semester, partner_code=None):
                                                                                partner=partner)]
     partner_codes = user_partners if partner_code is None else [partner_code]
 
-    proposals_allocated_time = find_proposals_allocated_time(partner_codes=partner_codes, semester=semester)
+    proposals_allocated_time = find_proposals_with_allocated_time(partner_codes=partner_codes, semester=semester)
     user_proposals = find_proposals_with_time_requests(partner_codes=partner_codes, semester=semester)
 
     all_proposals = pd.concat([proposals_allocated_time, user_proposals], ignore_index=True).drop_duplicates()
@@ -81,13 +114,12 @@ def get_all_proposal_ids(semester, partner_code=None):
                                                                                partner=partner)]
     partner_codes = user_partners if partner_code is None else [partner_code]
 
-    proposals_allocated_time = find_proposals_allocated_time(partner_codes=partner_codes, semester=semester)
+    proposals_allocated_time = find_proposals_with_allocated_time(partner_codes=partner_codes, semester=semester)
     user_proposals = find_proposals_with_time_requests(partner_codes=partner_codes, semester=semester)
 
     all_proposals = pd.concat([proposals_allocated_time, user_proposals], ignore_index=True).drop_duplicates()
 
     return all_proposals["ProposalCode_Id"].tolist()
-
 
 
 def proposal_code_ids_for_statistics(semester, partner_code=None):

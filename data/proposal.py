@@ -3,7 +3,7 @@ import os
 import pandas as pd
 
 from data import sdb_connect
-from data.common import get_user_proposal_ids, sql_list_string
+from data.common import get_user_viewable_proposal_ids, sql_list_string
 from data.instruments import get_instruments
 from data.proposal_data.allocations import update_time_allocations
 from data.proposal_data.requested import update_proposals_requested_time, update_requested_time_per_partner
@@ -148,7 +148,7 @@ def get_proposals(**args):
     semester = args['semester']
     partner = args['partner_code']
     public = args['details']
-    proposal_code_ids = sql_list_string(get_user_proposal_ids(semester, partner))
+    proposal_code_ids = sql_list_string(get_user_viewable_proposal_ids(semester, partner))
     data = query_proposal_data(proposal_code_ids, semester, public=public)
     return data
 

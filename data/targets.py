@@ -1,6 +1,6 @@
 from pandas._libs.tslib import NaTType
 from schema.target import Target, Position, Magnitude
-from data.common import sql_list_string, get_all_proposal_ids, get_user_proposal_ids
+from data.common import sql_list_string, get_all_proposal_ids, get_user_viewable_proposal_ids
 import pandas as pd
 from data import sdb_connect
 
@@ -55,7 +55,7 @@ def get_targets(proposal_code_ids=None, proposals=None, semester=None, partner_c
             get_all_proposal_ids(semester=semester, partner_code=partner_code)
         ) if partner_code is None \
             else sql_list_string(
-            get_user_proposal_ids(semester=semester, partner_code=partner_code)
+            get_user_viewable_proposal_ids(semester=semester, partner_code=partner_code)
         )
     sql = """
      SELECT *
