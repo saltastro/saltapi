@@ -6,7 +6,7 @@ from util.action import Action
 
 def find_proposals_allocated_time(partner_codes, semester):
     allocated_time_sql = """
-SELECT DISTINCT Proposal_Code
+SELECT DISTINCT ProposalCode_Id, Proposal_Code
 FROM MultiPartner
     JOIN PriorityAlloc USING (MultiPartner_Id)
     JOIN Semester AS s USING (Semester_Id)
@@ -24,18 +24,18 @@ WHERE Year = {year} AND Semester = {semester} AND Partner_Code IN ("{partner_cod
     return results
 
 
-def find_proposals_submitted(partner_codes, semester):
+def find_proposals_with_time_requests(partner_codes, semester):
     submitted_sql = """
-SELECT DISTINCT Proposal_Code
+SELECT DISTINCT ProposalCode_Id, Proposal_Code
 FROM Proposal
     JOIN ProposalCode USING(ProposalCode_Id)
     JOIN ProposalGeneralInfo USING (ProposalCode_Id)
     JOIN ProposalStatus USING (ProposalStatus_Id)
     JOIN MultiPartner USING(ProposalCode_Id)
-    JOIN Semester AS s ON MultiPartner.Semester_Id=Semester.Semester_Id
+    JOIN Semester AS s ON MultiPartner.Semester_Id = s.Semester_Id
     JOIN Partner AS partner ON (MultiPartner.Partner_Id = partner.Partner_Id)
 WHERE Current = 1 AND Status NOT IN ("Deleted", "Rejected")
-    AND Year = {year} AND Semester = {semester}
+    AND s.Year = {year} AND s.Semester = {semester}
     AND Partner_Code IN ("{partner_codes}")
     """.format(
         semester=semester.split("-")[1],
@@ -49,7 +49,7 @@ WHERE Current = 1 AND Status NOT IN ("Deleted", "Rejected")
     return results
 
 
-def get_proposal_ids(semester, partner_code=None):
+def get_user_proposal_ids(semester, partner_code=None):
 
     conn = sdb_connect()
     all_partners = [p['Partner_Code'] for i, p in pd.read_sql("SELECT Partner_Code FROM Partner", conn).iterrows()]
@@ -60,7 +60,7 @@ def get_proposal_ids(semester, partner_code=None):
     partner_codes = user_partners if partner_code is None else [partner_code]
 
     proposals_allocated_time = find_proposals_allocated_time(partner_codes=partner_codes, semester=semester)
-    user_proposals = find_proposals_submitted(partner_codes=partner_codes, semester=semester)
+    user_proposals = find_proposals_with_time_requests(partner_codes=partner_codes, semester=semester)
 
     all_proposals = pd.concat([proposals_allocated_time, user_proposals], ignore_index=True).drop_duplicates()
 
@@ -68,10 +68,26 @@ def get_proposal_ids(semester, partner_code=None):
     for index, row in all_proposals.iterrows():
         if g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code=str(row['Proposal_Code'])):
             all_user_proposals.append(str(row["ProposalCode_Id"]))
-    return {
-        'ProposalCode_Ids': all_user_proposals,
-        "all_proposals": all_user_proposals,
-    }
+    return all_user_proposals
+
+
+def get_all_proposal_ids(semester, partner_code=None):
+
+    conn = sdb_connect()
+    all_partners = [p['Partner_Code'] for i, p in pd.read_sql("SELECT Partner_Code FROM Partner", conn).iterrows()]
+    conn.close()
+
+    user_partners = [partner for partner in all_partners if g.user.may_perform(Action.VIEW_PARTNER_PROPOSALS,
+                                                                               partner=partner)]
+    partner_codes = user_partners if partner_code is None else [partner_code]
+
+    proposals_allocated_time = find_proposals_allocated_time(partner_codes=partner_codes, semester=semester)
+    user_proposals = find_proposals_with_time_requests(partner_codes=partner_codes, semester=semester)
+
+    all_proposals = pd.concat([proposals_allocated_time, user_proposals], ignore_index=True).drop_duplicates()
+
+    return all_proposals["ProposalCode_Id"].tolist()
+
 
 
 def proposal_code_ids_for_statistics(semester, partner_code=None):
@@ -130,7 +146,7 @@ GROUP BY ProposalCode_Id, Semester_Id HAVING Semester = "{semester}"
 
     proposal_code_ids = []
     for index, r in pd.read_sql(sql, conn).iterrows():
-        proposal_code_ids.append(str(r['ProposalCode_Id']))
+        proposal_code_ids.append(r['ProposalCode_Id'])
     conn.close()
     return proposal_code_ids
 
@@ -154,5 +170,5 @@ def sql_list_string(values):
 
     """
     if values:
-        return '({values})'.format(values=', '.join(values))
+        return '({values})'.format(values=', '.join(map(str, values)))
     return '(NULL)'
