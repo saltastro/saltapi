@@ -42,8 +42,8 @@ WHERE Year = {year} AND Semester = {semester} AND Partner_Code IN ("{partner_cod
 
 def find_proposals_with_time_requests(partner_codes, semester):
     """
-    All of the proposal that are requesting time.
-    The proposal is included even if the time request is for 0 seconds.
+    All the proposal that are requesting time.
+    A proposal is included even if the time request is for 0 seconds.
 
     Parameters
     ----------
