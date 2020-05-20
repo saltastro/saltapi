@@ -6,7 +6,7 @@ from util.action import Action
 
 def find_proposals_with_allocated_time(partner_codes, semester):
     """
-    All of the proposal that are allocated time.
+    All of the proposals that are allocated time.
 
     Parameters
     ----------
@@ -42,7 +42,7 @@ WHERE Year = {year} AND Semester = {semester} AND Partner_Code IN ("{partner_cod
 
 def find_proposals_with_time_requests(partner_codes, semester):
     """
-    All the proposal that are requesting time.
+    Alls the proposal that are requesting time.
     A proposal is included even if the time request is for 0 seconds.
 
     Parameters
@@ -82,28 +82,6 @@ WHERE Current = 1 AND Status NOT IN ("Deleted", "Rejected")
     return results
 
 
-def get_user_viewable_proposal_ids(semester, partner_code=None):
-
-    conn = sdb_connect()
-    all_partners = [p['Partner_Code'] for i, p in pd.read_sql("SELECT Partner_Code FROM Partner", conn).iterrows()]
-    conn.close()
-
-    user_partners = [partner for partner in all_partners if g.user.may_perform(Action.VIEW_PARTNER_PROPOSALS,
-                                                                               partner=partner)]
-    partner_codes = user_partners if partner_code is None else [partner_code]
-
-    proposals_allocated_time = find_proposals_with_allocated_time(partner_codes=partner_codes, semester=semester)
-    user_proposals = find_proposals_with_time_requests(partner_codes=partner_codes, semester=semester)
-
-    all_proposals = pd.concat([proposals_allocated_time, user_proposals], ignore_index=True).drop_duplicates()
-
-    all_user_proposals = []
-    for index, row in all_proposals.iterrows():
-        if g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code=str(row['Proposal_Code'])):
-            all_user_proposals.append(str(row["ProposalCode_Id"]))
-    return all_user_proposals
-
-
 def get_all_proposal_ids(semester, partner_code=None):
 
     conn = sdb_connect()
@@ -117,9 +95,16 @@ def get_all_proposal_ids(semester, partner_code=None):
     proposals_allocated_time = find_proposals_with_allocated_time(partner_codes=partner_codes, semester=semester)
     user_proposals = find_proposals_with_time_requests(partner_codes=partner_codes, semester=semester)
 
-    all_proposals = pd.concat([proposals_allocated_time, user_proposals], ignore_index=True).drop_duplicates()
+    return pd.concat([proposals_allocated_time, user_proposals], ignore_index=True).drop_duplicates()
 
-    return all_proposals["ProposalCode_Id"].tolist()
+
+def get_user_viewable_proposal_ids(semester, partner_code=None):
+
+    all_user_proposals = []
+    for index, row in get_all_proposal_ids(semester, partner_code).iterrows():
+        if g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code=str(row['Proposal_Code'])):
+            all_user_proposals.append(str(row["ProposalCode_Id"]))
+    return all_user_proposals
 
 
 def proposal_code_ids_for_statistics(semester, partner_code=None):

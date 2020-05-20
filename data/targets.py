@@ -52,7 +52,7 @@ def get_targets(proposal_code_ids=None, proposals=None, semester=None, partner_c
         if semester is None:
             raise ValueError("semester must be provided when query for Targets")
         proposal_code_ids = sql_list_string(
-            get_all_proposal_ids(semester=semester, partner_code=partner_code)
+            get_all_proposal_ids(semester=semester, partner_code=partner_code)["ProposalCode_Id"].tolist()
         ) if partner_code is None \
             else sql_list_string(
             get_user_viewable_proposal_ids(semester=semester, partner_code=partner_code)
