@@ -40,9 +40,9 @@ WHERE Year = {year} AND Semester = {semester} AND Partner_Code IN ("{partner_cod
     return results
 
 
-def find_proposals_with_time_requests(partner_codes, semester):
+def find_submitted_proposals(partner_codes, semester):
     """
-    Alls the proposal that are requesting time.
+    All the proposals that are requesting time.
     A proposal is included even if the time request is for 0 seconds.
 
     Parameters
@@ -93,7 +93,7 @@ def get_all_proposal_ids(semester, partner_code=None):
     partner_codes = user_partners if partner_code is None else [partner_code]
 
     proposals_allocated_time = find_proposals_with_allocated_time(partner_codes=partner_codes, semester=semester)
-    user_proposals = find_proposals_with_time_requests(partner_codes=partner_codes, semester=semester)
+    user_proposals = find_submitted_proposals(partner_codes=partner_codes, semester=semester)
 
     return pd.concat([proposals_allocated_time, user_proposals], ignore_index=True).drop_duplicates()
 
