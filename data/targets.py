@@ -1,4 +1,4 @@
-from pandas._libs.tslib import NaTType
+from pandas import NaT
 from schema.target import Target, Position, Magnitude
 from data.common import sql_list_string, get_all_proposal_ids, get_user_viewable_proposal_ids
 import pandas as pd
@@ -18,9 +18,9 @@ def target(row):
         position=Position(
             ra=(row['RaH'] + row['RaM'] / 60 + row['RaS'] / 3600) / (24 / 360),
             dec=(sign * (row['DecD'] + row['DecM'] / 60 + row['DecS'] / 3600)),
-            ra_dot=None if isinstance(row['Epoch'], NaTType) else row['RaDot'],
-            dec_dot=None if isinstance(row['Epoch'], NaTType) else row['DecDot'],
-            epoch=None if isinstance(row['Epoch'], NaTType) else row['Epoch']
+            ra_dot=None if isinstance(row['Epoch'], NaT) else row['RaDot'],
+            dec_dot=None if isinstance(row['Epoch'], NaT) else row['DecDot'],
+            epoch=None if isinstance(row['Epoch'], NaT) else row['Epoch']
         ),
         magnitude=Magnitude(
             filter=row['FilterName'],
