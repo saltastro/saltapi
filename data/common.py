@@ -67,7 +67,7 @@ FROM Proposal
     JOIN MultiPartner USING(ProposalCode_Id)
     JOIN Semester ON MultiPartner.Semester_Id = Semester.Semester_Id
     JOIN Partner ON (MultiPartner.Partner_Id = Partner.Partner_Id)
-WHERE Current = 1 AND Status NOT IN ("Deleted", "Rejected")
+WHERE Current = 1 AND Status NOT IN ("Deleted")
     AND Year = {year} AND Semester = {semester}
     AND Partner_Code IN ("{partner_codes}")
     """.format(
