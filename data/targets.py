@@ -18,9 +18,9 @@ def target(row):
         position=Position(
             ra=(row['RaH'] + row['RaM'] / 60 + row['RaS'] / 3600) / (24 / 360),
             dec=(sign * (row['DecD'] + row['DecM'] / 60 + row['DecS'] / 3600)),
-            ra_dot=None if isinstance(row['Epoch'], NaT) else row['RaDot'],
-            dec_dot=None if isinstance(row['Epoch'], NaT) else row['DecDot'],
-            epoch=None if isinstance(row['Epoch'], NaT) else row['Epoch']
+            ra_dot=None if row['Epoch'] == NaT else row['RaDot'],
+            dec_dot=None if row['Epoch'] == NaT else row['DecDot'],
+            epoch=None if row['Epoch'] == NaT else row['Epoch']
         ),
         magnitude=Magnitude(
             filter=row['FilterName'],
