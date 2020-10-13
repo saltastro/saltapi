@@ -1,5 +1,6 @@
+from pandas import NaT
 from schema.target import Target, Position, Magnitude
-from data.common import get_proposal_ids, sql_list_string
+from data.common import sql_list_string, get_all_proposal_ids, get_user_viewable_proposal_ids
 import pandas as pd
 from data import sdb_connect
 
@@ -50,9 +51,12 @@ def get_targets(proposal_code_ids=None, proposals=None, semester=None, partner_c
     if proposal_code_ids is None:
         if semester is None:
             raise ValueError("semester must be provided when query for Targets")
-        ids = get_proposal_ids(semester=semester, partner_code=partner_code)
-        proposal_code_ids = sql_list_string(ids['all_proposals']) if partner_code is None \
-            else sql_list_string(ids['ProposalCode_Ids'])
+        proposal_code_ids = sql_list_string(
+            get_all_proposal_ids(semester=semester, partner_code=partner_code)["ProposalCode_Id"].tolist()
+        ) if partner_code is None \
+            else sql_list_string(
+            get_user_viewable_proposal_ids(semester=semester, partner_code=partner_code)
+        )
     sql = """
      SELECT distinct Target_Id, Proposal_Code, DecSign, Target_Name, Optional, RaH, RaM, RaS, 
      DecD, DecM, DecS, Epoch, RaDot, DecDot, FilterName, MinMag, MaxMag
