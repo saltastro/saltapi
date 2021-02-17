@@ -1,6 +1,7 @@
 import pandas as pd
 from flask import g
 from data import sdb_connect
+from data.partner import get_partner_code_id, get_partner_codes
 from util.action import Action
 
 
@@ -89,7 +90,7 @@ def get_all_proposal_ids(semester, partner_code=None):
     conn.close()
 
     user_partners = [partner for partner in all_partners if g.user.may_perform(Action.VIEW_PARTNER_PROPOSALS,
-                                                                               partner=partner)]
+                                                                               partner=partner, semester=semester)]
     partner_codes = user_partners if partner_code is None else [partner_code]
 
     proposals_allocated_time = find_proposals_with_allocated_time(partner_codes=partner_codes, semester=semester)
@@ -102,7 +103,7 @@ def get_user_viewable_proposal_ids(semester, partner_code=None):
 
     all_user_proposals = []
     for index, row in get_all_proposal_ids(semester, partner_code).iterrows():
-        if g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code=str(row['Proposal_Code'])):
+        if g.user.may_perform(Action.VIEW_PROPOSAL, proposal_code=str(row['Proposal_Code']), semester=semester):
             all_user_proposals.append(str(row["ProposalCode_Id"]))
     return all_user_proposals
 
@@ -121,7 +122,10 @@ def proposal_code_ids_for_statistics(semester, partner_code=None):
         Array of proposal code ids
     """
 
-    # TODO: find a better way to handle active partners
+
+
+    partner_code_id = get_partner_code_id(partner_code) if partner_code else None
+
     # conn = sdb_connect()
     # all_partners = [p['Partner_Code'] for i, p in pd.read_sql("""
     # SELECT Partner_Code FROM Partner
@@ -132,7 +136,7 @@ def proposal_code_ids_for_statistics(semester, partner_code=None):
     #     AND TimePercent > 0
     # """.format(semester_id=query_semester_id(semester)), conn).iterrows()]
     # conn.close()
-    all_partners = ['UW', 'RSA', 'UNC', 'UKSC', 'DC', 'RU', 'POL', 'AMNH', 'IUCAA', "GU", "DUR", "UC"]
+    all_partners = get_partner_codes(only_partner_ids=[partner_code_id], semester=semester)
 
     sql = """
 SELECT distinct

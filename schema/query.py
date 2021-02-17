@@ -1,8 +1,9 @@
 import graphene
 from flask import g
-from schema.partner import *
+
+from data.user.user_util import get_user_details
 from schema.proposal import *
-from data.user import get_salt_users, get_tac_members
+from data.user.user import get_salt_users, get_tac_members
 from data.proposal import get_proposals
 from data.partner import get_partners
 from data.statistics import get_statistics
@@ -55,7 +56,17 @@ class Query(graphene.ObjectType):
         return get_partners(semester=semester, partner=partner_code)
 
     def resolve_user(self, info):
-        return g.user
+        print("I am in..")
+        user_id = g.user.user_id
+        print("XXX", info)
+        user_details = get_user_details(user_id)
+        return User(
+            user_id=user_id,
+            username=user_details["username"],
+            first_name=user_details["first_name"],
+            last_name=user_details["last_name"],
+            email=user_details["email"],
+        )
 
     def resolve_salt_astronomers(self, info):
         return get_salt_astronomers()

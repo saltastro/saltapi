@@ -381,7 +381,7 @@ def create_completion_stats(observed, allocated, share, partner):
             return all_time_summaries
         else:
             time_summaries = []
-            for r in g.user.role:
+            for r in g.user.roles:
                 if r.type == RoleType.TAC_CHAIR:
                     for c in all_time_summaries:
                         if c.partner in r.partners or c.partner == "ALL":

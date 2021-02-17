@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  saltapi:
+    build: ./saltapi
+    env_file:
+      - .env
+    environment:
+      - API_HOST=${API_HOST}
+      - API_USER=${API_USER}
+      - API_PASSWORD=${API_PASSWORD}
+      - API_DATABASE=${API_DATABASE}
+      - SECRET_TOKEN_KEY=${SECRET_TOKEN_KEY}
+      - PROPOSALS_DIR=${PROPOSALS_DIR}
+      - SENTRY_DSN=${SENTRY_DSN}
+
+  salt-server-api:
+    build: ./salt-server-api
+    env_file:
+      - .env
+    environment:
+      - API_USER=${API_USER}
+      - DATABASE_URI=${DATABASE_URI}
+      - DEV_DATABASE_URI=${DEV_DATABASE_URI}
+      - TEST_DATABASE_URI=${TEST_DATABASE_URI}
+      - FLASK_CONFIG=${FLASK_CONFIG}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - LOG_FILE_PATH=${LOG_FILE_PATH}
+
+  tacweb:
+    build: ./tacweb
+

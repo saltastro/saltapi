@@ -54,7 +54,8 @@ def update_completion_comment(proposal_code, semester, comment, cursor):
 
     if not g.user.may_perform(Action.UPDATE_COMPLETION_STAT_COMMENT,
                               proposal_code=proposal_code,
-                              comment=comment):
+                              comment=comment,
+                              semester=semester):
         raise InvalidUsage(message='You are not allowed to make the requested update for proposal {proposal_code}'
                            .format(proposal_code=proposal_code),
                            status_code=403)

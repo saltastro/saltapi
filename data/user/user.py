@@ -2,81 +2,9 @@ from flask import g
 import pandas as pd
 from data.common import sdb_connect
 from schema.partner import Partner
-from schema.user import User, Role, RoleType, TacMember
-from data.partner import get_partner_codes
+from schema.user import User, TacMember
 from util.action import Action
 from util.error import InvalidUsage
-
-
-def get_role(row, user_id):
-    all_partner = get_partner_codes()
-    sql = '''
-SELECT Partner_Id FROM PiptUser as pu
-    JOIN Investigator USING (Investigator_Id)
-    JOIN Institute USING (Institute_Id)
-    JOIN PiptUserSetting as pus ON (pu.PiptUser_Id = pus.PiptUser_Id)
-    JOIN PiptSetting using (PiptSetting_Id)
-where pu.PiptUser_Id={user_id}
-    AND PiptSetting_Name ='RightBoard'
-    AND Value = 1
-'''.format(user_id=user_id)
-    conn = sdb_connect()
-    results = pd.read_sql(sql, conn)
-    conn.close()
-
-    role = []
-    if len(results):
-        role.append(
-            Role(
-                type=RoleType.BOARD,
-                partners=get_partner_codes([results.iloc[0]["Partner_Id"]])
-            )
-        )
-
-    if not pd.isnull(row["Astro"]):
-        role.append(
-            Role(
-                type=RoleType.SALT_ASTRONOMER,
-                partners=all_partner
-            )
-        )
-    if not pd.isnull(row["Tac"]):
-        partner = get_partner_codes([row["TacPartner"]])
-        role.append(
-            Role(
-                type=RoleType.TAC_MEMBER,
-                partners=partner
-            )
-        )
-
-    if not pd.isnull(row["Chair"]) and row["Chair"] == 1:
-        partner = get_partner_codes([row["TacPartner"]])
-        role.append(
-            Role(
-                type=RoleType.TAC_CHAIR,
-                partners=partner
-            )
-        )
-
-    sql = '''
-SELECT *  FROM PiptUserSetting
-    LEFT JOIN PiptUserTAC using (PiptUser_Id)
-WHERE PiptSetting_Id = 22
-    AND PiptUser_Id = {user_id}
-'''.format(user_id=user_id)
-    conn = sdb_connect()
-    results = pd.read_sql(sql, conn)
-    conn.close()
-
-    if len(results) > 0 and int(results.iloc[0]["Value"]) > 1:
-        role.append(
-            Role(
-                type=RoleType.ADMINISTRATOR,
-                partners=all_partner
-            )
-        )
-
-    return role
 
 
 def get_user(user_id):
@@ -84,31 +12,24 @@ def get_user(user_id):
 
     sql = '''
 SELECT
-    *,
-    t.PiptUser_Id AS Tac,
-    t.Partner_Id AS TacPartner,
-    a.Investigator_Id AS Astro
+    Username, FirstName, Surname, Email
 FROM PiptUser AS u
     JOIN Investigator AS i using (Investigator_Id)
-    LEFT JOIN SaltAstronomers AS a using( Investigator_Id )
-    LEFT JOIN PiptUserTAC AS t ON (u.PiptUser_Id = t.PiptUser_Id)
 WHERE u.PiptUser_Id = {user_id}
 '''.format(user_id=user_id)
     conn = sdb_connect()
-    results = pd.read_sql(sql, conn)
+    user_details_results = pd.read_sql(sql, conn)
     conn.close()
-    username = ''
-    for index, row in results.iterrows():
-        username = row["Username"]
-        if username not in user:
-            user[username] = User(
-                username=row["Username"],
-                first_name=row["FirstName"],
-                last_name=row["Surname"],
-                email=row["Email"],
-                role=[]
-            )
-        user[username].role += get_role(row, user_id)
+    username = user_details_results.iloc[0]["Username"]
+    if username not in user:
+        user[username] = User(
+            user_id=user_id,
+            username=username,
+            first_name=user_details_results.iloc[0]["FirstName"],
+            last_name=user_details_results.iloc[0]["Surname"],
+            email=user_details_results.iloc[0]["Email"],
+            roles=[]
+        )
 
     return user[username]
 

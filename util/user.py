@@ -2,7 +2,7 @@ from flask import g
 import os
 import pandas as pd
 from data.common import sdb_connect
-from data.user import get_user
+from data.user.user import get_user
 import jwt
 
 from util.error import InvalidUsage

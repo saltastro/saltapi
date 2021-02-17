@@ -5,6 +5,7 @@ import traceback
 import uuid
 import base64
 import magic
+import zipfile
 import requests
 import xml.etree.ElementTree as ET
 
@@ -20,7 +21,7 @@ from data.completion_comment import update_completion_comments
 from data.proposal import summary_file, latest_version, latest_semester
 from data.blocks import get_blocks_status
 from data.technical_review import update_liaison_astronomers, update_reviews
-from data.user import update_tac_members, remove_tac_members
+from data.user.user import update_tac_members, remove_tac_members
 from schema.query import schema
 from util.action import Action
 from util.error import InvalidUsage
@@ -103,11 +104,8 @@ def submit_proposals():
     with open(tmp_dir, 'wb+') as output:
         output.write(file)
 
-    # Retrieving the file type of the temporary created file
-    file_type = magic.from_file(tmp_dir, mime=True)
-
     # Checks if the attached file type is a zip
-    if file_type is 'application/zip':
+    if zipfile.is_zipfile(tmp_dir):
         abort(make_response(jsonify(error="Only zip file is supported"), 415))
 
     # Setting a post request parameters
@@ -207,11 +205,8 @@ def update_proposal(proposal_code, file):
     with open(tmp_dir, 'wb+') as output:
         output.write(file)
 
-    # Retrieving the file type of the temporary created file
-    file_type = magic.from_file(tmp_dir, mime=True)
-
     # Checks if the attached file type is a zip
-    if file_type != 'application/zip':
+    if zipfile.is_zipfile(tmp_dir):
         abort(make_response(jsonify(error="Only zip file is supported"), 415))
 
     # Setting a put request parameters

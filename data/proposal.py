@@ -141,6 +141,7 @@ def query_proposal_data(proposal_code_ids, semester, public=False):
     update_requested_time_per_partner(proposal_code_ids, proposals)
 
     update_time_allocations(semester, proposals)
+    print("Done............proposals")
     return proposals.values()
 
 

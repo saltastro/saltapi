@@ -70,6 +70,6 @@ def query_semester_id(semester):
     SELECT Semester_Id FROM Semester WHERE CONCAT(Year, "-",Semester) = %(semester)s
     """
     df = pd.read_sql(sql, con=sdb_connect(), params={"semester": semester})
-    if pd.isnull(df["Semester_Id"][0]):
-        raise ValueError("Semester {semester} is not known".format(semester=semester))
+    if df.empty:
+        raise ValueError("Semester '{semester}' is not known".format(semester=semester))
     return int(df["Semester_Id"][0])
