@@ -43,7 +43,7 @@ graphql-relay==0.4.5
 idna==2.6
 iso8601==0.1.11
 itsdangerous==0.24
-Jinja2==2.11.2
+Jinja2==2.11.3
 jsonschema==2.5.1
 MarkupSafe==0.23
 mimerender==0.6.0
