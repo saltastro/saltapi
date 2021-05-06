@@ -21,7 +21,7 @@ Faker==0.7.3
 Flask==1.0
 Flask-Assets==0.12
 Flask-Bootstrap==3.3.6.0
-Flask-Cors==3.0.3
+Flask-Cors==3.0.9
 Flask-GraphQL==1.4.1
 Flask-HTTPAuth==3.2.3
 Flask-JWT==0.3.2
