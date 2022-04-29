@@ -149,8 +149,7 @@ def get_proposals(**args):
     partner = args['partner_code']
     public = args['details']
     proposal_code_ids = sql_list_string(get_user_viewable_proposal_ids(semester, partner))
-    data = query_proposal_data(proposal_code_ids, semester, public=public)
-    return data
+    return query_proposal_data(proposal_code_ids, semester, public=public)
 
 
 def liaison_astronomer(proposal_code):

@@ -83,18 +83,21 @@ def transparency_and_seeing_statistics(proposal_code_ids, semester, partner):
 
     sql = """
 SELECT
-    ReqTimeAmount*ReqTimePercent/100.0 as TimeForPartner,
+    SUM(ReqTimeAmount*ReqTimePercent/100.0) AS TimeForPartner,
     Transparency,
-    MaxSeeing
-FROM  ProposalCode as pc
+    MaxSeeing,
+    Proposal_Code
+FROM  ProposalCode AS pc
     JOIN MultiPartner USING(ProposalCode_Id)
     JOIN Partner USING(Partner_Id)
-    JOIN Semester as s  USING (Semester_Id)
+    JOIN Semester AS s  USING (Semester_Id)
     JOIN P1ObservingConditions as oc  ON pc.ProposalCode_Id=oc.ProposalCode_Id
         AND oc.Semester_Id=s.Semester_Id
-    JOIN Transparency as t ON oc.Transparency_Id=t.Transparency_Id
+    JOIN Transparency AS t ON oc.Transparency_Id=t.Transparency_Id
 WHERE CONCAT(s.Year, "-", s.Semester)=%(semester)s
+    AND Partner_Code != "OTH"
     AND pc.ProposalCode_Id IN %(proposal_code_ids)s
+GROUP BY Proposal_Code
        """
     if partner:
         sql += " AND Partner_Code=%(partner_code)s"
@@ -112,13 +115,13 @@ WHERE CONCAT(s.Year, "-", s.Semester)=%(semester)s
         if max_seeing < 0:
             raise ValueError("Maximum seeing is less than zero.")
         if max_seeing <= 1.5:
-            return "less_equal_1_dot_5"
+            return "between_0_and_1_dot_5"
         if max_seeing <= 2:
-            return "less_equal_2"
+            return "between_1_dot_5_and_2"
         if max_seeing <= 2.5:
-            return "less_equal_2_dot_5"
+            return "between_2_and_2_dot_5"
         if max_seeing <= 3:
-            return "less_equal_3"
+            return "between_2_dot_5_and_3"
         if max_seeing > 3:
             return "more_than_3"
         raise ValueError("Unsupported seeing value")
@@ -129,7 +132,6 @@ WHERE CONCAT(s.Year, "-", s.Semester)=%(semester)s
         seeing_range = get_seeing_range(row["MaxSeeing"])
         seeing_times[seeing_range] += row["TimeForPartner"]/3600
         seeing_counts[seeing_range] += 1
-
     return {
         "time_request_per_transparency": TransparencyTimeDistribution(
             any=cloud_times.get("Any", 0),
@@ -138,10 +140,10 @@ WHERE CONCAT(s.Year, "-", s.Semester)=%(semester)s
             thin_cloud=cloud_times.get("Thin cloud", 0)
         ),
         "time_request_per_seeing": SeeingTimeDistribution(
-            less_equal_1_dot_5=seeing_times.get("less_equal_1_dot_5", 0),
-            less_equal_2=seeing_times.get("less_equal_2", 0),
-            less_equal_2_dot_5=seeing_times.get("less_equal_2_dot_5", 0),
-            less_equal_3=seeing_times.get("less_equal_3", 0),
+            between_0_and_1_dot_5=seeing_times.get("between_0_and_1_dot_5", 0),
+            between_1_dot_5_and_2=seeing_times.get("between_1_dot_5_and_2", 0),
+            between_2_and_2_dot_5=seeing_times.get("between_2_and_2_dot_5", 0),
+            between_2_dot_5_and_3=seeing_times.get("between_2_dot_5_and_3", 0),
             more_than_3=seeing_times.get("more_than_3", 0)
         ),
         "number_of_proposals_per_transparency": TransparencyNumberDistribution(
@@ -151,10 +153,10 @@ WHERE CONCAT(s.Year, "-", s.Semester)=%(semester)s
             thin_cloud=cloud_counts.get("Thin cloud", 0)
         ),
         "number_of_proposals_per_seeing": SeeingNumberDistribution(
-            less_equal_1_dot_5=seeing_counts.get("less_equal_1_dot_5", 0),
-            less_equal_2=seeing_counts.get("less_equal_2", 0),
-            less_equal_2_dot_5=seeing_counts.get("less_equal_2_dot_5", 0),
-            less_equal_3=seeing_counts.get("less_equal_3", 0),
+            between_0_and_1_dot_5=seeing_counts.get("between_0_and_1_dot_5", 0),
+            between_1_dot_5_and_2=seeing_counts.get("between_1_dot_5_and_2", 0),
+            between_2_and_2_dot_5=seeing_counts.get("between_2_and_2_dot_5", 0),
+            between_2_dot_5_and_3=seeing_counts.get("between_2_dot_5_and_3", 0),
             more_than_3=seeing_counts.get("more_than_3", 0)
         )
     }
@@ -459,6 +461,7 @@ def proposal_configurations(data):
                 "time_requested_pp": dict(),
             }
         _instrument_counter(row)
+
     return proposals
 
 
@@ -562,12 +565,12 @@ SELECT
     ExposureMode as HRSResolution,
     sc.DetectorMode AS SCAMDetectorMode,
     rs.DetectorMode AS RSSDetectorMode,
-    (ReqTimeAmount*ReqTimePercent/100.0)/3600 as TimeForPartner
-FROM P1Config
-    JOIN ProposalCode USING(ProposalCode_Id)
-    JOIN MultiPartner USING(ProposalCode_Id)
+    ((ReqTimeAmount*(ReqTimePercent/100.0))/3600) as TimeForPartner
+FROM ProposalCode PC
+    JOIN P1Config P1C ON(P1C.ProposalCode_Id=PC.ProposalCode_Id)
+    JOIN MultiPartner MP ON(MP.ProposalCode_Id=PC.ProposalCode_Id)
     JOIN Semester USING (Semester_Id)
-    JOIN Partner USING (Partner_Id)
+    JOIN Partner P ON (P.Partner_Id=MP.Partner_Id)
     LEFT JOIN P1Rss USING(P1Rss_Id)
     LEFT JOIN RssDetectorMode AS rs USING(RssDetectorMode_Id)
     LEFT JOIN RssMode USING(RssMode_Id)
@@ -586,13 +589,14 @@ FROM P1Config
     LEFT JOIN BvitFilter USING(BvitFilter_Id)
     LEFT JOIN P1Hrs USING(P1Hrs_Id)
     LEFT JOIN HrsMode USING(HrsMode_Id)
-WHERE  CONCAT(Year,"-" ,Semester)=%(semester)s
-    AND ProposalCode_Id IN %(proposal_code_ids)s
+WHERE  CONCAT(Year,"-" ,Semester)="2022-1"
+    AND PC.ProposalCode_Id IN %(proposal_code_ids)s
+    AND Partner_Code != "OTH"
     """
-    if not proposal_code_ids:
-        df = pd.DataFrame()
-    else:
-        df = pd.read_sql(sql, con=sdb_connect(), params=params)
+    if partner:
+        sql += f""" AND Partner_Code = "{partner}" """
+
+    df = pd.read_sql(sql, con=sdb_connect(), params=params) if proposal_code_ids else pd.DataFrame()
 
     proposal_conf = proposal_configurations(df)
 
