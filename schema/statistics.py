@@ -27,26 +27,32 @@ class TransparencyNumberDistribution(ObjectType):
 class SeeingTimeDistribution(ObjectType):
     """
     Distribution of time from the maximum seeing request per category.
-    "less_equal_1_dot_5" means seeing between 0 and 1.5 arcseconds, "less_equal_2" means it is between 1.5 and 2
-    arcseconds, and so forth
+    "between_0_and_1_dot_5" means seeing between 0 and 1.5 arcseconds inclusive,
+    "between_1_dot_5_and_2" means seeing greater 1.5 and less or equal 2 arcseconds,
+    "between_2_and_2_dot_5" means seeing greater 2 and less or equal 2.5,
+    "between_2_dot_5_and_3" means seeing greater 2.5 and less or equal 3,
+    "more_than_3" means seeing greater than 3.
     """
-    less_equal_1_dot_5 = Float()
-    less_equal_2 = Float()
-    less_equal_2_dot_5 = Float()
-    less_equal_3 = Float()
+    between_0_and_1_dot_5 = Float()
+    between_1_dot_5_and_2 = Float()
+    between_2_and_2_dot_5 = Float()
+    between_2_dot_5_and_3 = Float()
     more_than_3 = Float()
 
 
 class SeeingNumberDistribution(ObjectType):
     """
     Number of proposals requesting time from the maximum seeing request per category.
-    "less_equal_1_dot_5" means seeing between 0 and 1.5 arcseconds, "less_equal_2" means it is between 1.5 and 2
-    arcseconds, and so forth
+    "between_0_and_1_dot_5" means seeing between 0 and 1.5 arcseconds inclusive,
+    "between_1_dot_5_and_2" means seeing greater 1.5 and less or equal 2 arcseconds,
+    "between_2_and_2_dot_5" means seeing greater 2 and less or equal 2.5,
+    "between_2_dot_5_and_3" means seeing greater 2.5 and less or equal 3,
+    "more_than_3" means seeing greater than 3.
     """
-    less_equal_1_dot_5 = Int()
-    less_equal_2 = Int()
-    less_equal_2_dot_5 = Int()
-    less_equal_3 = Int()
+    between_0_and_1_dot_5 = Int()
+    between_1_dot_5_and_2 = Int()
+    between_2_and_2_dot_5 = Int()
+    between_2_dot_5_and_3 = Int()
     more_than_3 = Int()
 
 
@@ -60,6 +66,7 @@ class StatisticsPartner(Enum):
     DUR = "DUR"
     GU = "GU"
     IUCAA = "IUCAA"
+    ORP = "ORP"
     POL = "POL"
     RSA = "RSA"
     RU = "RU"
