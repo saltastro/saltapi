@@ -551,7 +551,7 @@ def instruments_statistics(proposal_code_ids, partner, semester):
     params = dict()
     params["proposal_code_ids"] = proposal_code_ids
     params["semester"] = semester
-    params["partner"] = partner
+    params["partner_code"] = partner
 
     sql = """
 SELECT
@@ -589,12 +589,12 @@ FROM ProposalCode PC
     LEFT JOIN BvitFilter USING(BvitFilter_Id)
     LEFT JOIN P1Hrs USING(P1Hrs_Id)
     LEFT JOIN HrsMode USING(HrsMode_Id)
-WHERE  CONCAT(Year,"-" ,Semester)="2022-1"
+WHERE  CONCAT(Year,"-" ,Semester)=%(semester)s
     AND PC.ProposalCode_Id IN %(proposal_code_ids)s
     AND Partner_Code != "OTH"
     """
     if partner:
-        sql += f""" AND Partner_Code = "{partner}" """
+        sql += """ AND Partner_Code = %(partner_code) """
 
     df = pd.read_sql(sql, con=sdb_connect(), params=params) if proposal_code_ids else pd.DataFrame()
 
