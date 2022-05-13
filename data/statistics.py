@@ -594,7 +594,7 @@ WHERE  CONCAT(Year,"-" ,Semester)="2022-1"
     AND Partner_Code != "OTH"
     """
     if partner:
-        sql += f""" AND Partner_Code = "{partner}" """
+        sql += " AND Partner_Code = \"" + partner + "\" "
 
     df = pd.read_sql(sql, con=sdb_connect(), params=params) if proposal_code_ids else pd.DataFrame()
 
