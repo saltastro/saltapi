@@ -589,7 +589,7 @@ FROM ProposalCode PC
     LEFT JOIN BvitFilter USING(BvitFilter_Id)
     LEFT JOIN P1Hrs USING(P1Hrs_Id)
     LEFT JOIN HrsMode USING(HrsMode_Id)
-WHERE  CONCAT(Year,"-" ,Semester)=%(semester)
+WHERE  CONCAT(Year,"-" ,Semester)=%(semester)s
     AND PC.ProposalCode_Id IN %(proposal_code_ids)s
     AND Partner_Code != "OTH"
     """
