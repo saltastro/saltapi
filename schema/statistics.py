@@ -62,6 +62,7 @@ class StatisticsPartner(Enum):
     """
     ALL = "ALL"
     AMNH = "AMNH"
+    CMU = "CMU"
     DC = "DC"
     DUR = "DUR"
     GU = "GU"

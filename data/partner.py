@@ -73,12 +73,12 @@ def get_partner_codes(only_partner_ids=None):
     """
 
     par = '''
-SELECT Partner_Code FROM Partner
+SELECT DISTINCT Partner_Code FROM Partner
     JOIN PartnerShareTimeDist USING(Partner_Id)
     JOIN Semester USING(Semester_Id)
 WHERE `Virtual` = 0
-    AND Semester_Id = %s
-    AND TimePercent > 0
+    AND Semester_Id >= %s
+    AND (TimePercent > 0 OR ExtraHours > 0)
     '''
     if only_partner_ids is not None:
         ids = [str(i) for i in only_partner_ids]
