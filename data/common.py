@@ -132,7 +132,7 @@ def proposal_code_ids_for_statistics(semester, partner_code=None):
     #     AND TimePercent > 0
     # """.format(semester_id=query_semester_id(semester)), conn).iterrows()]
     # conn.close()
-    all_partners = ['UW', 'RSA', 'UNC', 'UKSC', 'DC', 'RU', 'POL', 'AMNH', 'IUCAA', "GU", "DUR", "UC", "ORP"]
+    all_partners = ["CMU", 'UW', 'RSA', 'UNC', 'UKSC', 'DC', 'RU', 'POL', 'AMNH', 'IUCAA', "GU", "DUR", "UC", "ORP"]
 
     sql = """
 SELECT distinct

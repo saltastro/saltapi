@@ -7,7 +7,7 @@ sudo apt-get install python3-pip python3-dev nginx supervisor
 sudo apt-get install git
 ```
 
-##Clone SALT API
+## Clone SALT API
 
 Cloning the saltapi repository using git home directory for user and cd to it.
 ```bazaar
@@ -15,7 +15,7 @@ cd ~
 git clone https://github.com/saltastro/saltapi.git
 cd saltapi/
 ```
-##Create a Python Virtual Environment 
+## Create a Python Virtual Environment 
 Start by installing the virtualenv package using pip
 ```bazaar
 sudo pip3 install virtualenv
@@ -73,7 +73,7 @@ sudo ln -s /etc/nginx/sites-available/tacapi /etc/nginx/sites-enabled/tacapi
 ```
 (please note site-enables is a directory not a file)
 
-##Setup supervisor
+## Setup supervisor
 
 create a supervisor config file by make sure user has sudo permissions:
 ```bazaar
@@ -94,7 +94,7 @@ Enter
 Ctrl + x
 ```
 
-##Reboot server
+## Reboot server
 ```bazaar
 sudo reboot
 ```
