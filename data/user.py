@@ -191,7 +191,7 @@ def update_tac_member(partner, member, is_chair, cursor):
     chair = 1 if is_chair else 0
     sql = '''
 INSERT INTO PiptUserTAC (PiptUser_Id, Partner_Id, Chair)
-    SELECT PiptUser_Id, Partner_Id, 0
+    SELECT PiptUser_Id, Partner_Id, %s
     FROM PiptUser join Partner on (Partner_Code = %s)
     WHERE  Username = %s
     ON DUPLICATE KEY UPDATE
@@ -200,7 +200,7 @@ INSERT INTO PiptUserTAC (PiptUser_Id, Partner_Id, Chair)
         Partner_Id=
             (SELECT  Partner_Id FROM  Partner WHERE Partner_Code = %s),
         Chair=%s'''
-    params = (partner, member, member, partner, chair)
+    params = (chair, partner, member, member, partner, chair)
     cursor.execute(sql, params)
 
 
