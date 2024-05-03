@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  salt_api_one:
+    build: .
+    environment:
+      - FLASK_APP
+      - PROPOSAL_DIR
+      - LOGS_DIR
+    env_file:
+      - .env
+    ports:
+      - "5001:5001"
+    volumes:
+      - ${PROPOSAL_DIR}/proposals
+      - ${LOGS_DIR}/salt_server_logs
+    entrypoint:
+      - python3
+      - run.py
+      - --host=0.0.0.0
+    working_dir: /app
+    restart: always
