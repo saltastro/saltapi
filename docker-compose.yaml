@@ -14,9 +14,5 @@ services:
     volumes:
       - ${PROPOSAL_DIR}/proposals
       - ${LOGS_DIR}/salt_server_logs
-    entrypoint:
-      - python3
-      - run.py
-      - --host=0.0.0.0
     working_dir: /app
     restart: always
