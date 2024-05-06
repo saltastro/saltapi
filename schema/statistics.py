@@ -71,6 +71,7 @@ class StatisticsPartner(Enum):
     POL = "POL"
     RSA = "RSA"
     RU = "RU"
+    SVP = "SVP"
     UC = "UC"
     UKSC = "UKSC"
     UNC = "UNC"
