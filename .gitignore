@@ -9,3 +9,4 @@ venv/
 *.pyc
 tests/test_proposal_dir/
 *.iml
+.DS_Store
